@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سوالات آزمون MBTI</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>وقتشه به چند تا سوال جواب بدی!</h1>
+        <p>لطفاً به سوالات زیر با دقت و صداقت کامل جواب بده. هرچی بیشتر توضیح بدی، نتیجه دقیق‌تر میشه. برای هر سوال حداقل یک پاراگراف بنویس.</p>
+
+        {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+
+        <form action="/submit_answers" method="post" id="questionsForm">
+            <input type="hidden" name="user_id" value="{{ user_id }}">
+            <input type="hidden" name="age_range" value="{{ age_range }}">
+            
+            {% for i in range(questions|length) %}
+            <div class="form-group question-block">
+                <label for="answer_{{i}}">سوال {{ i + 1 }}: {{ questions[i] }}</label>
+                {# Corrected line for previous_answers #}
+                <textarea id="answer_{{i}}" name="answer_{{i}}" rows="6" required placeholder="پاسخ خود را اینجا بنویسید...">{{ previous_answers.get('answer_' ~ i, '') if previous_answers else '' }}</textarea>
+            </div>
+            {% endfor %}
+            
+            <button type="submit" id="submitButton">ارسال پاسخ‌ها و مشاهده نتیجه</button>
+            <p id="loadingMessage" style="display:none; color: #27ae60; font-weight: bold; margin-top:15px;">
+                درحال تحلیل پاسخ‌های شما... لطفاً چند لحظه صبر کنید. این صفحه به صورت خودکار به نتیجه هدایت می‌شود.
+            </p>
+        </form>
+    </div>
+    <script>
+        document.getElementById('questionsForm').addEventListener('submit', function() {
+            // Basic validation to ensure all textareas have some content
+            let allFilled = true;
+            const textareas = this.querySelectorAll('textarea[required]');
+            for (let i = 0; i < textareas.length; i++) {
+                if (textareas[i].value.trim() === '') {
+                    allFilled = false;
+                    // You could highlight the empty textarea or show a more specific message
+                    // For simplicity, the server-side validation will catch this too.
+                    break;
+                }
+            }
+
+            if (allFilled) {
+                document.getElementById('submitButton').disabled = true;
+                document.getElementById('submitButton').innerText = 'درحال ارسال...';
+                document.getElementById('loadingMessage').style.display = 'block';
+            } else {
+                // Optionally, prevent form submission if client-side validation fails
+                // alert("لطفاً به تمام سوالات پاسخ دهید.");
+                // event.preventDefault(); // Uncomment to prevent submission
+            }
+        });
+    </script>
+</body>
+</html>

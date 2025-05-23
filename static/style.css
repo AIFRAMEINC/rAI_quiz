@@ -1,0 +1,159 @@
+body {
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* فونت وزیرمتن برای فارسی */
+    background-color: #e0f7fa; /* آبی روشن و آرامش‌بخش */
+    color: #37474f; /* خاکستری تیره برای متن اصلی */
+    line-height: 1.8;
+    margin: 0;
+    padding: 20px;
+    direction: rtl;
+}
+
+.container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #00796b; /* سبز-آبی تیره */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #004d40; /* سبز تیره‌تر */
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #b2dfdb; /* سبز روشن برای کادر */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #00796b; /* سبز-آبی تیره هنگام فوکوس */
+    outline: none;
+}
+
+.form-group textarea {
+    resize: vertical; /* اجازه تغییر اندازه عمودی */
+}
+
+button[type="submit"], .button {
+    background-color: #00796b; /* سبز-آبی تیره */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button[type="submit"]:hover, .button:hover {
+    background-color: #004d40; /* سبز تیره‌تر هنگام هاور */
+}
+button[type="submit"]:disabled {
+    background-color: #90a4ae; /* خاکستری برای دکمه غیرفعال */
+    cursor: not-allowed;
+}
+
+.error-message {
+    background-color: #ffcdd2; /* قرمز روشن برای خطا */
+    color: #c62828; /* قرمز تیره برای متن خطا */
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ef9a9a;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.question-block {
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.report-container .section {
+    border: 1px solid #eee;
+}
+.report-container .answer {
+    background-color: #f0f7ff;
+    border: 1px solid #cce0ff;
+}
+
+/* برای نمایش بهتر اطلاعات دیباگ */
+.debug-data-container {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.debug-data-container strong {
+    color: #00796b;
+}
+
+/* ... (all previous styles) ... */
+
+.chart-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* A light, pleasant gradient */
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.chart-section h2 {
+    color: #1a2a6c; /* A deep, professional blue */
+    text-align: center;
+    margin-bottom: 10px; /* Reduced margin */
+    font-size: 1.6em;
+}
+.chart-section p { /* Style for the descriptive paragraph */
+    text-align: center;
+    font-size: 0.95em;
+    color: #4a5568; /* Softer text color */
+    margin-bottom: 20px;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 320px; /* Increased height slightly */
+    width: 100%;   /* Use full width of its container */
+    max-width: 380px; /* Slightly increased max-width */
+}

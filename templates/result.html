@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نتیجه آزمون MBTI شما</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Reset و تنظیمات پایه */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 10px;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .report-container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* بخش‌های گزارش */
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        /* استایل مخصوص نقاط قوت و ضعف */
+        .strengths-weaknesses {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin: 25px 0;
+            border: 1px solid #bae6fd;
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.08);
+        }
+
+        .strengths-weaknesses h2 {
+            color: #0c4a6e;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .strengths-weaknesses h3 {
+            color: #0369a1;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 25px 0 20px 0;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .strengths-weaknesses ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        .strengths-weaknesses li {
+            background: #ffffff;
+            margin: 12px 0;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border-right: 4px solid #0ea5e9;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            font-size: 1rem;
+            color: #1e293b;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .strengths-weaknesses li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* بخش تحلیل نهایی */
+        .final-analysis {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin: 30px 0;
+            border: 1px solid #fbbf24;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.1);
+            text-align: center;
+        }
+
+        .final-analysis h3 {
+            color: #92400e;
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -0.025em;
+        }
+
+        .final-analysis p {
+            color: #451a03;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* داشبورد نمودارها - طراحی بهبود یافته */
+        .charts-dashboard {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin: 30px 0;
+            border: 1px solid #cbd5e0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .charts-dashboard h2 {
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .charts-dashboard h3 {
+            color: #2d3748;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .charts-dashboard > p {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 35px;
+            max-width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        /* آرایش نمودارها */
+        .chart-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* کانتینر عمومی نمودار */
+        .chart-container {
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: visible;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chart-container:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+        }
+
+        /* نمودارهای دایره‌ای و رادار - بهبود یافته */
+        .pie-chart-container,
+        .radar-chart-container {
+            flex: 1 1 45%;
+            min-width: 400px;
+            max-width: 550px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* تنظیم خاص برای نمودار دایره‌ای */
+        .pie-chart-container {
+            padding: 35px 25px;
+        }
+
+        /* تنظیم خاص برای نمودار رادار */
+        .radar-chart-container {
+            padding: 35px 25px;
+        }
+
+        /* کانتینر Canvas برای نمودارهای اصلی */
+        .pie-chart-container canvas,
+        .radar-chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 380px;
+            max-height: 380px;
+        }
+
+        /* شبکه نمودارهای میله‌ای */
+        .bar-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            width: 100%;
+        }
+
+        .bar-chart-container {
+            min-height: 350px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar-chart-container:hover {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+        }
+
+        /* Canvas نمودارها */
+        .chart-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* عنوان داخلی نمودار */
+        .chart-container .chart-title-internal {
+            font-size: 1.2rem;
+            color: #1a202c;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            width: 100%;
+            padding: 0 10px;
+            letter-spacing: -0.025em;
+        }
+
+        /* دکمه */
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            letter-spacing: -0.025em;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        /* تنظیمات ریسپانسیو */
+        @media (max-width: 1024px) {
+            .pie-chart-container,
+            .radar-chart-container {
+                flex: 1 1 100%;
+                max-width: none;
+                min-width: 350px;
+                height: 450px;
+            }
+
+            .chart-row {
+                gap: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px 10px;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .section {
+                padding: 25px 20px;
+            }
+
+            .charts-dashboard {
+                padding: 35px 20px;
+                margin: 25px 0;
+            }
+
+            .charts-dashboard h2 {
+                font-size: 1.8rem;
+            }
+
+            .charts-dashboard h3 {
+                font-size: 1.5rem;
+                margin-top: 35px;
+                margin-bottom: 20px;
+            }
+
+            .chart-row {
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .pie-chart-container,
+            .radar-chart-container {
+                min-width: 320px;
+                height: 400px;
+                padding: 30px 20px;
+            }
+
+            .pie-chart-container canvas,
+            .radar-chart-container canvas {
+                max-width: 300px;
+                max-height: 300px;
+            }
+
+            .bar-charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .bar-chart-container {
+                min-height: 320px;
+                padding: 20px;
+            }
+
+            .chart-container {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pie-chart-container,
+            .radar-chart-container {
+                min-width: 280px;
+                height: 350px;
+                padding: 25px 15px;
+            }
+
+            .pie-chart-container canvas,
+            .radar-chart-container canvas {
+                max-width: 250px;
+                max-height: 250px;
+            }
+
+            .charts-dashboard {
+                padding: 30px 15px;
+            }
+
+            .section {
+                padding: 20px 15px;
+            }
+
+            .chart-container,
+            .bar-chart-container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container report-container">
+        {{ report_content | safe }}
+        
+        <div style="text-align: center; margin-top: 40px; padding: 30px;">
+            <a href="/" class="button">انجام دوباره آزمون</a>
+        </div>
+    </div>
+
+    <script>
+        // تنظیمات فونت و رنگ‌های نمودار - بدون تغییر در منطق
+        const chartFont = { 
+            size: 12, 
+            family: 'Vazirmatn, Segoe UI, sans-serif',
+            weight: '500'
+        };
+        
+        const chartTitleColor = '#1a202c';
+        const chartLabelColor = '#4a5568';
+        const defaultChartErrorMessage = "<p style='text-align:center; color:#718096; padding:30px 0; font-size:1.1rem; font-family: Vazirmatn, sans-serif;'>نمودار در حال حاضر در دسترس نیست.</p>";
+
+        function renderPieChart() {
+            const ctx = document.getElementById('mbtiPieChart');
+            const container = document.querySelector('.pie-chart-container'); 
+            if (ctx && pieChartData && pieChartData.labels && pieChartData.data) {
+                if(container) container.style.height = '500px';
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: pieChartData.labels,
+                        datasets: [{
+                            label: `ترجیحات غالب ${pieChartData.mbtiType}`,
+                            data: pieChartData.data,
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.85)', 
+                                'rgba(118, 75, 162, 0.85)', 
+                                'rgba(255, 183, 77, 0.85)', 
+                                'rgba(129, 236, 236, 0.85)'
+                            ],
+                            borderColor: ['#ffffff'],
+                            borderWidth: 2, 
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { 
+                            animateScale: true, 
+                            animateRotate: true, 
+                            duration: 1400, 
+                            easing: 'easeOutQuart' 
+                        },
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    font: { 
+                                        size: chartFont.size,
+                                        family: chartFont.family,
+                                        weight: chartFont.weight
+                                    },
+                                    color: chartLabelColor, 
+                                    padding: 18,
+                                    usePointStyle: true, 
+                                    boxWidth: 12 
+                                } 
+                            },
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.parsed !== undefined ? c.parsed + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        function renderBarChart(canvasId, chartTitle, data) {
+            const ctx = document.getElementById(canvasId);
+            const container = ctx ? ctx.closest('.bar-chart-container') : null;
+            if (ctx && data && data.labels && data.data) {
+                if(container) container.style.height = '350px';
+                const allZeros = data.data.every(item => item === 0);
+                let maxVal = allZeros ? 100 : undefined; 
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'درصد تمایل',
+                            data: data.data,
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.8)', 
+                                'rgba(255, 183, 77, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(102, 126, 234, 1)', 
+                                'rgba(255, 183, 77, 1)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            barPercentage: 0.7, 
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1200,
+                            easing: 'easeOutQuart'
+                        },
+                        scales: { 
+                            x: { 
+                                beginAtZero: true, 
+                                max: maxVal, 
+                                ticks: { 
+                                    callback: (v) => v + '%', 
+                                    font: { 
+                                        size: chartFont.size - 1,
+                                        family: chartFont.family
+                                    },
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }, 
+                            y: { 
+                                ticks: {
+                                    font: { 
+                                        size: chartFont.size,
+                                        family: chartFont.family,
+                                        weight: chartFont.weight
+                                    },
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            } 
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }, 
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.raw !== undefined ? c.raw + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        function renderRadarChart() {
+            const ctx = document.getElementById('mbtiRadarChart');
+            const container = document.querySelector('.radar-chart-container');
+            if (ctx && radarChartData && radarChartData.labels && radarChartData.data) {
+                if(container) container.style.height = '500px';
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: radarChartData.labels,
+                        datasets: [{
+                            label: `پروفایل ${radarChartData.mbtiType}`,
+                            data: radarChartData.data,
+                            fill: true,
+                            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                            borderColor: 'rgba(102, 126, 234, 0.8)',
+                            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                            pointBorderColor: '#ffffff',
+                            pointHoverBackgroundColor: '#ffffff',
+                            pointHoverBorderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2,
+                            pointRadius: 4, 
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart'
+                        },
+                        elements: { 
+                            line: { tension: 0.1 } 
+                        }, 
+                        scales: {
+                            r: { 
+                                beginAtZero: true, 
+                                max: 100,
+                                angleLines: { 
+                                    color: 'rgba(0, 0, 0, 0.1)' 
+                                }, 
+                                grid: { 
+                                    color: 'rgba(0, 0, 0, 0.1)' 
+                                }, 
+                                pointLabels: { 
+                                    font: { 
+                                        size: chartFont.size,
+                                        family: chartFont.family,
+                                        weight: chartFont.weight
+                                    },
+                                    color: chartLabelColor,
+                                    padding: 8
+                                }, 
+                                ticks: { 
+                                    backdropColor: 'rgba(255,255,255,0.8)', 
+                                    stepSize: 20, 
+                                    font: { 
+                                        size: 10,
+                                        family: chartFont.family
+                                    },
+                                    color: chartLabelColor,
+                                    maxTicksLimit: 6,
+                                    padding: 5,
+                                    callback: (v) => v + '%' 
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }, 
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#e2e8f0',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.raw !== undefined ? c.raw + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderPieChart();
+            if (barChartsData) {
+                renderBarChart('energyBarChart', 'انرژی', barChartsData.energy);
+                renderBarChart('informationBarChart', 'دریافت اطلاعات', barChartsData.information);
+                renderBarChart('decisionBarChart', 'تصمیم‌گیری', barChartsData.decision);
+                renderBarChart('lifestyleBarChart', 'سبک زندگی', barChartsData.lifestyle);
+            } else {
+                ['energyBarChart', 'informationBarChart', 'decisionBarChart', 'lifestyleBarChart'].forEach(id => {
+                    const el = document.getElementById(id);
+                    const container = el ? el.closest('.bar-chart-container') : null;
+                    if(container) {
+                         container.innerHTML = defaultChartErrorMessage;
+                         container.style.height = 'auto';
+                    }
+                });
+            }
+            renderRadarChart();
+        });
+    </script>
+</body>
+</html>

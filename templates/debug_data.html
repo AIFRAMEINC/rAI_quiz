@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اطلاعات کاربران (دیباگ)</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>اطلاعات ذخیره شده کاربران</h1>
+        <p><a href="/" class="button">بازگشت به صفحه اصلی</a></p>
+        {% if users_data %}
+            {% for user_item in users_data %}
+                <div class="debug-data-container" style="border: 1px solid #ccc; margin-bottom: 10px; padding: 10px;">
+                    <strong>شناسه کاربر:</strong> {{ user_item.id }}<br>
+                    <strong>نام:</strong> {{ user_item.get('first_name', 'N/A') }} {{ user_item.get('last_name', 'N/A') }}<br>
+                    <strong>تلفن:</strong> {{ user_item.get('phone', 'N/A') }}<br>
+                    <strong>رده سنی:</strong> {{ user_item.get('age_range', 'N/A') }}<br>
+                    <strong>زمان ثبت نام:</strong> {{ user_item.get('registration_time', 'N/A') }}<br>
+                    <strong>پاسخ‌ها:</strong>
+                    {% if user_item.get('answers') %}
+                        <ul>
+                        {% for ans in user_item.get('answers', []) %}
+                            <li>{{ ans | e }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <em>بدون پاسخ ثبت شده</em>
+                    {% endif %}
+                    <strong>نتیجه MBTI:</strong> {{ user_item.get('mbti_result', 'N/A') | e }}<br>
+                    <strong>درصدهای MBTI (تخمینی):</strong>
+                    {% if user_item.get('mbti_percentages') and user_item.mbti_percentages is not mapping %} {# Check if it's not the error string/dict #}
+                        {% if user_item.mbti_percentages.get('error') %}
+                             <em>{{ user_item.mbti_percentages.error }}</em>
+                        {% else %}
+                        <ul>
+                            {% for key, value in user_item.mbti_percentages.items() %}
+                                <li>{{ key | replace('_percentage', '') | e }}: {{ value }}%</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    {% elif user_item.get('mbti_percentages') %} {# For the case where it's already a dict but might be an error dict #}
+                         {% if user_item.mbti_percentages.get('error') %}
+                             <em>{{ user_item.mbti_percentages.error }}</em>
+                         {% else %}
+                            <em>اطلاعات درصدها موجود نیست یا خطا در پردازش.</em>
+                         {% endif %}
+                    {% else %}
+                        <em>اطلاعات درصدها موجود نیست.</em>
+                    {% endif %}
+                    <br>
+                    <strong>زمان تحلیل:</strong> {{ user_item.get('analysis_time', 'N/A') }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>هنوز هیچ اطلاعاتی ذخیره نشده است.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
