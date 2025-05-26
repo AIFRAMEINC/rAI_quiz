@@ -5,11 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سوالات آزمون MBTI</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <style>
+        .progress-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .question-counter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .question-block {
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            background-color: #fafafa;
+            transition: border-color 0.3s ease;
+        }
+        
+        .question-block:hover {
+            border-color: #667eea;
+        }
+        
+        .question-block.completed {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        
+        .question-block label {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .question-block textarea {
+            margin-top: 15px;
+            min-height: 120px;
+            resize: vertical;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1em;
+            line-height: 1.5;
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+        
+        .question-block textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .char-counter {
+            font-size: 0.8em;
+            color: #888;
+            text-align: left;
+            margin-top: 5px;
+        }
+        
+        .submit-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .submit-section button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-section button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .submit-section button:disabled {
+            background: #90a4ae;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading-message {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .completion-status {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .tips-section {
+            background: #f0f7ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .tips-section h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .tips-section ul {
+            margin: 0;
+            padding-right: 20px;
+        }
+        
+        .tips-section li {
+            margin-bottom: 8px;
+            color: #424242;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>وقتشه به چند تا سوال جواب بدی!</h1>
         <p>لطفاً به سوالات زیر با دقت و صداقت کامل جواب بده. هرچی بیشتر توضیح بدی، نتیجه دقیق‌تر میشه. برای هر سوال حداقل یک پاراگراف بنویس.</p>
+
+        <div class="tips-section">
+            <h3>💡 نکات مهم برای پاسخ‌دادن:</h3>
+            <ul>
+                <li>صادقانه و بر اساس تجربیات واقعی‌ت پاسخ بده</li>
+                <li>سعی کن مثال‌های مشخص از زندگی‌ت بزنی</li>
+                <li>نگران درست یا غلط بودن پاسخت نباش - هر پاسخی درسته</li>
+                <li>حداقل ۳-۴ جمله برای هر سوال بنویس</li>
+            </ul>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 از {{ questions|length }} سوال تکمیل شده</div>
 
         {% if error_message %}
             <p class="error-message">{{ error_message }}</p>
@@ -20,43 +196,198 @@
             <input type="hidden" name="age_range" value="{{ age_range }}">
             
             {% for i in range(questions|length) %}
-            <div class="form-group question-block">
-                <label for="answer_{{i}}">سوال {{ i + 1 }}: {{ questions[i] }}</label>
-                {# Corrected line for previous_answers #}
-                <textarea id="answer_{{i}}" name="answer_{{i}}" rows="6" required placeholder="پاسخ خود را اینجا بنویسید...">{{ previous_answers.get('answer_' ~ i, '') if previous_answers else '' }}</textarea>
+            <div class="form-group question-block" id="question_{{ i }}">
+                <div class="question-counter">سوال {{ i + 1 }} از {{ questions|length }}</div>
+                <label for="answer_{{i}}">{{ questions[i] }}</label>
+                <textarea 
+                    id="answer_{{i}}" 
+                    name="answer_{{i}}" 
+                    rows="6" 
+                    required 
+                    placeholder="پاسخ خود را اینجا بنویسید... (حداقل ۵۰ کلمه)"
+                    data-question-index="{{ i }}"
+                >{{ previous_answers.get('answer_' ~ i, '') if previous_answers else '' }}</textarea>
+                <div class="char-counter" id="counter_{{ i }}">0 کلمه</div>
             </div>
             {% endfor %}
             
-            <button type="submit" id="submitButton">ارسال پاسخ‌ها و مشاهده نتیجه</button>
-            <p id="loadingMessage" style="display:none; color: #27ae60; font-weight: bold; margin-top:15px;">
-                درحال تحلیل پاسخ‌های شما... لطفاً چند لحظه صبر کنید. این صفحه به صورت خودکار به نتیجه هدایت می‌شود.
-            </p>
+            <div class="submit-section">
+                <div class="completion-status" id="completionStatus">
+                    لطفاً تمام سوالات را تکمیل کنید
+                </div>
+                
+                <button type="submit" id="submitButton" disabled>
+                    ارسال پاسخ‌ها و مشاهده نتیجه
+                </button>
+                
+                <div class="loading-message" id="loadingMessage">
+                    🔄 درحال تحلیل پاسخ‌های شما توسط هوش مصنوعی...
+                    <br>
+                    این فرآیند ممکن است تا ۳۰ ثانیه طول بکشد. لطفاً صبور باشید.
+                </div>
+            </div>
         </form>
     </div>
+
     <script>
-        document.getElementById('questionsForm').addEventListener('submit', function() {
-            // Basic validation to ensure all textareas have some content
-            let allFilled = true;
+        // Track completion status
+        let completedQuestions = 0;
+        const totalQuestions = {{ questions|length }};
+        const minWordsPerAnswer = 20; // حداقل تعداد کلمات
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAllAnswers();
+            
+            // Add event listeners to all textareas
+            const textareas = document.querySelectorAll('textarea[required]');
+            textareas.forEach(textarea => {
+                // Check initial state
+                updateWordCount(textarea);
+                checkAnswerCompletion(textarea);
+                
+                // Add real-time checking
+                textarea.addEventListener('input', function() {
+                    updateWordCount(this);
+                    checkAnswerCompletion(this);
+                    updateProgressBar();
+                    updateSubmitButton();
+                });
+                
+                textarea.addEventListener('blur', function() {
+                    checkAnswerCompletion(this);
+                });
+            });
+        });
+        
+        function updateWordCount(textarea) {
+            const text = textarea.value.trim();
+            const wordCount = text ? text.split(/\s+/).length : 0;
+            const counter = document.getElementById('counter_' + textarea.dataset.questionIndex);
+            
+            if (counter) {
+                counter.textContent = wordCount + ' کلمه';
+                
+                if (wordCount >= minWordsPerAnswer) {
+                    counter.style.color = '#28a745';
+                    counter.style.fontWeight = 'bold';
+                } else {
+                    counter.style.color = '#888';
+                    counter.style.fontWeight = 'normal';
+                }
+            }
+        }
+        
+        function checkAnswerCompletion(textarea) {
+            const text = textarea.value.trim();
+            const wordCount = text ? text.split(/\s+/).length : 0;
+            const questionBlock = textarea.closest('.question-block');
+            const isComplete = wordCount >= minWordsPerAnswer;
+            
+            if (isComplete) {
+                questionBlock.classList.add('completed');
+                textarea.style.borderColor = '#28a745';
+            } else {
+                questionBlock.classList.remove('completed');
+                textarea.style.borderColor = '#ddd';
+            }
+        }
+        
+        function checkAllAnswers() {
+            completedQuestions = 0;
+            const textareas = document.querySelectorAll('textarea[required]');
+            
+            textareas.forEach(textarea => {
+                const text = textarea.value.trim();
+                const wordCount = text ? text.split(/\s+/).length : 0;
+                
+                if (wordCount >= minWordsPerAnswer) {
+                    completedQuestions++;
+                }
+                
+                updateWordCount(textarea);
+                checkAnswerCompletion(textarea);
+            });
+        }
+        
+        function updateProgressBar() {
+            checkAllAnswers();
+            const progress = (completedQuestions / totalQuestions) * 100;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `${completedQuestions} از ${totalQuestions} سوال تکمیل شده`;
+            
+            // Update completion status
+            const completionStatus = document.getElementById('completionStatus');
+            if (completedQuestions === totalQuestions) {
+                completionStatus.textContent = '✅ تمام سوالات تکمیل شده! می‌توانید ارسال کنید';
+                completionStatus.style.background = '#d4edda';
+                completionStatus.style.borderColor = '#c3e6cb';
+                completionStatus.style.color = '#155724';
+            } else {
+                const remaining = totalQuestions - completedQuestions;
+                completionStatus.textContent = `⏳ ${remaining} سوال باقی مانده`;
+                completionStatus.style.background = '#fff3cd';
+                completionStatus.style.borderColor = '#ffeaa7';
+                completionStatus.style.color = '#856404';
+            }
+        }
+        
+        function updateSubmitButton() {
+            const submitButton = document.getElementById('submitButton');
+            
+            if (completedQuestions === totalQuestions) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'ارسال پاسخ‌ها و مشاهده نتیجه ✨';
+            } else {
+                submitButton.disabled = true;
+                submitButton.textContent = `ارسال پاسخ‌ها (${totalQuestions - completedQuestions} سوال باقی مانده)`;
+            }
+        }
+        
+        // Form submission handler
+        document.getElementById('questionsForm').addEventListener('submit', function(e) {
+            // Final validation
+            let allValid = true;
             const textareas = this.querySelectorAll('textarea[required]');
-            for (let i = 0; i < textareas.length; i++) {
-                if (textareas[i].value.trim() === '') {
-                    allFilled = false;
-                    // You could highlight the empty textarea or show a more specific message
-                    // For simplicity, the server-side validation will catch this too.
+            
+            for (let textarea of textareas) {
+                const text = textarea.value.trim();
+                const wordCount = text ? text.split(/\s+/).length : 0;
+                
+                if (wordCount < minWordsPerAnswer) {
+                    allValid = false;
+                    // Scroll to first incomplete question
+                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    textarea.focus();
+                    
+                    alert(`لطفاً سوال ${parseInt(textarea.dataset.questionIndex) + 1} را با حداقل ${minWordsPerAnswer} کلمه تکمیل کنید.`);
                     break;
                 }
             }
-
-            if (allFilled) {
-                document.getElementById('submitButton').disabled = true;
-                document.getElementById('submitButton').innerText = 'درحال ارسال...';
-                document.getElementById('loadingMessage').style.display = 'block';
-            } else {
-                // Optionally, prevent form submission if client-side validation fails
-                // alert("لطفاً به تمام سوالات پاسخ دهید.");
-                // event.preventDefault(); // Uncomment to prevent submission
+            
+            if (!allValid) {
+                e.preventDefault();
+                return false;
             }
+            
+            // Show loading message
+            document.getElementById('submitButton').disabled = true;
+            document.getElementById('submitButton').textContent = 'درحال ارسال...';
+            document.getElementById('loadingMessage').style.display = 'block';
+            
+            // Scroll to loading message
+            document.getElementById('loadingMessage').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
         });
+        
+        // Initialize on page load
+        updateProgressBar();
+        updateSubmitButton();
     </script>
 </body>
 </html>

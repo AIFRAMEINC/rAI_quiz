@@ -1,42 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+
 body {
-    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* فونت وزیرمتن برای فارسی */
-    background-color: #e0f7fa; /* آبی روشن و آرامش‌بخش */
-    color: #37474f; /* خاکستری تیره برای متن اصلی */
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+    color: #37474f;
     line-height: 1.8;
     margin: 0;
     padding: 20px;
     direction: rtl;
+    min-height: 100vh;
 }
 
 .container {
-    max-width: 700px;
+    max-width: 800px;
     margin: 30px auto;
-    padding: 25px;
+    padding: 30px;
     background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-    color: #00796b; /* سبز-آبی تیره */
+    color: #00796b;
     text-align: center;
     margin-bottom: 20px;
+    font-size: 2.2em;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #00695c;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.6em;
+}
+
+h3 {
+    color: #00838f;
+    font-weight: 500;
+    margin-bottom: 12px;
+    font-size: 1.3em;
 }
 
 p {
     font-size: 1.1em;
     margin-bottom: 15px;
+    color: #455a64;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #004d40; /* سبز تیره‌تر */
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #004d40;
+    font-size: 1.1em;
 }
 
 .form-group input[type="text"],
@@ -44,107 +66,262 @@ p {
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #b2dfdb; /* سبز روشن برای کادر */
-    border-radius: 6px;
+    padding: 15px;
+    border: 2px solid #b2dfdb;
+    border-radius: 10px;
     box-sizing: border-box;
     font-size: 1em;
-    transition: border-color 0.3s ease;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: #00796b; /* سبز-آبی تیره هنگام فوکوس */
+    border-color: #00796b;
     outline: none;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
 }
 
 .form-group textarea {
-    resize: vertical; /* اجازه تغییر اندازه عمودی */
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
 }
 
 button[type="submit"], .button {
-    background-color: #00796b; /* سبز-آبی تیره */
+    background: linear-gradient(135deg, #00796b 0%, #004d40 100%);
     color: white;
-    padding: 12px 25px;
+    padding: 15px 30px;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 1.1em;
-    transition: background-color 0.3s ease;
+    font-weight: 600;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     display: inline-block;
+    box-shadow: 0 4px 15px rgba(0, 121, 107, 0.3);
 }
 
 button[type="submit"]:hover, .button:hover {
-    background-color: #004d40; /* سبز تیره‌تر هنگام هاور */
+    background: linear-gradient(135deg, #004d40 0%, #00251a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 121, 107, 0.4);
 }
+
 button[type="submit"]:disabled {
-    background-color: #90a4ae; /* خاکستری برای دکمه غیرفعال */
+    background: linear-gradient(135deg, #90a4ae 0%, #607d8b 100%);
     cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .error-message {
-    background-color: #ffcdd2; /* قرمز روشن برای خطا */
-    color: #c62828; /* قرمز تیره برای متن خطا */
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #ef9a9a;
+    background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+    color: #c62828;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 2px solid #ef5350;
     margin-bottom: 20px;
     text-align: center;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.2);
 }
 
 .question-block {
-    border: 1px solid #e0e0e0;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    background-color: #f9f9f9;
+    border: 2px solid #e0f2f1;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.question-block:hover {
+    border-color: #4db6ac;
+    box-shadow: 0 5px 15px rgba(77, 182, 172, 0.15);
+    transform: translateY(-2px);
+}
+
+.question-block.completed {
+    border-color: #4caf50;
+    background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.2);
+}
+
+.question-counter {
+    background: linear-gradient(135deg, #00796b 0%, #004d40 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 121, 107, 0.3);
+}
+
+.progress-container {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+    height: 8px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #00796b 0%, #4db6ac 100%);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 0.95em;
+    color: #546e7a;
+    font-weight: 500;
+}
+
+.char-counter {
+    font-size: 0.85em;
+    color: #78909c;
+    text-align: left;
+    margin-top: 8px;
+    font-weight: 400;
+}
+
+.submit-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+    padding: 35px;
+    border-radius: 20px;
+    margin-top: 40px;
+    text-align: center;
+    border: 2px solid #e1f5fe;
+}
+
+.completion-status {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border: 2px solid #ffb74d;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+    color: #e65100;
+}
+
+.loading-message {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border: 2px solid #4caf50;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 25px;
+    color: #1b5e20;
+    font-weight: 600;
+    text-align: center;
+    display: none;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.tips-section {
+    background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
+    border: 2px solid #90caf9;
+    border-radius: 15px;
+    padding: 25px;
+    margin: 25px 0;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+}
+
+.tips-section h3 {
+    color: #1565c0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.tips-section ul {
+    margin: 0;
+    padding-right: 25px;
+}
+
+.tips-section li {
+    margin-bottom: 10px;
+    color: #424242;
+    line-height: 1.6;
 }
 
 .report-container .section {
-    border: 1px solid #eee;
+    border: 1px solid #e0e0e0;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background-color: #fafafa;
 }
+
 .report-container .answer {
-    background-color: #f0f7ff;
-    border: 1px solid #cce0ff;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+    border: 2px solid #90caf9;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+    font-style: italic;
+    color: #1565c0;
 }
 
 /* برای نمایش بهتر اطلاعات دیباگ */
 .debug-data-container {
-    background-color: #f5f5f5;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    font-family: monospace;
+    background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-family: 'Vazirmatn', monospace;
     font-size: 0.9em;
-    white-space: pre-wrap;
-    word-break: break-all;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
+
 .debug-data-container strong {
     color: #00796b;
+    font-weight: 700;
 }
 
-/* ... (all previous styles) ... */
-
+/* چارت‌ها */
 .chart-section {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* A light, pleasant gradient */
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e1f5fe;
 }
+
 .chart-section h2 {
-    color: #1a2a6c; /* A deep, professional blue */
+    color: #1a237e;
     text-align: center;
-    margin-bottom: 10px; /* Reduced margin */
-    font-size: 1.6em;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+    font-weight: 700;
 }
-.chart-section p { /* Style for the descriptive paragraph */
+
+.chart-section p {
     text-align: center;
-    font-size: 0.95em;
-    color: #4a5568; /* Softer text color */
-    margin-bottom: 20px;
+    font-size: 1em;
+    color: #455a64;
+    margin-bottom: 25px;
     max-width: 90%;
     margin-left: auto;
     margin-right: auto;
@@ -153,7 +330,74 @@ button[type="submit"]:disabled {
 .chart-container {
     position: relative;
     margin: auto;
-    height: 320px; /* Increased height slightly */
-    width: 100%;   /* Use full width of its container */
-    max-width: 380px; /* Slightly increased max-width */
+    height: 350px;
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        margin: 15px auto;
+        padding: 20px;
+        border-radius: 15px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    .question-block {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px;
+    }
+    
+    .submit-section {
+        padding: 25px 20px;
+    }
+    
+    .tips-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 10px auto;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 1.6em;
+    }
+    
+    .question-block {
+        padding: 15px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px;
+        font-size: 0.95em;
+    }
+    
+    button[type="submit"], .button {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
 }

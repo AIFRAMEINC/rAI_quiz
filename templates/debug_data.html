@@ -2,59 +2,392 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اطلاعات کاربران (دیباگ)</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <style>
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .header-section h1 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #388e3c;
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+        
+        .user-card {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .user-card:hover {
+            border-color: #2196f3;
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .user-header {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #90caf9;
+        }
+        
+        .user-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1565c0;
+            margin-bottom: 5px;
+        }
+        
+        .user-info {
+            color: #424242;
+            font-size: 0.95em;
+        }
+        
+        .mbti-result {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ffb74d;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .mbti-type {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ef6c00;
+        }
+        
+        .answers-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .answers-section h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .answer-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-right: 4px solid #2196f3;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        
+        .percentages-section {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            border: 2px solid #ba68c8;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .percentages-section h4 {
+            color: #6a1b9a;
+            margin-bottom: 15px;
+        }
+        
+        .percentage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .percentage-item {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ce93d8;
+        }
+        
+        .percentage-label {
+            font-size: 0.9em;
+            color: #7b1fa2;
+            margin-bottom: 5px;
+        }
+        
+        .percentage-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #4a148c;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #757575;
+            font-style: italic;
+            padding: 40px;
+            background: #f5f5f5;
+            border-radius: 12px;
+        }
+        
+        .control-section {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            z-index: 100;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .filter-input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 1em;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .filter-input:focus {
+            border-color: #2196f3;
+            outline: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>اطلاعات ذخیره شده کاربران</h1>
-        <p><a href="/" class="button">بازگشت به صفحه اصلی</a></p>
+        <div class="header-section">
+            <h1>📊 اطلاعات ذخیره شده کاربران</h1>
+            <p>پنل مدیریت و نمایش داده‌های جمع‌آوری شده از آزمون MBTI</p>
+        </div>
+        
+        <div class="control-section">
+            <div class="button-group">
+                <a href="/" class="button">🏠 بازگشت به صفحه اصلی</a>
+                <input type="text" class="filter-input" id="searchInput" placeholder="🔍 جستجو در نام، تلفن یا نوع MBTI...">
+            </div>
+        </div>
+        
         {% if users_data %}
-            {% for user_item in users_data %}
-                <div class="debug-data-container" style="border: 1px solid #ccc; margin-bottom: 10px; padding: 10px;">
-                    <strong>شناسه کاربر:</strong> {{ user_item.id }}<br>
-                    <strong>نام:</strong> {{ user_item.get('first_name', 'N/A') }} {{ user_item.get('last_name', 'N/A') }}<br>
-                    <strong>تلفن:</strong> {{ user_item.get('phone', 'N/A') }}<br>
-                    <strong>رده سنی:</strong> {{ user_item.get('age_range', 'N/A') }}<br>
-                    <strong>زمان ثبت نام:</strong> {{ user_item.get('registration_time', 'N/A') }}<br>
-                    <strong>پاسخ‌ها:</strong>
-                    {% if user_item.get('answers') %}
-                        <ul>
-                        {% for ans in user_item.get('answers', []) %}
-                            <li>{{ ans | e }}</li>
-                        {% endfor %}
-                        </ul>
-                    {% else %}
-                        <em>بدون پاسخ ثبت شده</em>
-                    {% endif %}
-                    <strong>نتیجه MBTI:</strong> {{ user_item.get('mbti_result', 'N/A') | e }}<br>
-                    <strong>درصدهای MBTI (تخمینی):</strong>
-                    {% if user_item.get('mbti_percentages') and user_item.mbti_percentages is not mapping %} {# Check if it's not the error string/dict #}
-                        {% if user_item.mbti_percentages.get('error') %}
-                             <em>{{ user_item.mbti_percentages.error }}</em>
-                        {% else %}
-                        <ul>
-                            {% for key, value in user_item.mbti_percentages.items() %}
-                                <li>{{ key | replace('_percentage', '') | e }}: {{ value }}%</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    {% elif user_item.get('mbti_percentages') %} {# For the case where it's already a dict but might be an error dict #}
-                         {% if user_item.mbti_percentages.get('error') %}
-                             <em>{{ user_item.mbti_percentages.error }}</em>
-                         {% else %}
-                            <em>اطلاعات درصدها موجود نیست یا خطا در پردازش.</em>
-                         {% endif %}
-                    {% else %}
-                        <em>اطلاعات درصدها موجود نیست.</em>
-                    {% endif %}
-                    <br>
-                    <strong>زمان تحلیل:</strong> {{ user_item.get('analysis_time', 'N/A') }}
+            <div class="stats-section">
+                <div class="stat-card">
+                    <span class="stat-number">{{ users_data|length }}</span>
+                    <div class="stat-label">کل کاربران</div>
                 </div>
-            {% endfor %}
+                <div class="stat-card">
+                    <span class="stat-number">{{ users_data|selectattr('mbti_result')|list|length }}</span>
+                    <div class="stat-label">تست تکمیل شده</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">15</span>
+                    <div class="stat-label">سوال در هر تست</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">{{ (users_data|selectattr('age_range', 'equalto', '13-15')|list|length) }}</span>
+                    <div class="stat-label">رده سنی 13-15</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">{{ (users_data|selectattr('age_range', 'equalto', '15-18')|list|length) }}</span>
+                    <div class="stat-label">رده سنی 15-18</div>
+                </div>
+            </div>
+            
+            <div id="usersContainer">
+                {% for user_item in users_data %}
+                    <div class="user-card" data-search="{{ (user_item.get('first_name', '') + ' ' + user_item.get('last_name', '') + ' ' + user_item.get('phone', '') + ' ' + user_item.get('mbti_result', ''))|lower }}">
+                        <div class="user-header">
+                            <div class="user-name">
+                                👤 {{ user_item.get('first_name', 'N/A') }} {{ user_item.get('last_name', 'N/A') }}
+                            </div>
+                            <div class="user-info">
+                                📱 <strong>تلفن:</strong> {{ user_item.get('phone', 'N/A') }} |
+                                🎂 <strong>رده سنی:</strong> {{ user_item.get('age_range', 'N/A') }} |
+                                📅 <strong>ثبت نام:</strong> {{ user_item.get('registration_time', 'N/A')[:19] if user_item.get('registration_time') else 'N/A' }}
+                            </div>
+                        </div>
+                        
+                        {% if user_item.get('mbti_result') and 'خطا' not in user_item.get('mbti_result', '') %}
+                            <div class="mbti-result">
+                                <div class="mbti-type">🎯 {{ user_item.get('mbti_result', 'N/A') }}</div>
+                                <div style="color: #bf360c; margin-top: 5px;">
+                                    ⏰ تحلیل شده در: {{ user_item.get('analysis_time', 'N/A')[:19] if user_item.get('analysis_time') else 'N/A' }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; color: #757575; font-style: italic; padding: 15px;">
+                                {% if user_item.get('mbti_result') %}
+                                    ⚠️ خطا در تحلیل: {{ user_item.get('mbti_result') }}
+                                {% else %}
+                                    ⏳ آزمون هنوز تکمیل نشده است
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if user_item.get('mbti_percentages') and user_item.mbti_percentages is mapping %}
+                            {% if not user_item.mbti_percentages.get('error') %}
+                                <div class="percentages-section">
+                                    <h4>📈 درصدهای MBTI (تخمینی)</h4>
+                                    <div class="percentage-grid">
+                                        {% for key, value in user_item.mbti_percentages.items() %}
+                                            <div class="percentage-item">
+                                                <div class="percentage-label">{{ key | replace('_percentage', '') | replace('extraversion', 'برونگرایی') | replace('introversion', 'درونگرایی') | replace('sensing', 'حسی') | replace('intuition', 'شهودی') | replace('thinking', 'منطقی') | replace('feeling', 'احساسی') | replace('judging', 'قضاوتی') | replace('perceiving', 'ادراکی') }}</div>
+                                                <div class="percentage-value">{{ value }}%</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div style="text-align: center; color: #f44336; padding: 15px; background: #ffebee; border-radius: 8px; margin: 15px 0;">
+                                    ⚠️ {{ user_item.mbti_percentages.error }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% if user_item.get('answers') and user_item.answers|length > 0 %}
+                            <div class="answers-section">
+                                <h4>💬 پاسخ‌های کاربر ({{ user_item.answers|length }} پاسخ)</h4>
+                                {% for ans in user_item.get('answers', [])[:5] %}
+                                    <div class="answer-item">
+                                        <strong>سوال {{ loop.index }}:</strong> {{ ans[:150] | e }}{% if ans|length > 150 %}...{% endif %}
+                                    </div>
+                                {% endfor %}
+                                {% if user_item.answers|length > 5 %}
+                                    <div style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">
+                                        ... و {{ user_item.answers|length - 5 }} پاسخ دیگر
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div style="text-align: center; color: #757575; font-style: italic; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                                📝 بدون پاسخ ثبت شده
+                            </div>
+                        {% endif %}
+                        
+                        <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; color: #666; font-size: 0.85em;">
+                            🆔 شناسه کاربر: {{ user_item.id }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
-            <p>هنوز هیچ اطلاعاتی ذخیره نشده است.</p>
+            <div class="no-data">
+                <h2>📭 هنوز هیچ اطلاعاتی ذخیره نشده است</h2>
+                <p>بعد از ثبت نام و تکمیل آزمون توسط کاربران، اطلاعات اینجا نمایش داده خواهد شد.</p>
+                <a href="/" class="button" style="margin-top: 20px;">شروع آزمون جدید</a>
+            </div>
         {% endif %}
     </div>
+
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const userCards = document.querySelectorAll('.user-card');
+            
+            userCards.forEach(card => {
+                const searchData = card.getAttribute('data-search');
+                if (searchData.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Update visible count
+            const visibleCards = document.querySelectorAll('.user-card[style*="block"], .user-card:not([style*="none"])').length;
+            const totalCards = userCards.length;
+            
+            if (searchTerm) {
+                console.log(`نمایش ${visibleCards} از ${totalCards} کاربر`);
+            }
+        });
+        
+        // Smooth scroll to top button
+        const scrollButton = document.createElement('button');
+        scrollButton.innerHTML = '↑';
+        scrollButton.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+            transition: all 0.3s ease;
+        `;
+        
+        document.body.appendChild(scrollButton);
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                scrollButton.style.display = 'block';
+            } else {
+                scrollButton.style.display = 'none';
+            }
+        });
+        
+        scrollButton.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
 </body>
 </html>
