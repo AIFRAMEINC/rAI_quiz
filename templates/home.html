@@ -250,7 +250,7 @@
         /* Features Section */
         .features {
             padding: 120px 20px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
         }
 
@@ -289,16 +289,19 @@
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 20px;
+            /* بهبود شده - کادر واضح‌تر و جذاب‌تر */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
             padding: 40px 30px;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(25px);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(255, 255, 255, 0.1) inset;
         }
 
         .feature-card::before {
@@ -307,22 +310,47 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
         .feature-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-12px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(255, 255, 255, 0.15) inset;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .feature-card:hover::after {
+            opacity: 1;
         }
 
         .feature-icon {
             font-size: 4em;
             margin-bottom: 30px;
             display: block;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotateY(10deg);
         }
 
         .feature-card h3 {
@@ -330,15 +358,15 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .feature-card p {
-            color: #f8f9fa;
+            color: #f1f5f9;
             font-size: 1.1em;
             line-height: 1.7;
             font-weight: 400;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Stats Section */
@@ -358,42 +386,62 @@
 
         .stat-item {
             text-align: center;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(20px);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 35px 25px;
+            /* بهبود شده - کادر واضح‌تر */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.15),
+                0 2px 8px rgba(255, 255, 255, 0.1) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            border-radius: 20px 20px 0 0;
         }
 
         .stat-item:hover {
-            background: rgba(255, 255, 255, 0.18);
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(255, 255, 255, 0.15) inset;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .stat-number {
             font-size: 3.5em;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             display: block;
             margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .stat-label {
             font-size: 1.2em;
             color: #ffffff;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
         }
 
         /* How it works */
         .how-it-works {
             padding: 120px 20px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(20px);
         }
 
@@ -408,6 +456,25 @@
         .step-card {
             text-align: center;
             position: relative;
+            /* بهبود شده - کادر واضح‌تر */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px 30px;
+            backdrop-filter: blur(25px);
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                0 2px 8px rgba(255, 255, 255, 0.08) inset;
+        }
+
+        .step-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(255, 255, 255, 0.12) inset;
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .step-number {
@@ -422,7 +489,14 @@
             font-weight: 800;
             color: #ffffff;
             margin: 0 auto 30px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 
+                0 10px 30px rgba(102, 126, 234, 0.4),
+                0 2px 8px rgba(255, 255, 255, 0.2) inset;
+            transition: transform 0.3s ease;
+        }
+
+        .step-card:hover .step-number {
+            transform: scale(1.1) rotateY(15deg);
         }
 
         .step-card h3 {
@@ -430,28 +504,37 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
         }
 
         .step-card p {
-            color: #f8f9fa;
+            color: #f1f5f9;
             line-height: 1.7;
             font-size: 1.1em;
             font-weight: 400;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* CTA Section */
         .cta-section {
             padding: 120px 20px;
             text-align: center;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(20px);
         }
 
         .cta-content {
             max-width: 800px;
             margin: 0 auto;
+            /* بهبود شده - کادر واضح‌تر */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 32px;
+            padding: 60px 40px;
+            backdrop-filter: blur(30px);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 4px 16px rgba(255, 255, 255, 0.1) inset;
         }
 
         .cta-section h2 {
@@ -466,23 +549,23 @@
         .cta-section p {
             font-size: 1.4em;
             margin-bottom: 50px;
-            color: #f8f9fa;
+            color: #f1f5f9;
             line-height: 1.7;
             font-weight: 400;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Footer */
         .footer {
             padding: 60px 20px 30px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255, 255, 255, 0.15);
             text-align: center;
         }
 
         .footer p {
-            color: #ffffff;
+            color: #f1f5f9;
             font-size: 1em;
             font-weight: 500;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -534,14 +617,26 @@
                 gap: 30px;
             }
 
+            .feature-card {
+                padding: 30px 25px;
+            }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 30px;
             }
 
+            .stat-item {
+                padding: 25px 20px;
+            }
+
             .steps-grid {
                 grid-template-columns: 1fr;
                 gap: 40px;
+            }
+
+            .step-card {
+                padding: 30px 25px;
             }
 
             .section-title h2 {
@@ -550,6 +645,10 @@
 
             .cta-section h2 {
                 font-size: 2.2em;
+            }
+
+            .cta-content {
+                padding: 40px 30px;
             }
         }
 
@@ -561,6 +660,36 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .feature-card,
+            .stat-item,
+            .step-card {
+                padding: 25px 20px;
+            }
+        }
+
+        /* اضافه کردن جلوه‌های بصری بیشتر */
+        .glow-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-effect::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-effect:hover::after {
+            opacity: 0.3;
         }
     </style>
 </head>
@@ -598,7 +727,7 @@
                 شخصیت خود را به طور کامل بشناسید و مسیر زندگی‌تان را بهبود دهید.
             </p>
             <div class="cta-buttons">
-                <a href="/register" class="btn-primary">
+                <a href="/register" class="btn-primary glow-effect">
                     🚀 شروع آزمون رایگان
                 </a>
                 <a href="/login" class="btn-secondary">
@@ -617,32 +746,32 @@
                 <p>تکنولوژی پیشرفته و تحلیل دقیق برای شناخت عمیق شخصیت شما</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">🤖</span>
                     <h3>هوش مصنوعی پیشرفته</h3>
                     <p>تحلیل دقیق پاسخ‌های شما با استفاده از الگوریتم‌های پیشرفته Google Gemini برای نتایج بی‌نظیر</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">📊</span>
                     <h3>گزارش‌های تصویری جامع</h3>
                     <p>نمودارهای تعاملی و گزارش‌های کامل که شخصیت شما را به صورت بصری نمایش می‌دهند</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">🔒</span>
                     <h3>امنیت مطلق داده‌ها</h3>
                     <p>تمام اطلاعات شما با رمزنگاری پیشرفته محافظت می‌شود و فقط در اختیار شما قرار دارد</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">🎯</span>
                     <h3>دقت علمی بالا</h3>
                     <p>بر اساس تحقیقات روان‌شناسی مدرن و استاندارد بین‌المللی Myers-Briggs طراحی شده</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">📱</span>
                     <h3>طراحی Responsive</h3>
                     <p>تجربه یکسان و عالی در تمام دستگاه‌ها - موبایل، تبلت و دسکتاپ</p>
                 </div>
-                <div class="feature-card">
+                <div class="feature-card glow-effect">
                     <span class="feature-icon">⚡</span>
                     <h3>سرعت و کارایی</h3>
                     <p>دریافت نتایج در کمتر از 30 ثانیه با حفظ دقت و کیفیت تحلیل</p>
@@ -659,19 +788,19 @@
                 <p>اعتماد هزاران کاربر در سراسر جهان</p>
             </div>
             <div class="stats-grid">
-                <div class="stat-item">
+                <div class="stat-item glow-effect">
                     <span class="stat-number">16</span>
                     <div class="stat-label">تیپ شخصیتی مختلف</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item glow-effect">
                     <span class="stat-number">98%</span>
                     <div class="stat-label">دقت تحلیل</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item glow-effect">
                     <span class="stat-number">15</span>
                     <div class="stat-label">سوال تخصصی</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item glow-effect">
                     <span class="stat-number">24/7</span>
                     <div class="stat-label">پشتیبانی آنلاین</div>
                 </div>
@@ -687,17 +816,17 @@
                 <p>تنها در 3 مرحله ساده به شناخت کامل خود برسید</p>
             </div>
             <div class="steps-grid">
-                <div class="step-card">
+                <div class="step-card glow-effect">
                     <div class="step-number">1</div>
                     <h3>ثبت نام و شروع</h3>
                     <p>با ایجاد حساب کاربری امن، سفر شناخت خود را آغاز کنید. فقط چند اطلاعات ساده نیاز است.</p>
                 </div>
-                <div class="step-card">
+                <div class="step-card glow-effect">
                     <div class="step-number">2</div>
                     <h3>پاسخ به سوالات</h3>
                     <p>به 15 سوال تخصصی با صداقت پاسخ دهید. هر سوال برای شناخت بعدی از شخصیت شما طراحی شده.</p>
                 </div>
-                <div class="step-card">
+                <div class="step-card glow-effect">
                     <div class="step-number">3</div>
                     <h3>دریافت نتایج</h3>
                     <p>گزارش کامل شخصیت خود را با نمودارهای تفصیلی و راهنمایی‌های عملی دریافت کنید.</p>
@@ -708,13 +837,13 @@
 
     <!-- CTA Section -->
     <section class="cta-section">
-        <div class="cta-content">
+        <div class="cta-content glow-effect">
             <h2>آماده شناخت خود هستید؟</h2>
             <p>
                 هزاران نفر قبل از شما این مسیر را رفته‌اند و زندگی بهتری ساخته‌اند. 
                 حالا نوبت شماست تا با شناخت عمیق‌تر خود، آینده‌ای روشن‌تر بسازید.
             </p>
-            <a href="/register" class="btn-primary" style="font-size: 1.3em; padding: 20px 50px;">
+            <a href="/register" class="btn-primary glow-effect" style="font-size: 1.3em; padding: 20px 50px;">
                 ✨ شروع رایگان کنید
             </a>
         </div>
@@ -831,6 +960,27 @@
                     this.innerHTML = '⏳ در حال هدایت...';
                     this.style.pointerEvents = 'none';
                 }
+            });
+        });
+
+        // Advanced 3D hover effects
+        document.querySelectorAll('.feature-card, .stat-item, .step-card').forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-12px) scale(1.02)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
             });
         });
     </script>
