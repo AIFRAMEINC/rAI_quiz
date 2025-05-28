@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون‌های شخصیت‌شناسی</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <style>
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 25px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+        }
+        
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="hexagons" width="28" height="24" patternUnits="userSpaceOnUse"><polygon points="14,2 26,8 26,16 14,22 2,16 2,8" stroke="white" stroke-width="0.5" fill="none" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23hexagons)"/></svg>');
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .dashboard-header h1 {
+            color: white;
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .welcome-text {
+            font-size: 1.3em;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 25px;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .user-info h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .user-info p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 5px 0;
+            font-size: 1em;
+        }
+        
+        .navigation-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #4a5568;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-link.primary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .nav-link.primary:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+        
+        .logout-btn:hover {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+        
+        .tests-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .section-subtitle {
+            font-size: 1.1em;
+            color: #4a5568;
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .tests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .test-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 25px;
+            padding: 35px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .test-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .test-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .test-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+            text-align: center;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+        
+        .test-card h3 {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .test-description {
+            color: #4a5568;
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .test-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .test-detail {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .test-detail-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .test-detail-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .start-test-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 25px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+        }
+        
+        .start-test-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .stats-overview {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            border-radius: 25px;
+            padding: 50px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-overview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+        
+        .stats-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats-overview h2 {
+            color: white;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #68d391;
+            display: block;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 40px 20px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2.3em;
+            }
+            
+            .navigation-bar {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .tests-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .test-card {
+                padding: 25px 20px;
+            }
+            
+            .stats-overview {
+                padding: 40px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .dashboard-header h1 {
+                font-size: 2em;
+            }
+            
+            .test-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .nav-link {
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h1>🎯 آزمون‌های شخصیت‌شناسی</h1>
+                <p class="welcome-text">خوش آمدید! آماده کشف شخصیت واقعی خود هستید؟</p>
+                
+                <div class="user-info">
+                    <h3>👋 سلام {{ user.first_name }} {{ user.last_name }}</h3>
+                    <p>📱 {{ user.phone }}</p>
+                    <p>🎂 رده سنی: {{ user.age_range }} سال</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <div class="navigation-bar">
+            <div class="nav-links">
+                <a href="/my-results" class="nav-link primary">
+                    📊 نتایج آزمون‌های من
+                </a>
+                <a href="/show_data" class="nav-link">
+                    🗂️ مشاهده تمام داده‌ها
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/logout" class="nav-link logout-btn">
+                    🚪 خروج از حساب
+                </a>
+            </div>
+        </div>
+
+        <!-- Tests Section -->
+        <div class="tests-section">
+            <h2 class="section-title">🧠 آزمون‌های موجود</h2>
+            <p class="section-subtitle">
+                با انجام این آزمون‌های علمی، جنبه‌های مختلف شخصیت خود را کشف کنید و درک عمیق‌تری از خود بدست آورید.
+            </p>
+            
+            <div class="tests-grid">
+                {% for test_id, test_info in available_tests.items() %}
+                <div class="test-card">
+                    <span class="test-icon">{{ test_info.icon }}</span>
+                    <h3>{{ test_info.title }}</h3>
+                    <p class="test-description">{{ test_info.description }}</p>
+                    
+                    <div class="test-details">
+                        <div class="test-detail">
+                            <div class="test-detail-label">مدت زمان</div>
+                            <div class="test-detail-value">{{ test_info.duration }}</div>
+                        </div>
+                        <div class="test-detail">
+                            <div class="test-detail-label">تعداد سوال</div>
+                            <div class="test-detail-value">{{ test_info.questions_count }}</div>
+                        </div>
+                    </div>
+                    
+                    <a href="/test/{{ test_id }}" class="start-test-btn">
+                        🚀 شروع آزمون
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stats-content">
+                <h2>📈 آمار کلی سیستم</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">16</span>
+                        <div class="stat-label">تیپ شخصیتی</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">{{ available_tests|length }}</span>
+                        <div class="stat-label">آزمون موجود</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">98%</span>
+                        <div class="stat-label">دقت تحلیل</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">24/7</span>
+                        <div class="stat-label">در دسترس</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); border-radius: 20px; padding: 40px; margin-bottom: 30px; text-align: center; border: 2px solid #90caf9;">
+            <h3 style="color: #1565c0; font-size: 1.8em; margin-bottom: 20px;">💡 نکات مهم برای آزمون</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: right;">
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🎯 صداقت کامل</h4>
+                    <p style="color: #424242; font-size: 0.95em;">برای دریافت نتیجه دقیق، کاملاً صادقانه پاسخ دهید</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">⏰ بدون عجله</h4>
+                    <p style="color: #424242; font-size: 0.95em;">وقت کافی بگذارید و با دقت به سوالات پاسخ دهید</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">📝 توضیح کامل</h4>
+                    <p style="color: #424242; font-size: 0.95em;">برای هر سوال، حداقل یک پاراگراف توضیح دهید</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animations to cards
+            const cards = document.querySelectorAll('.test-card, .stat-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
+                observer.observe(card);
+            });
+
+            // Add hover effects to navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px) scale(1.02)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add click animation to test cards
+            document.querySelectorAll('.start-test-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+                    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.pointerEvents = 'none';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

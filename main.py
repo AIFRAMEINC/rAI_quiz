@@ -3,11 +3,14 @@ import json
 import asyncio
 import os
 import html
+import secrets
+import string
+import hashlib
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from uuid import uuid4
 
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -18,6 +21,7 @@ import google.generativeai as genai
 # --- Configuration ---
 DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
+SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
 def load_or_generate_key():
     if os.path.exists(ENCRYPTION_KEY_FILE):
@@ -47,7 +51,7 @@ if not API_KEY:
     raise ValueError("متغیر محیطی GEMINI_API_KEY تنظیم نشده است")
 genai.configure(api_key=API_KEY)
 
-# --- Database Setup (No changes from previous version with encrypted_mbti_percentages column) ---
+# --- Database Setup ---
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_FILE)
     conn.row_factory = sqlite3.Row
@@ -62,20 +66,100 @@ def init_db():
         encrypted_first_name BLOB NOT NULL,
         encrypted_last_name BLOB NOT NULL,
         encrypted_phone BLOB UNIQUE NOT NULL,
+        encrypted_password BLOB NOT NULL,
         age_range TEXT NOT NULL,
-        registration_time TEXT NOT NULL,
+        registration_time TEXT NOT NULL
+    )
+    """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS test_results (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        test_name TEXT NOT NULL,
         encrypted_answers BLOB,
         mbti_result TEXT,
         encrypted_mbti_percentages BLOB,
-        analysis_time TEXT
+        analysis_time TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id)
     )
     """)
+    
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sessions (
+        session_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+    )
+    """)
+    
     conn.commit()
     conn.close()
 
 init_db()
 
-# --- Encryption/Decryption Helpers (No changes) ---
+# --- Authentication & Session Management ---
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(password: str, hashed: str) -> bool:
+    return hash_password(password) == hashed
+
+def generate_password(length: int = 12) -> str:
+    characters = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(secrets.choice(characters) for _ in range(length))
+
+def create_session(user_id: str) -> str:
+    session_id = secrets.token_urlsafe(32)
+    expires_at = datetime.now().timestamp() + (24 * 60 * 60)  # 24 hours
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO sessions (session_id, user_id, created_at, expires_at)
+        VALUES (?, ?, ?, ?)
+    """, (session_id, user_id, datetime.now().isoformat(), expires_at))
+    conn.commit()
+    conn.close()
+    
+    return session_id
+
+def get_current_user(session_id: str = Cookie(None)) -> Optional[Dict]:
+    if not session_id:
+        return None
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Check if session is valid and not expired
+    cursor.execute("""
+        SELECT s.user_id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.session_id = ? AND s.expires_at > ?
+    """, (session_id, datetime.now().timestamp()))
+    
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result:
+        return {
+            'id': result['user_id'],
+            'first_name': decrypt_data(result['encrypted_first_name']),
+            'last_name': decrypt_data(result['encrypted_last_name']),
+            'phone': decrypt_data(result['encrypted_phone']),
+            'age_range': result['age_range']
+        }
+    return None
+
+def require_login(user = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="لطفاً وارد شوید")
+    return user
+
+# --- Encryption/Decryption Helpers ---
 def encrypt_data(data: str) -> Optional[bytes]:
     if data is None: return None
     return cipher_suite.encrypt(data.encode('utf-8'))
@@ -87,7 +171,7 @@ def decrypt_data(encrypted_data: Optional[bytes]) -> Optional[str]:
     except Exception:
         return "خطا در رمزگشایی"
 
-# --- MBTI Questions Database - Updated with 15 questions for each age range ---
+# --- MBTI Questions Database ---
 QUESTIONS_DB = {
     "13-15": [
         "تو توی کلاس و مدرسه ترجیح میدی چطور وقت بگذرونی؟ بیشتر دوست داری با دوستات حرف بزنی و در گروه باشی، یا ترجیح میدی تنها باشی و کارهای خودت رو بکنی؟ چرا؟ (حداقل یک پاراگراف توضیح بده)",
@@ -269,6 +353,17 @@ MBTI_DESCRIPTIONS = {
     }
 }
 
+# Available tests
+AVAILABLE_TESTS = {
+    "mbti_personality": {
+        "title": "آزمون شخصیت‌شناسی MBTI",
+        "description": "کشف تیپ شخصیتی خود بر اساس استاندارد بین‌المللی MBTI",
+        "duration": "15-20 دقیقه",
+        "questions_count": 15,
+        "icon": "🧠"
+    }
+}
+
 # --- Gemini Tools & Model ---
 determine_mbti_tool = [{
     "function_declarations": [{
@@ -311,7 +406,7 @@ estimate_all_eight_preferences_tool = [{
 gemini_model_for_type = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_mbti_tool)
 gemini_model_for_all_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_all_eight_preferences_tool)
 
-# --- Gemini Interaction Functions - Updated to include age range ---
+# --- Gemini Interaction Functions ---
 def determine_mbti_from_gemini_args(extraversion_introversion, sensing_intuition, thinking_feeling, judging_perceiving):
     return {"mbti_type": f"{extraversion_introversion}{sensing_intuition}{thinking_feeling}{judging_perceiving}"}
 
@@ -437,7 +532,7 @@ def get_reasoning_for_mbti(mbti_type: str, answers: List[str]) -> str:
         reason += f"؛ به عنوان مثال، در پاسخ اول خود به مواردی اشاره کردید که نشان‌دهنده '{html.escape(answers[0][:70])}...' بود."
     return reason
 
-def generate_html_mbti_report(user_id: str, mbti_type: str, user_questions: List[str], user_answers: List[str], all_percentages: Optional[Dict[str, int]]) -> str:
+def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[str], user_answers: List[str], all_percentages: Optional[Dict[str, int]]) -> str:
     info = MBTI_DESCRIPTIONS.get(mbti_type)
     if not info:
         return f"<h1>خطا</h1><p>تیپ شخصیتی '{html.escape(mbti_type)}' یافت نشد.</p>"
@@ -581,22 +676,41 @@ def generate_html_mbti_report(user_id: str, mbti_type: str, user_questions: List
 
 # --- FastAPI Endpoints ---
 @app.get("/", response_class=HTMLResponse)
-async def get_registration_page(request: Request, error: str = None, phone: str = None):
+async def get_home_page(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
+
+@app.get("/register", response_class=HTMLResponse)  
+async def get_register_page(request: Request, error: str = None):
     error_message = None
-    if error == "phone_exists" and phone:
-        error_message = f"شماره همراه {html.escape(phone)} قبلاً ثبت شده."
-    elif error == "check_failed":
-        error_message = "خطا در بررسی اطلاعات. لطفاً دوباره تلاش کنید."
+    if error == "phone_exists":
+        error_message = "این شماره همراه قبلاً ثبت شده است."
+    elif error == "passwords_mismatch":
+        error_message = "رمزهای وارد شده مطابقت ندارند."
+    elif error == "weak_password":
+        error_message = "رمز باید حداقل 8 کاراکتر باشد."
+    elif error == "registration_failed":
+        error_message = "خطا در ثبت نام. لطفاً دوباره تلاش کنید."
+        
     return templates.TemplateResponse("register.html", {"request": request, "error_message": error_message})
 
-@app.post("/register", response_class=RedirectResponse)
+@app.post("/register")
 async def handle_registration(
     request: Request,
     first_name: str = Form(...),
     last_name: str = Form(...),
     phone: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
     age_range: str = Form(...)
 ):
+    # Validation
+    if password != confirm_password:
+        return RedirectResponse(url="/register?error=passwords_mismatch", status_code=303)
+    
+    if len(password) < 8:
+        return RedirectResponse(url="/register?error=weak_password", status_code=303)
+    
+    # Check if phone exists
     conn = get_db_connection()
     cursor = conn.cursor()
     is_duplicate = False
@@ -611,93 +725,164 @@ async def handle_registration(
     except Exception as e:
         print(f"خطا در بررسی یکتایی شماره تلفن: {e}")
         conn.close()
-        return RedirectResponse(url=f"/?error=check_failed", status_code=303)
+        return RedirectResponse(url="/register?error=registration_failed", status_code=303)
 
     if is_duplicate:
         conn.close()
-        return RedirectResponse(url=f"/?error=phone_exists&phone={phone}", status_code=303)
+        return RedirectResponse(url="/register?error=phone_exists", status_code=303)
 
+    # Create user
     user_id = str(uuid4())
     encrypted_fname = encrypt_data(first_name)
     encrypted_lname = encrypt_data(last_name)
     encrypted_phone_val = encrypt_data(phone)
+    encrypted_password = encrypt_data(hash_password(password))
     
     try:
         cursor.execute("""
-            INSERT INTO users (id, encrypted_first_name, encrypted_last_name, encrypted_phone, age_range, registration_time)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (user_id, encrypted_fname, encrypted_lname, encrypted_phone_val, age_range, datetime.now().isoformat()))
+            INSERT INTO users (id, encrypted_first_name, encrypted_last_name, encrypted_phone, encrypted_password, age_range, registration_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, encrypted_fname, encrypted_lname, encrypted_phone_val, encrypted_password, age_range, datetime.now().isoformat()))
         conn.commit()
-    except sqlite3.IntegrityError:
+        
+        # Create session
+        session_id = create_session(user_id)
+        
+        # Redirect to quiz dashboard
+        response = RedirectResponse(url="/quiz", status_code=303)
+        response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=86400)  # 24 hours
+        return response
+        
+    except Exception as e:
+        print(f"خطا در ایجاد کاربر: {e}")
         conn.close()
-        return RedirectResponse(url=f"/?error=phone_exists&phone={phone}", status_code=303)
+        return RedirectResponse(url="/register?error=registration_failed", status_code=303)
     finally:
         conn.close()
-    
-    return RedirectResponse(url=f"/questions?user_id={user_id}&age_range={age_range}", status_code=303)
 
-@app.get("/questions", response_class=HTMLResponse)
-async def get_questions_page(request: Request, user_id: str, age_range: str, error_message: str = None, previous_answers: str = None):
-    if age_range not in QUESTIONS_DB:
-        raise HTTPException(status_code=400, detail="رده سنی نامعتبر است.")
-    
-    questions_for_age = QUESTIONS_DB[age_range]
-    parsed_previous_answers = {}
-    if previous_answers:
-        try:
-            parsed_previous_answers = json.loads(previous_answers)
-        except json.JSONDecodeError:
-            pass 
+@app.get("/login", response_class=HTMLResponse)
+async def get_login_page(request: Request, error: str = None):
+    error_message = None
+    if error == "invalid_credentials":
+        error_message = "شماره همراه یا رمز اشتباه است."
+    elif error == "login_failed":
+        error_message = "خطا در ورود. لطفاً دوباره تلاش کنید."
+        
+    return templates.TemplateResponse("login.html", {"request": request, "error_message": error_message})
 
-    return templates.TemplateResponse("questions.html", {
-        "request": request, 
-        "user_id": user_id,
-        "age_range": age_range,
-        "questions": questions_for_age,
-        "error_message": error_message,
-        "previous_answers": parsed_previous_answers
-    })
-
-@app.post("/submit_answers")
-async def handle_answers_submission(request: Request):
-    form_data = await request.form()
-    user_id = form_data.get("user_id")
-    age_range = form_data.get("age_range")
-
-    if not user_id or not age_range:
-        raise HTTPException(status_code=400, detail="شناسه کاربری یا رده سنی ارسال نشده است.")
-
+@app.post("/login")
+async def handle_login(
+    request: Request,
+    phone: str = Form(...),
+    password: str = Form(...)
+):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM users WHERE id = ?", (user_id,))
-    if not cursor.fetchone():
+    
+    try:
+        # Find user by phone
+        cursor.execute("SELECT id, encrypted_phone, encrypted_password FROM users")
+        all_users = cursor.fetchall()
+        
+        user_id = None
+        for user in all_users:
+            if decrypt_data(user['encrypted_phone']) == phone:
+                stored_password_hash = decrypt_data(user['encrypted_password'])
+                if verify_password(password, stored_password_hash):
+                    user_id = user['id']
+                    break
+        
+        if not user_id:
+            conn.close()
+            return RedirectResponse(url="/login?error=invalid_credentials", status_code=303)
+        
+        # Create session
+        session_id = create_session(user_id)
+        
+        response = RedirectResponse(url="/quiz", status_code=303)
+        response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=86400)
+        return response
+        
+    except Exception as e:
+        print(f"خطا در ورود: {e}")
         conn.close()
-        raise HTTPException(status_code=404, detail="کاربر یافت نشد.")
+        return RedirectResponse(url="/login?error=login_failed", status_code=303)
+    finally:
+        conn.close()
+
+@app.get("/logout")
+async def logout(session_id: str = Cookie(None)):
+    # Delete session from database
+    if session_id:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+        conn.commit()
+        conn.close()
+    
+    response = RedirectResponse(url="/", status_code=303)
+    response.delete_cookie(key="session_id")
+    return response
+
+@app.get("/quiz", response_class=HTMLResponse)
+async def get_quiz_dashboard(request: Request, user = Depends(require_login)):
+    return templates.TemplateResponse("quiz_dashboard.html", {
+        "request": request, 
+        "user": user,
+        "available_tests": AVAILABLE_TESTS
+    })
+
+@app.get("/test/{test_id}", response_class=HTMLResponse)
+async def get_test_page(request: Request, test_id: str, user = Depends(require_login)):
+    if test_id not in AVAILABLE_TESTS:
+        raise HTTPException(status_code=404, detail="تست یافت نشد")
+    
+    if test_id == "mbti_personality":
+        age_range = user['age_range']
+        if age_range not in QUESTIONS_DB:
+            raise HTTPException(status_code=400, detail="رده سنی نامعتبر است.")
+        
+        questions_for_age = QUESTIONS_DB[age_range]
+        return templates.TemplateResponse("questions.html", {
+            "request": request, 
+            "test_id": test_id,
+            "questions": questions_for_age,
+            "user": user
+        })
+    
+    raise HTTPException(status_code=404, detail="تست پیدا نشد")
+
+@app.post("/submit_test/{test_id}")
+async def handle_test_submission(request: Request, test_id: str, user = Depends(require_login)):
+    if test_id not in AVAILABLE_TESTS:
+        raise HTTPException(status_code=404, detail="تست یافت نشد")
+    
+    if test_id == "mbti_personality":
+        return await handle_mbti_test_submission(request, user)
+    
+    raise HTTPException(status_code=404, detail="تست پیدا نشد")
+
+async def handle_mbti_test_submission(request: Request, user: Dict):
+    form_data = await request.form()
+    age_range = user['age_range']
 
     if age_range not in QUESTIONS_DB:
-        conn.close()
         raise HTTPException(status_code=400, detail="رده سنی نامعتبر برای سوالات.")
 
     questions_for_user = QUESTIONS_DB[age_range]
     answers = []
-    raw_answers_for_repopulation = {}
+    
     for i in range(len(questions_for_user)):
         answer_key = f"answer_{i}"
         answer_value = form_data.get(answer_key)
-        raw_answers_for_repopulation[answer_key] = answer_value
         if not answer_value or not answer_value.strip():
-            conn.close()
-            prev_ans_json = json.dumps(raw_answers_for_repopulation)
-            error_msg_val = f"لطفاً به سوال {i+1} پاسخ کامل دهید."
             return RedirectResponse(
-                url=f"/questions?user_id={user_id}&age_range={age_range}&error_message={error_msg_val}&previous_answers={prev_ans_json}",
+                url=f"/test/mbti_personality?error=incomplete&question={i+1}",
                 status_code=303
             )
         answers.append(answer_value)
     
-    encrypted_answers_json_blob = encrypt_data(json.dumps(answers))
-    
-    # Updated to pass age_range to AI analysis
+    # Process with AI
     mbti_type_result = await get_mbti_type_from_gemini(questions_for_user, answers, age_range)
     
     all_mbti_percentages_dict = None
@@ -706,38 +891,113 @@ async def handle_answers_submission(request: Request):
         all_mbti_percentages_dict = await get_all_eight_mbti_percentages_from_gemini(questions_for_user, answers, mbti_type_result, age_range)
         if all_mbti_percentages_dict:
             encrypted_percentages_blob = encrypt_data(json.dumps(all_mbti_percentages_dict))
-        else:
-            print(f"هشدار: درصدها برای کاربر {user_id} با تیپ {mbti_type_result} دریافت نشد.")
 
+    # Save to database
+    test_result_id = str(uuid4())
+    encrypted_answers_json_blob = encrypt_data(json.dumps(answers))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
     try:
         cursor.execute("""
-            UPDATE users
-            SET encrypted_answers = ?, mbti_result = ?, encrypted_mbti_percentages = ?, analysis_time = ?
-            WHERE id = ?
-        """, (encrypted_answers_json_blob, mbti_type_result, encrypted_percentages_blob, datetime.now().isoformat(), user_id))
+            INSERT INTO test_results (id, user_id, test_name, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (test_result_id, user['id'], "آزمون شخصیت‌شناسی MBTI", encrypted_answers_json_blob, mbti_type_result, encrypted_percentages_blob, datetime.now().isoformat()))
         conn.commit()
     except Exception as e:
-        print(f"خطا در به‌روزرسانی دیتابیس: {e}")
+        print(f"خطا در ذخیره نتیجه تست: {e}")
     finally:
         conn.close()
 
-    if "خطا" in mbti_type_result:
-        report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(mbti_type_result)}</p><a href='/' class='button'>بازگشت به صفحه اصلی</a>"
+    return RedirectResponse(url=f"/result/{user['phone']}/{test_result_id}", status_code=303)
+
+@app.get("/result/{phone}/{test_result_id}", response_class=HTMLResponse)
+async def get_test_result(request: Request, phone: str, test_result_id: str, user = Depends(require_login)):
+    # Check if user can access this result
+    if user['phone'] != phone:
+        raise HTTPException(status_code=403, detail="شما اجازه دسترسی به این نتیجه را ندارید")
+    
+    # Get test result
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tr.*, u.age_range FROM test_results tr
+        JOIN users u ON tr.user_id = u.id
+        WHERE tr.id = ? AND tr.user_id = ?
+    """, (test_result_id, user['id']))
+    
+    result = cursor.fetchone()
+    conn.close()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="نتیجه تست یافت نشد")
+    
+    # Decrypt and process result
+    answers = []
+    percentages = None
+    
+    if result['encrypted_answers']:
+        decrypted_answers = decrypt_data(result['encrypted_answers'])
+        if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
+            try:
+                answers = json.loads(decrypted_answers)
+            except json.JSONDecodeError:
+                pass
+    
+    if result['encrypted_mbti_percentages']:
+        decrypted_percentages = decrypt_data(result['encrypted_mbti_percentages'])
+        if decrypted_percentages and decrypted_percentages != "خطا در رمزگشایی":
+            try:
+                percentages = json.loads(decrypted_percentages)
+            except json.JSONDecodeError:
+                pass
+    
+    # Generate report
+    if "خطا" in result['mbti_result']:
+        report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(result['mbti_result'])}</p>"
     else:
-        report_html = generate_html_mbti_report(user_id, mbti_type_result, questions_for_user, answers, all_mbti_percentages_dict)
+        questions_for_age = QUESTIONS_DB.get(result['age_range'], [])
+        report_html = generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
 
     return templates.TemplateResponse("result.html", {
         "request": request,
-        "user_id": user_id,
+        "test_result_id": test_result_id,
         "report_content": report_html,
-        "mbti_type": mbti_type_result
+        "mbti_type": result['mbti_result'],
+        "user": user
+    })
+
+@app.get("/my-results", response_class=HTMLResponse)
+async def get_user_results(request: Request, user = Depends(require_login)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, test_name, mbti_result, analysis_time
+        FROM test_results 
+        WHERE user_id = ?
+        ORDER BY analysis_time DESC
+    """, (user['id'],))
+    
+    results = cursor.fetchall()
+    conn.close()
+    
+    return templates.TemplateResponse("my_results.html", {
+        "request": request,
+        "user": user,
+        "results": results
     })
 
 @app.get("/show_data", response_class=HTMLResponse)
-async def show_data_page(request: Request):
+async def show_data_page(request: Request, user = Depends(require_login)):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, encrypted_first_name, encrypted_last_name, encrypted_phone, age_range, registration_time, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time FROM users")
+    cursor.execute("""
+        SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
+               tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
+        FROM users u
+        LEFT JOIN test_results tr ON u.id = tr.user_id
+        ORDER BY u.registration_time DESC
+    """)
     rows = cursor.fetchall()
     conn.close()
 
@@ -770,7 +1030,12 @@ async def show_data_page(request: Request):
             
         users_list.append(user_dict)
         
-    return templates.TemplateResponse("debug_data.html", {"request": request, "users_data": users_list})
+    return templates.TemplateResponse("debug_data.html", {"request": request, "users_data": users_list, "user": user})
+
+@app.get("/generate-password")
+async def generate_random_password():
+    password = generate_password()
+    return {"password": password}
 
 if __name__ == "__main__":
     import uvicorn

@@ -80,6 +80,49 @@
             opacity: 0.9;
         }
 
+        /* Navigation in header */
+        .header-navigation {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .header-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-nav-btn.primary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #4f46e5;
+        }
+
+        .header-nav-btn.primary:hover {
+            background: white;
+            color: #4338ca;
+        }
+
         /* Main content area */
         .main-content {
             padding: 50px 40px;
@@ -500,6 +543,17 @@
                 max-width: 300px;
                 justify-content: center;
             }
+
+            .header-navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header-nav-btn {
+                width: 100%;
+                max-width: 200px;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -561,6 +615,19 @@
             <div class="result-header">
                 <div class="celebration-text">🎉</div>
                 <div class="congratulations">تبریک! آزمون شخصیت‌شناسی شما تکمیل شد</div>
+                
+                <!-- Navigation in Header -->
+                <div class="header-navigation">
+                    <a href="/my-results" class="header-nav-btn primary">
+                        📊 نتایج آزمون‌های من
+                    </a>
+                    <a href="/quiz" class="header-nav-btn">
+                        🏠 داشبورد آزمون‌ها
+                    </a>
+                    <a href="/logout" class="header-nav-btn">
+                        🚪 خروج از حساب
+                    </a>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -569,14 +636,11 @@
             <!-- Action Buttons -->
             <div class="action-section">
                 <div class="button-group">
-                    <a href="/" class="action-button">
-                        🔄 انجام دوباره آزمون
+                    <a href="/quiz" class="action-button">
+                        🔄 انجام آزمون جدید
                     </a>
                     <button onclick="window.print()" class="action-button secondary-button">
                         🖨️ چاپ نتایج
-                    </button>
-                    <button onclick="shareResults()" class="action-button secondary-button">
-                        📤 اشتراک‌گذاری
                     </button>
                 </div>
             </div>
@@ -626,6 +690,17 @@
                 });
             }
             renderRadarChart();
+            
+            // Add hover effects to header navigation
+            document.querySelectorAll('.header-nav-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px) scale(1.05)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
         });
 
         function renderPieChart() {
@@ -863,26 +938,6 @@
             } else if(container) {
                 container.innerHTML = defaultChartErrorMessage;
                 container.style.height = 'auto';
-            }
-        }
-
-        // Share functionality
-        function shareResults() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'نتیجه آزمون MBTI من',
-                    text: `من در آزمون MBTI، تیپ شخصیتی ${document.querySelector('.mbti-badge').textContent} هستم!`,
-                    url: window.location.href
-                });
-            } else {
-                // Fallback for browsers that don't support Web Share API
-                const text = `من در آزمون MBTI، تیپ شخصیتی ${document.querySelector('.mbti-badge').textContent} هستم!`;
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text + '\n' + window.location.href);
-                    alert('متن برای اشتراک‌گذاری کپی شد!');
-                } else {
-                    prompt('متن زیر را کپی کنید:', text + '\n' + window.location.href);
-                }
             }
         }
 

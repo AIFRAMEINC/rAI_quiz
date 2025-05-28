@@ -3,23 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اطلاعات کاربران (دیباگ)</title>
+    <title>اطلاعات کاربران - MBTI</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
     <style>
         .header-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
+            padding: 50px 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
             text-align: center;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="data-pattern" width="25" height="25" patternUnits="userSpaceOnUse"><rect x="5" y="5" width="3" height="3" fill="white" opacity="0.1"/><rect x="17" y="17" width="2" height="2" fill="white" opacity="0.08"/><rect x="12" y="20" width="1" height="1" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23data-pattern)"/></svg>');
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
         }
         
         .header-section h1 {
             color: white;
+            margin-bottom: 15px;
+            font-size: 2.8em;
+            font-weight: 700;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-section p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .user-info-header {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+        
+        .user-info-header h3 {
+            color: white;
             margin-bottom: 10px;
-            font-size: 2.2em;
+            font-size: 1.2em;
+        }
+        
+        .user-info-header p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 5px 0;
+            font-size: 1em;
+        }
+        
+        .navigation-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #4a5568;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-link.primary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .nav-link.primary:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
         }
         
         .stats-section {
@@ -49,6 +147,39 @@
             color: #388e3c;
             font-size: 1.1em;
             margin-top: 5px;
+        }
+        
+        .control-section {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            z-index: 100;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .filter-input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 1em;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .filter-input:focus {
+            border-color: #2196f3;
+            outline: none;
         }
         
         .user-card {
@@ -85,6 +216,36 @@
         .user-info {
             color: #424242;
             font-size: 0.95em;
+        }
+        
+        .test-results-section {
+            margin-top: 20px;
+        }
+        
+        .test-result-item {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ffb74d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .test-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .test-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #ef6c00;
+        }
+        
+        .test-date {
+            font-size: 0.9em;
+            color: #bf360c;
         }
         
         .mbti-result {
@@ -173,49 +334,134 @@
             border-radius: 12px;
         }
         
-        .control-section {
-            position: sticky;
-            top: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            z-index: 100;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .filter-input {
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
+        .no-results {
+            text-align: center;
+            padding: 80px 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-radius: 25px;
-            width: 300px;
-            font-size: 1em;
-            font-family: 'Vazirmatn', sans-serif;
+            border: 2px solid #e2e8f0;
         }
         
-        .filter-input:focus {
-            border-color: #2196f3;
-            outline: none;
+        .no-results-icon {
+            font-size: 5em;
+            margin-bottom: 30px;
+            opacity: 0.6;
+        }
+        
+        .no-results h3 {
+            font-size: 2em;
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .no-results p {
+            font-size: 1.1em;
+            color: #718096;
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-section {
+                padding: 40px 20px;
+            }
+            
+            .header-section h1 {
+                font-size: 2.2em;
+            }
+            
+            .navigation-bar {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-input {
+                width: 100%;
+            }
+            
+            .user-card {
+                padding: 20px 15px;
+            }
+            
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-section h1 {
+                font-size: 2em;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .nav-link {
+                justify-content: center;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .percentage-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-section">
-            <h1>📊 اطلاعات ذخیره شده کاربران</h1>
-            <p>پنل مدیریت و نمایش داده‌های جمع‌آوری شده از آزمون MBTI</p>
+            <div class="header-content">
+                <h1>📊 مشاهده اطلاعات کاربران</h1>
+                <p>پنل مدیریت و نمایش داده‌های جمع‌آوری شده از آزمون‌های شخصیت‌شناسی</p>
+                
+                <div class="user-info-header">
+                    <h3>👤 {{ user.first_name }} {{ user.last_name }}</h3>
+                    <p>📱 {{ user.phone }}</p>
+                    <p>🎂 رده سنی: {{ user.age_range }} سال</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Bar -->
+        <div class="navigation-bar">
+            <div class="nav-links">
+                <a href="/quiz" class="nav-link primary">
+                    🏠 بازگشت به داشبورد
+                </a>
+                <a href="/my-results" class="nav-link">
+                    📊 نتایج آزمون‌های من
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/logout" class="nav-link" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); color: white;">
+                    🚪 خروج از حساب
+                </a>
+            </div>
         </div>
         
         <div class="control-section">
             <div class="button-group">
-                <a href="/" class="button">🏠 بازگشت به صفحه اصلی</a>
                 <input type="text" class="filter-input" id="searchInput" placeholder="🔍 جستجو در نام، تلفن یا نوع MBTI...">
             </div>
         </div>
@@ -258,62 +504,71 @@
                             </div>
                         </div>
                         
-                        {% if user_item.get('mbti_result') and 'خطا' not in user_item.get('mbti_result', '') %}
-                            <div class="mbti-result">
-                                <div class="mbti-type">🎯 {{ user_item.get('mbti_result', 'N/A') }}</div>
-                                <div style="color: #bf360c; margin-top: 5px;">
-                                    ⏰ تحلیل شده در: {{ user_item.get('analysis_time', 'N/A')[:19] if user_item.get('analysis_time') else 'N/A' }}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div style="text-align: center; color: #757575; font-style: italic; padding: 15px;">
-                                {% if user_item.get('mbti_result') %}
-                                    ⚠️ خطا در تحلیل: {{ user_item.get('mbti_result') }}
-                                {% else %}
-                                    ⏳ آزمون هنوز تکمیل نشده است
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                        
-                        {% if user_item.get('mbti_percentages') and user_item.mbti_percentages is mapping %}
-                            {% if not user_item.mbti_percentages.get('error') %}
-                                <div class="percentages-section">
-                                    <h4>📈 درصدهای MBTI (تخمینی)</h4>
-                                    <div class="percentage-grid">
-                                        {% for key, value in user_item.mbti_percentages.items() %}
-                                            <div class="percentage-item">
-                                                <div class="percentage-label">{{ key | replace('_percentage', '') | replace('extraversion', 'برونگرایی') | replace('introversion', 'درونگرایی') | replace('sensing', 'حسی') | replace('intuition', 'شهودی') | replace('thinking', 'منطقی') | replace('feeling', 'احساسی') | replace('judging', 'قضاوتی') | replace('perceiving', 'ادراکی') }}</div>
-                                                <div class="percentage-value">{{ value }}%</div>
-                                            </div>
-                                        {% endfor %}
+                        <!-- Test Results Section -->
+                        <div class="test-results-section">
+                            {% if user_item.get('test_name') and user_item.get('mbti_result') %}
+                                <div class="test-result-item">
+                                    <div class="test-result-header">
+                                        <div class="test-name">🧠 {{ user_item.get('test_name', 'آزمون MBTI') }}</div>
+                                        <div class="test-date">⏰ {{ user_item.get('analysis_time', 'N/A')[:19] if user_item.get('analysis_time') else 'N/A' }}</div>
                                     </div>
+                                    
+                                    {% if user_item.get('mbti_result') and 'خطا' not in user_item.get('mbti_result', '') %}
+                                        <div class="mbti-result">
+                                            <div class="mbti-type">🎯 {{ user_item.get('mbti_result', 'N/A') }}</div>
+                                        </div>
+                                    {% else %}
+                                        <div style="text-align: center; color: #757575; font-style: italic; padding: 15px;">
+                                            {% if user_item.get('mbti_result') %}
+                                                ⚠️ خطا در تحلیل: {{ user_item.get('mbti_result') }}
+                                            {% else %}
+                                                ⏳ آزمون هنوز تکمیل نشده است
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if user_item.get('mbti_percentages') and user_item.mbti_percentages is mapping %}
+                                        {% if not user_item.mbti_percentages.get('error') %}
+                                            <div class="percentages-section">
+                                                <h4>📈 درصدهای MBTI (تخمینی)</h4>
+                                                <div class="percentage-grid">
+                                                    {% for key, value in user_item.mbti_percentages.items() %}
+                                                        <div class="percentage-item">
+                                                            <div class="percentage-label">{{ key | replace('_percentage', '') | replace('extraversion', 'برونگرایی') | replace('introversion', 'درونگرایی') | replace('sensing', 'حسی') | replace('intuition', 'شهودی') | replace('thinking', 'منطقی') | replace('feeling', 'احساسی') | replace('judging', 'قضاوتی') | replace('perceiving', 'ادراکی') }}</div>
+                                                            <div class="percentage-value">{{ value }}%</div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <div style="text-align: center; color: #f44336; padding: 15px; background: #ffebee; border-radius: 8px; margin: 15px 0;">
+                                                ⚠️ {{ user_item.mbti_percentages.error }}
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    {% if user_item.get('answers') and user_item.answers|length > 0 %}
+                                        <div class="answers-section">
+                                            <h4>💬 پاسخ‌های کاربر ({{ user_item.answers|length }} پاسخ)</h4>
+                                            {% for ans in user_item.get('answers', [])[:3] %}
+                                                <div class="answer-item">
+                                                    <strong>سوال {{ loop.index }}:</strong> {{ ans[:100] | e }}{% if ans|length > 100 %}...{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                            {% if user_item.answers|length > 3 %}
+                                                <div style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">
+                                                    ... و {{ user_item.answers|length - 3 }} پاسخ دیگر
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% else %}
-                                <div style="text-align: center; color: #f44336; padding: 15px; background: #ffebee; border-radius: 8px; margin: 15px 0;">
-                                    ⚠️ {{ user_item.mbti_percentages.error }}
+                                <div style="text-align: center; color: #757575; font-style: italic; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                                    📝 هنوز آزمونی انجام نداده است
                                 </div>
                             {% endif %}
-                        {% endif %}
-                        
-                        {% if user_item.get('answers') and user_item.answers|length > 0 %}
-                            <div class="answers-section">
-                                <h4>💬 پاسخ‌های کاربر ({{ user_item.answers|length }} پاسخ)</h4>
-                                {% for ans in user_item.get('answers', [])[:5] %}
-                                    <div class="answer-item">
-                                        <strong>سوال {{ loop.index }}:</strong> {{ ans[:150] | e }}{% if ans|length > 150 %}...{% endif %}
-                                    </div>
-                                {% endfor %}
-                                {% if user_item.answers|length > 5 %}
-                                    <div style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">
-                                        ... و {{ user_item.answers|length - 5 }} پاسخ دیگر
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <div style="text-align: center; color: #757575; font-style: italic; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                                📝 بدون پاسخ ثبت شده
-                            </div>
-                        {% endif %}
+                        </div>
                         
                         <div style="text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0; color: #666; font-size: 0.85em;">
                             🆔 شناسه کاربر: {{ user_item.id }}
@@ -322,10 +577,10 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="no-data">
-                <h2>📭 هنوز هیچ اطلاعاتی ذخیره نشده است</h2>
+            <div class="no-results">
+                <div class="no-results-icon">📭</div>
+                <h3>هنوز هیچ اطلاعاتی ذخیره نشده است</h3>
                 <p>بعد از ثبت نام و تکمیل آزمون توسط کاربران، اطلاعات اینجا نمایش داده خواهد شد.</p>
-                <a href="/" class="button" style="margin-top: 20px;">شروع آزمون جدید</a>
             </div>
         {% endif %}
     </div>
@@ -387,6 +642,43 @@
         
         scrollButton.addEventListener('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Add animations to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.user-card, .stat-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `all 0.6s ease-out ${index * 0.05}s`;
+                observer.observe(card);
+            });
+
+            // Add hover effects to navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px) scale(1.02)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
         });
     </script>
 </body>

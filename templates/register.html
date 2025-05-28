@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ثبت نام آزمون MBTI</title>
+    <title>ثبت نام - آزمون MBTI</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
     <style>
         .welcome-section {
@@ -101,6 +101,7 @@
             font-family: 'Vazirmatn', sans-serif;
             transition: all 0.3s ease;
             background-color: #ffffff;
+            box-sizing: border-box;
         }
         
         .form-group input:focus,
@@ -112,6 +113,83 @@
         
         .form-group input:valid {
             border-color: #4caf50;
+        }
+        
+        
+        .password-input-wrapper {
+            position: relative;
+        }
+        
+        .password-input-wrapper input {
+            padding-left: 50px;
+        }
+        
+        .generate-password-btn-inside {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+            z-index: 2;
+        }
+        
+        .generate-password-btn-inside:hover {
+            background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            font-size: 0.85em;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-strength.weak {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .password-strength.medium {
+            background: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffe0b2;
+        }
+        
+        .password-strength.strong {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .password-match {
+            margin-top: 8px;
+            font-size: 0.85em;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+        
+        .password-match.match {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .password-match.no-match {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
         }
         
         .submit-button {
@@ -130,10 +208,17 @@
             font-family: 'Vazirmatn', sans-serif;
         }
         
-        .submit-button:hover {
+        .submit-button:hover:not(:disabled) {
             background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6);
+        }
+        
+        .submit-button:disabled {
+            background: linear-gradient(135deg, #90a4ae 0%, #607d8b 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .privacy-notice {
@@ -162,6 +247,24 @@
             font-size: 0.9em;
         }
         
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .login-link a {
+            color: #1976d2;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
         /* آیکون‌ها */
         .icon {
             font-size: 2em;
@@ -173,8 +276,8 @@
 <body>
     <div class="container">
         <div class="welcome-section">
-            <h1>🌟 سلام دوست من! به آزمون MBTI خوش اومدی</h1>
-            <p>برای شروع، لطفاً اطلاعات زیر رو وارد کن تا بتونیم بهتر با هم آشنا بشیم و آزمون مخصوص خودت رو شروع کنی.</p>
+            <h1>🌟 به آزمون MBTI خوش آمدید!</h1>
+            <p>برای شروع، لطفاً حساب کاربری خود را ایجاد کنید تا بتوانید آزمون‌های شخصیت‌شناسی را انجام دهید.</p>
         </div>
         
         <div class="info-cards">
@@ -202,7 +305,7 @@
         {% endif %}
 
         <div class="form-container">
-            <h2>🚀 بیا شروع کنیم!</h2>
+            <h2>🚀 ایجاد حساب کاربری</h2>
             
             <form action="/register" method="post" id="registerForm">
                 <div class="form-group">
@@ -230,8 +333,29 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="password">
+                        🔑 رمز عبور:
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="password" name="password" required placeholder="رمز عبور خود را وارد کنید" minlength="8">
+                        <button type="button" class="generate-password-btn-inside" id="generatePasswordBtn" title="تولید رمز تصادفی">
+                            🎲
+                        </button>
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">
+                        🔐 تأیید رمز عبور:
+                    </label>
+                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="رمز عبور را مجدداً وارد کنید">
+                    <div class="password-match" id="passwordMatch"></div>
+                </div>
+                
+                <div class="form-group">
                     <label for="age_range">
-                        🎂 رده سنی خودت رو انتخاب کن:
+                        🎂 رده سنی خود را انتخاب کنید:
                     </label>
                     <select id="age_range" name="age_range" required>
                         <option value="">انتخاب کنید...</option>
@@ -240,33 +364,39 @@
                     </select>
                     
                     <div class="age-info">
-                        <strong>💡 چرا سن مهمه؟</strong><br>
+                        <strong>💡 چرا سن مهم است؟</strong><br>
                         سوالات و تحلیل بر اساس مرحله رشد شما تنظیم می‌شود تا نتیجه دقیق‌تری بگیرید.
                     </div>
                 </div>
                 
-                <button type="submit" class="submit-button" id="submitBtn">
-                    ✨ شروع آزمون!
+                <button type="submit" class="submit-button" id="submitBtn" disabled>
+                    ✨ ایجاد حساب و شروع
                 </button>
             </form>
+        </div>
+        
+        <div class="login-link">
+            <p>قبلاً حساب کاربری دارید؟ <a href="/login">وارد شوید</a></p>
         </div>
         
         <div class="privacy-notice">
             <h4>🔐 حفظ حریم خصوصی</h4>
             <p>
                 اطلاعات شما با بالاترین استانداردهای امنیتی محافظت می‌شود و تنها برای ارائه نتایج آزمون استفاده خواهد شد.
-                شماره تلفن فقط برای جلوگیری از تکرار آزمون استفاده می‌شود.
+                شماره تلفن فقط برای ورود به حساب کاربری استفاده می‌شود.
             </p>
         </div>
     </div>
 
     <script>
-        // Form validation and UX improvements
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('registerForm');
             const submitBtn = document.getElementById('submitBtn');
             const phoneInput = document.getElementById('phone');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm_password');
             const ageSelect = document.getElementById('age_range');
+            const generatePasswordBtn = document.getElementById('generatePasswordBtn');
             
             // Phone number formatting
             phoneInput.addEventListener('input', function() {
@@ -284,57 +414,174 @@
                 } else {
                     this.style.borderColor = '#bbdefb';
                 }
+                
+                checkFormValidity();
+            });
+            
+            // Password strength check
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                checkPasswordMatch();
+                checkFormValidity();
+            });
+            
+            // Confirm password check
+            confirmPasswordInput.addEventListener('input', function() {
+                checkPasswordMatch();
+                checkFormValidity();
             });
             
             // Age range selection feedback
             ageSelect.addEventListener('change', function() {
-                const ageInfo = document.querySelector('.age-info');
                 if (this.value) {
-                    ageInfo.style.display = 'block';
                     this.style.borderColor = '#4caf50';
                 } else {
                     this.style.borderColor = '#bbdefb';
                 }
+                checkFormValidity();
             });
+            
+            // Generate random password
+            generatePasswordBtn.addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/generate-password');
+                    const data = await response.json();
+                    
+                    passwordInput.value = data.password;
+                    confirmPasswordInput.value = data.password;
+                    
+                    checkPasswordStrength(data.password);
+                    checkPasswordMatch();
+                    checkFormValidity();
+                    
+                    // Show generated password temporarily
+                    const originalType = passwordInput.type;
+                    passwordInput.type = 'text';
+                    confirmPasswordInput.type = 'text';
+                    
+                    setTimeout(() => {
+                        passwordInput.type = originalType;
+                        confirmPasswordInput.type = originalType;
+                    }, 3000);
+                    
+                } catch (error) {
+                    console.error('Error generating password:', error);
+                    alert('خطا در تولید رمز. لطفاً دوباره تلاش کنید.');
+                }
+            });
+            
+            function checkPasswordStrength(password) {
+                const strengthIndicator = document.getElementById('passwordStrength');
+                
+                if (password.length === 0) {
+                    strengthIndicator.style.display = 'none';
+                    return;
+                }
+                
+                strengthIndicator.style.display = 'block';
+                
+                let score = 0;
+                if (password.length >= 8) score++;
+                if (/[a-z]/.test(password)) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+                
+                if (score < 3) {
+                    strengthIndicator.className = 'password-strength weak';
+                    strengthIndicator.textContent = '⚠️ رمز ضعیف - حداقل 8 کاراکتر نیاز است';
+                } else if (score < 4) {
+                    strengthIndicator.className = 'password-strength medium';
+                    strengthIndicator.textContent = '🔶 رمز متوسط - بهتر می‌تواند باشد';
+                } else {
+                    strengthIndicator.className = 'password-strength strong';
+                    strengthIndicator.textContent = '✅ رمز قوی - عالی است!';
+                }
+            }
+            
+            function checkPasswordMatch() {
+                const matchIndicator = document.getElementById('passwordMatch');
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (confirmPassword.length === 0) {
+                    matchIndicator.style.display = 'none';
+                    return;
+                }
+                
+                matchIndicator.style.display = 'block';
+                
+                if (password === confirmPassword) {
+                    matchIndicator.className = 'password-match match';
+                    matchIndicator.textContent = '✅ رمزها مطابقت دارند';
+                } else {
+                    matchIndicator.className = 'password-match no-match';
+                    matchIndicator.textContent = '❌ رمزها مطابقت ندارند';
+                }
+            }
+            
+            function checkFormValidity() {
+                const phone = phoneInput.value;
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                const firstName = document.getElementById('first_name').value;
+                const lastName = document.getElementById('last_name').value;
+                const ageRange = ageSelect.value;
+                
+                const isValid = 
+                    firstName.trim().length > 0 &&
+                    lastName.trim().length > 0 &&
+                    phone.length === 11 && phone.startsWith('09') &&
+                    password.length >= 8 &&
+                    password === confirmPassword &&
+                    ageRange !== '';
+                
+                submitBtn.disabled = !isValid;
+                
+                if (isValid) {
+                    submitBtn.textContent = '✨ ایجاد حساب و شروع';
+                } else {
+                    submitBtn.textContent = '🔄 لطفاً تمام فیلدها را تکمیل کنید';
+                }
+            }
             
             // Form submission
             form.addEventListener('submit', function(e) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '⏳ درحال ثبت نام...';
-                submitBtn.style.background = 'linear-gradient(135deg, #90a4ae 0%, #607d8b 100%)';
-                
-                // Basic validation
                 const phone = phoneInput.value;
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
                 if (phone.length !== 11 || !phone.startsWith('09')) {
                     e.preventDefault();
                     alert('لطفاً شماره همراه را به صورت صحیح وارد کنید (مثال: 09123456789)');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '✨ شروع آزمون!';
-                    submitBtn.style.background = 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)';
+                    return false;
+                }
+                
+                if (password.length < 8) {
+                    e.preventDefault();
+                    alert('رمز عبور باید حداقل 8 کاراکتر باشد');
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('رمزهای وارد شده مطابقت ندارند');
                     return false;
                 }
                 
                 if (!ageSelect.value) {
                     e.preventDefault();
                     alert('لطفاً رده سنی خود را انتخاب کنید');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '✨ شروع آزمون!';
-                    submitBtn.style.background = 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)';
                     return false;
                 }
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '⏳ درحال ایجاد حساب...';
+                submitBtn.style.background = 'linear-gradient(135deg, #90a4ae 0%, #607d8b 100%)';
             });
             
-            // Add some interactivity to info cards
-            const infoCards = document.querySelectorAll('.info-card');
-            infoCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-8px) scale(1.02)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
+            // Initial form check
+            checkFormValidity();
         });
     </script>
 </body>

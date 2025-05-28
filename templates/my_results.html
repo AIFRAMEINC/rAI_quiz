@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نتایج آزمون‌های من - MBTI</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <style>
+        .results-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 25px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .results-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="circles" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="8" stroke="white" stroke-width="0.5" fill="none" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23circles)"/></svg>');
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .results-header h1 {
+            color: white;
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .results-header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .user-summary {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+        }
+        
+        .user-summary h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .user-summary p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 8px 0;
+            font-size: 1em;
+        }
+        
+        .navigation-bar {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 2px solid #f1f5f9;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #4a5568;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .nav-link.primary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .nav-link.primary:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        }
+        
+        .results-section {
+            margin-bottom: 50px;
+        }
+        
+        .section-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 25px;
+            padding: 35px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .test-icon {
+            font-size: 3em;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+        
+        .result-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-completed {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .mbti-result {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border: 2px solid #ffb74d;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .mbti-type {
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #ef6c00;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mbti-description {
+            color: #bf360c;
+            font-size: 1em;
+            font-weight: 500;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .result-detail {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .detail-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .view-result-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 20px;
+        }
+        
+        .view-result-btn:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 80px 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 25px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .no-results-icon {
+            font-size: 5em;
+            margin-bottom: 30px;
+            opacity: 0.6;
+        }
+        
+        .no-results h3 {
+            font-size: 2em;
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .no-results p {
+            font-size: 1.1em;
+            color: #718096;
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .start-first-test-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 18px 35px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(72, 187, 120, 0.4);
+        }
+        
+        .start-first-test-btn:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(72, 187, 120, 0.6);
+        }
+        
+        .stats-summary {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stats-summary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="diamonds" width="25" height="25" patternUnits="userSpaceOnUse"><polygon points="12.5,2 23,12.5 12.5,23 2,12.5" stroke="white" stroke-width="0.5" fill="none" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23diamonds)"/></svg>');
+        }
+        
+        .stats-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats-summary h2 {
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 25px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: #68d391;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.95em;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .results-header {
+                padding: 40px 20px;
+            }
+            
+            .results-header h1 {
+                font-size: 2.3em;
+            }
+            
+            .navigation-bar {
+                padding: 15px 20px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-links {
+                justify-content: center;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .result-card {
+                padding: 25px 20px;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stats-summary {
+                padding: 30px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .results-header h1 {
+                font-size: 2em;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .nav-link {
+                justify-content: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .no-results {
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Results Header -->
+        <div class="results-header">
+            <div class="header-content">
+                <h1>📊 نتایج آزمون‌های من</h1>
+                <p>مرور و مشاهده تمام آزمون‌هایی که تا کنون انجام داده‌اید</p>
+                
+                <div class="user-summary">
+                    <h3>👤 {{ user.first_name }} {{ user.last_name }}</h3>
+                    <p>📱 {{ user.phone }}</p>
+                    <p>🎂 رده سنی: {{ user.age_range }} سال</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <div class="navigation-bar">
+            <div class="nav-links">
+                <a href="/quiz" class="nav-link primary">
+                    🏠 بازگشت به داشبورد
+                </a>
+                <a href="/show_data" class="nav-link">
+                    🗂️ مشاهده تمام داده‌ها
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/logout" class="nav-link" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); color: white;">
+                    🚪 خروج از حساب
+                </a>
+            </div>
+        </div>
+
+        {% if results %}
+            <!-- Stats Summary -->
+            <div class="stats-summary">
+                <div class="stats-content">
+                    <h2>📈 خلاصه آمار شما</h2>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number">{{ results|length }}</span>
+                            <div class="stat-label">آزمون انجام شده</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">{{ results|selectattr('mbti_result')|rejectattr('mbti_result', 'search', 'خطا')|list|length }}</span>
+                            <div class="stat-label">نتیجه موفق</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">{{ (results|selectattr('mbti_result')|rejectattr('mbti_result', 'search', 'خطا')|list|length / results|length * 100)|round|int if results|length > 0 else 0 }}%</span>
+                            <div class="stat-label">نرخ موفقیت</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">{{ results|map(attribute='test_name')|unique|list|length }}</span>
+                            <div class="stat-label">نوع آزمون متفاوت</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <h2 class="section-title">🎯 نتایج آزمون‌های شما</h2>
+                
+                <div class="results-grid">
+                    {% for result in results %}
+                    <div class="result-card" onclick="window.location.href='/result/{{ user.phone }}/{{ result.id }}'">
+                        <div class="result-header">
+                            <span class="test-icon">🧠</span>
+                            {% if result.mbti_result and 'خطا' not in result.mbti_result %}
+                                <div class="result-status status-completed">✅ تکمیل شده</div>
+                            {% else %}
+                                <div class="result-status status-error">❌ خطا در تحلیل</div>
+                            {% endif %}
+                        </div>
+                        
+                        <h3 class="result-title">{{ result.test_name }}</h3>
+                        
+                        {% if result.mbti_result and 'خطا' not in result.mbti_result %}
+                            <div class="mbti-result">
+                                <div class="mbti-type">{{ result.mbti_result }}</div>
+                                <div class="mbti-description">نوع شخصیتی شما</div>
+                            </div>
+                        {% else %}
+                            <div style="background: #ffebee; border: 2px solid #f44336; border-radius: 15px; padding: 20px; text-align: center; color: #c62828;">
+                                <strong>⚠️ خطا در تحلیل:</strong><br>
+                                {{ result.mbti_result if result.mbti_result else 'نتیجه در دسترس نیست' }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="result-details">
+                            <div class="result-detail">
+                                <div class="detail-label">تاریخ انجام</div>
+                                <div class="detail-value">{{ result.analysis_time[:10] if result.analysis_time else 'نامشخص' }}</div>
+                            </div>
+                            <div class="result-detail">
+                                <div class="detail-label">زمان</div>
+                                <div class="detail-value">{{ result.analysis_time[11:16] if result.analysis_time and result.analysis_time|length > 16 else 'نامشخص' }}</div>
+                            </div>
+                        </div>
+                        
+                        <a href="/result/{{ user.phone }}/{{ result.id }}" class="view-result-btn">
+                            👁️ مشاهده نتیجه کامل
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <!-- No Results -->
+            <div class="no-results">
+                <div class="no-results-icon">📭</div>
+                <h3>هنوز آزمونی انجام نداده‌اید</h3>
+                <p>
+                    برای شروع سفر شناخت خود، اولین آزمون شخصیت‌شناسی را انجام دهید. 
+                    این آزمون‌ها به شما کمک می‌کنند تا درک عمیق‌تری از شخصیت خود بدست آورید.
+                </p>
+                <a href="/quiz" class="start-first-test-btn">
+                    🚀 شروع اولین آزمون
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Tips Section -->
+        <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); border-radius: 20px; padding: 40px; margin-top: 50px; text-align: center; border: 2px solid #90caf9;">
+            <h3 style="color: #1565c0; font-size: 1.8em; margin-bottom: 20px;">💡 نکاتی برای بهره‌برداری بهتر</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: right;">
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🔄 آزمون مجدد</h4>
+                    <p style="color: #424242; font-size: 0.95em;">می‌توانید آزمون‌ها را مجدداً انجام دهید تا تغییرات شخصیت خود را رصد کنید</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">📊 مقایسه نتایج</h4>
+                    <p style="color: #424242; font-size: 0.95em;">نتایج مختلف خود را با هم مقایسه کنید و روند تغییرات را ببینید</p>
+                </div>
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #bbdefb;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">💾 ذخیره نتایج</h4>
+                    <p style="color: #424242; font-size: 0.95em;">نتایج شما برای همیشه ذخیره می‌ماند و قابل دسترسی است</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animations to result cards
+            const cards = document.querySelectorAll('.result-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
+                observer.observe(card);
+            });
+
+            // Add hover effects to navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px) scale(1.02)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add click animation to result cards
+            document.querySelectorAll('.result-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add loading animation for view buttons
+            document.querySelectorAll('.view-result-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.innerHTML = '⏳ در حال بارگذاری...';
+                    this.style.pointerEvents = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
