@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود مشاوران - آزمون MBTI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 25%, #7c3aed 50%, #c026d3 75%, #db2777 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) { width: 80px; height: 80px; top: 20%; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 120px; height: 120px; top: 60%; left: 80%; animation-delay: 2s; }
+        .shape:nth-child(3) { width: 60px; height: 60px; top: 80%; left: 20%; animation-delay: 4s; }
+        .shape:nth-child(4) { width: 100px; height: 100px; top: 30%; left: 70%; animation-delay: 1s; }
+        .shape:nth-child(5) { width: 140px; height: 140px; top: 10%; right: 15%; animation-delay: 3s; }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Login Header */
+        .login-header {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 32px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 4px 16px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c026d3 0%, #7c3aed 50%, #3730a3 100%);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .login-icon {
+            font-size: 4em;
+            margin-bottom: 25px;
+            display: block;
+            animation: pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .login-header h1 {
+            font-size: 3.2em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-header p {
+            font-size: 1.3em;
+            color: #f1f5f9;
+            line-height: 1.7;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fecaca;
+            padding: 20px 25px;
+            border-radius: 16px;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Login Form Container */
+        .login-form-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 32px;
+            padding: 50px 40px;
+            backdrop-filter: blur(30px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 4px 16px rgba(255, 255, 255, 0.1) inset;
+            margin-bottom: 30px;
+        }
+
+        .login-form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #6ee7b7 100%);
+            border-radius: 30px 30px 0 0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 1.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 18px 50px 18px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            font-size: 1.1em;
+            font-family: 'Vazirmatn', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            backdrop-filter: blur(20px);
+            box-sizing: border-box;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-group input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            outline: none;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 0 0 4px rgba(255, 255, 255, 0.1),
+                0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:focus + .input-icon {
+            color: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .form-group input:valid {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .form-group input:valid + .input-icon {
+            color: #10b981;
+        }
+
+        .input-helper {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9em;
+            margin-top: 8px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Login Button */
+        .login-button {
+            background: linear-gradient(135deg, #c026d3 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.4em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: block;
+            margin: 40px auto 0;
+            box-shadow: 0 8px 32px rgba(192, 38, 211, 0.4);
+            font-family: 'Vazirmatn', sans-serif;
+            min-width: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #a21caf 0%, #6b46c1 100%);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 15px 45px rgba(192, 38, 211, 0.6);
+        }
+
+        .login-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .login-button:disabled {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Security Notice */
+        .security-notice {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: #bfdbfe;
+            font-size: 1em;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .security-notice h4 {
+            color: #93c5fd;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .security-notice p {
+            line-height: 1.7;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Back to Home Link */
+        .back-home {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-home a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            padding: 10px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .back-home a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .login-header {
+                padding: 40px 25px;
+            }
+
+            .login-header h1 {
+                font-size: 2.5em;
+            }
+
+            .login-form-container {
+                padding: 35px 25px;
+            }
+
+            .form-group input {
+                padding: 15px 45px 15px 18px;
+                font-size: 1em;
+            }
+
+            .login-button {
+                padding: 18px 40px;
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-header h1 {
+                font-size: 2em;
+            }
+
+            .login-form-container {
+                padding: 25px 20px;
+            }
+
+            .form-group input {
+                padding: 12px 40px 12px 15px;
+            }
+
+            .input-icon {
+                right: 12px;
+                font-size: 1.2em;
+            }
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glow Effects */
+        .glow-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-effect::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #c026d3, #7c3aed, #3730a3, #1e3a8a, #db2777);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-effect:hover::after {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Login Header -->
+        <div class="login-header fade-in glow-effect">
+            <span class="login-icon">👨‍💼</span>
+            <h1>ورود مشاوران</h1>
+            <p>پنل مخصوص مشاوران برای مشاهده داده‌های آزمون‌ها</p>
+        </div>
+
+        <!-- Error Message -->
+        {% if error_message %}
+            <div class="error-message fade-in">
+                ⚠️ {{ error_message }}
+            </div>
+        {% endif %}
+
+        <!-- Login Form -->
+        <div class="login-form-container fade-in glow-effect">
+            <form action="/karshenasanlogin" method="post" id="loginForm">
+                <div class="form-group">
+                    <label for="username">👤 نام کاربری:</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="نام کاربری خود را وارد کنید" 
+                            required
+                            autocomplete="username"
+                        >
+                        <span class="input-icon">👤</span>
+                    </div>
+                    <div class="input-helper">نام کاربری مشاور</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">🔐 رمز عبور:</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="رمز عبور خود را وارد کنید"
+                            autocomplete="current-password"
+                        >
+                        <span class="input-icon">🔐</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="login-button glow-effect" id="loginBtn">
+                    🚀 ورود به پنل مشاوران
+                </button>
+            </form>
+        </div>
+        
+        <!-- Security Notice -->
+        <div class="security-notice fade-in glow-effect">
+            <h4>🛡️ دسترسی محدود</h4>
+            <p>
+                این بخش فقط برای مشاوران مجاز طراحی شده است. 
+                برای دسترسی به این قسمت، نیاز به احراز هویت دارید.
+            </p>
+        </div>
+        
+        <!-- Back to Home -->
+        <div class="back-home fade-in">
+            <a href="/">
+                🏠 بازگشت به صفحه اصلی
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            
+            // Add fade-in animation to elements
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.8s ease-out';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+
+            // Username validation
+            usernameInput.addEventListener('input', function() {
+                if (this.value.length >= 1) {
+                    this.style.borderColor = '#10b981';
+                    this.style.background = 'rgba(16, 185, 129, 0.1)';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    this.style.background = 'rgba(255, 255, 255, 0.15)';
+                }
+                
+                checkFormValidity();
+            });
+            
+            // Password validation
+            passwordInput.addEventListener('input', function() {
+                if (this.value.length >= 1) {
+                    this.style.borderColor = '#10b981';
+                    this.style.background = 'rgba(16, 185, 129, 0.1)';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    this.style.background = 'rgba(255, 255, 255, 0.15)';
+                }
+                
+                checkFormValidity();
+            });
+            
+            function checkFormValidity() {
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+                
+                const isValid = username.length > 0 && password.length > 0;
+                
+                loginBtn.disabled = !isValid;
+                
+                if (isValid) {
+                    loginBtn.textContent = '🚀 ورود به پنل مشاوران';
+                } else {
+                    loginBtn.textContent = '📝 لطفاً اطلاعات را تکمیل کنید';
+                }
+            }
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                if (usernameInput.value.trim().length === 0) {
+                    e.preventDefault();
+                    alert('لطفاً نام کاربری خود را وارد کنید');
+                    usernameInput.focus();
+                    return false;
+                }
+                
+                if (passwordInput.value.trim().length === 0) {
+                    e.preventDefault();
+                    alert('لطفاً رمز عبور خود را وارد کنید');
+                    passwordInput.focus();
+                    return false;
+                }
+                
+                // Update button state
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '⏳ درحال ورود...';
+                loginBtn.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+            });
+            
+            // Focus on first input after animation
+            setTimeout(() => {
+                usernameInput.focus();
+            }, 1000);
+            
+            // Initial form check
+            checkFormValidity();
+
+            // 3D hover effects for sections
+            document.querySelectorAll('.security-notice').forEach(section => {
+                section.addEventListener('mousemove', function(e) {
+                    const rect = section.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = (y - centerY) / 15;
+                    const rotateY = (centerX - x) / 15;
+                    
+                    section.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
+                });
+                
+                section.addEventListener('mouseleave', function() {
+                    section.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                });
+            });
+
+            // Input focus animations
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentNode.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentNode.classList.remove('focused');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

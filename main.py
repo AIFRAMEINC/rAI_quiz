@@ -26,6 +26,10 @@ DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
 SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
+# مشخصات لاگین مشاوران
+ADVISOR_USERNAME = "1570760403"
+ADVISOR_PASSWORD = "1570760403"
+
 # Thread pool for CPU-intensive tasks
 executor = ThreadPoolExecutor(max_workers=4)
 
@@ -164,6 +168,16 @@ async def init_db():
         )
     """)
 
+    # جدول جلسات مشاوران
+    await db_manager.execute_query("""
+        CREATE TABLE IF NOT EXISTS advisor_sessions (
+            session_id TEXT PRIMARY KEY,
+            username TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL
+        )
+    """)
+
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
     """Hash password asynchronously"""
@@ -192,6 +206,18 @@ async def create_session(user_id: str) -> str:
     
     return session_id
 
+async def create_advisor_session(username: str) -> str:
+    """Create advisor session asynchronously"""
+    session_id = secrets.token_urlsafe(32)
+    expires_at = datetime.now().timestamp() + (24 * 60 * 60)  # 24 hours
+    
+    await db_manager.execute_query("""
+        INSERT INTO advisor_sessions (session_id, username, created_at, expires_at)
+        VALUES (?, ?, ?, ?)
+    """, (session_id, username, datetime.now().isoformat(), expires_at))
+    
+    return session_id
+
 async def get_current_user(session_id: str = Cookie(None)) -> Optional[Dict]:
     """Get current user asynchronously"""
     if not session_id:
@@ -215,11 +241,31 @@ async def get_current_user(session_id: str = Cookie(None)) -> Optional[Dict]:
         }
     return None
 
+async def get_current_advisor(advisor_session_id: str = Cookie(None)) -> Optional[Dict]:
+    """Get current advisor asynchronously"""
+    if not advisor_session_id:
+        return None
+    
+    result = await db_manager.execute_query("""
+        SELECT username FROM advisor_sessions
+        WHERE session_id = ? AND expires_at > ?
+    """, (advisor_session_id, datetime.now().timestamp()), fetch=True)
+    
+    if result:
+        return {'username': result[0]['username'], 'type': 'advisor'}
+    return None
+
 async def require_login(user = Depends(get_current_user)):
     """Require user login dependency"""
     if not user:
         raise HTTPException(status_code=401, detail="لطفاً وارد شوید")
     return user
+
+async def require_advisor_login(advisor = Depends(get_current_advisor)):
+    """Require advisor login dependency"""
+    if not advisor:
+        raise HTTPException(status_code=401, detail="لطفاً وارد شوید")
+    return advisor
 
 # --- Async Encryption/Decryption Helpers ---
 async def encrypt_data(data: str) -> Optional[bytes]:
@@ -857,6 +903,120 @@ async def handle_login(
     except Exception as e:
         logger.error(f"خطا در ورود: {e}")
         return RedirectResponse(url="/login?error=login_failed", status_code=303)
+
+# --- ADVISOR LOGIN ROUTES ---
+@app.get("/karshenasanlogin", response_class=HTMLResponse)
+async def get_advisor_login_page(request: Request, error: str = None):
+    error_message = None
+    if error == "invalid_credentials":
+        error_message = "نام کاربری یا رمز عبور اشتباه است."
+    elif error == "login_failed":
+        error_message = "خطا در ورود. لطفاً دوباره تلاش کنید."
+        
+    return templates.TemplateResponse("advisor_login.html", {"request": request, "error_message": error_message})
+
+@app.post("/karshenasanlogin")
+async def handle_advisor_login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    try:
+        # Check advisor credentials
+        if username == ADVISOR_USERNAME and password == ADVISOR_PASSWORD:
+            # Create advisor session
+            session_id = await create_advisor_session(username)
+            
+            response = RedirectResponse(url="/advisor/show_data", status_code=303)
+            response.set_cookie(key="advisor_session_id", value=session_id, httponly=True, max_age=86400)
+            return response
+        else:
+            return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
+        
+    except Exception as e:
+        logger.error(f"خطا در ورود مشاور: {e}")
+        return RedirectResponse(url="/karshenasanlogin?error=login_failed", status_code=303)
+
+@app.get("/advisor/show_data", response_class=HTMLResponse)
+async def show_advisor_data_page(request: Request, advisor = Depends(require_advisor_login)):
+    """Show all data page for advisors"""
+    try:
+        rows = await db_manager.execute_query("""
+            SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
+                   tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
+            FROM users u
+            LEFT JOIN test_results tr ON u.id = tr.user_id
+            ORDER BY u.registration_time DESC
+        """, fetch=True)
+
+        users_list = []
+        
+        # Process all user data concurrently for better performance
+        async def process_user_row(row_data):
+            user_dict = dict(row_data)
+            
+            # Decrypt user data with proper null handling
+            user_dict['first_name'] = await decrypt_data(user_dict.pop('encrypted_first_name')) or ""
+            user_dict['last_name'] = await decrypt_data(user_dict.pop('encrypted_last_name')) or ""
+            user_dict['phone'] = await decrypt_data(user_dict.pop('encrypted_phone')) or ""
+            
+            # Ensure mbti_result is never None
+            if user_dict.get('mbti_result') is None:
+                user_dict['mbti_result'] = ""
+            
+            # Process answers
+            decrypted_answers_list = []
+            encrypted_ans_blob = user_dict.pop('encrypted_answers')
+            if encrypted_ans_blob:
+                dec_ans_json = await decrypt_data(encrypted_ans_blob)
+                if dec_ans_json and dec_ans_json != "خطا در رمزگشایی":
+                    try: 
+                        decrypted_answers_list = json.loads(dec_ans_json)
+                    except json.JSONDecodeError: 
+                        decrypted_answers_list = ["خطا در پارس JSON پاسخ‌ها"]
+                elif dec_ans_json == "خطا در رمزگشایی": 
+                    decrypted_answers_list = ["خطا در رمزگشایی پاسخ‌ها"]
+            user_dict['answers'] = decrypted_answers_list
+
+            # Process percentages
+            decrypted_percentages_dict = None
+            encrypted_perc_blob = user_dict.pop('encrypted_mbti_percentages')
+            if encrypted_perc_blob:
+                dec_perc_json = await decrypt_data(encrypted_perc_blob)
+                if dec_perc_json and dec_perc_json != "خطا در رمزگشایی":
+                    try: 
+                        decrypted_percentages_dict = json.loads(dec_perc_json)
+                    except json.JSONDecodeError: 
+                        decrypted_percentages_dict = {"error": "خطا در پارس JSON درصدها"}
+                elif dec_perc_json == "خطا در رمزگشایی": 
+                    decrypted_percentages_dict = {"error": "خطا در رمزگشایی درصدها"}
+            user_dict['mbti_percentages'] = decrypted_percentages_dict
+                
+            return user_dict
+
+        # Process all rows concurrently
+        if rows:
+            users_list = await asyncio.gather(*[process_user_row(row) for row in rows])
+        
+        return templates.TemplateResponse("advisor_data.html", {
+            "request": request, 
+            "users_data": users_list, 
+            "advisor": advisor
+        })
+        
+    except Exception as e:
+        logger.error(f"خطا در نمایش داده‌ها: {e}")
+        raise HTTPException(status_code=500, detail="خطا در بارگذاری داده‌ها")
+
+@app.get("/advisor/logout")
+async def advisor_logout(advisor_session_id: str = Cookie(None)):
+    # Delete advisor session from database (async)
+    if advisor_session_id:
+        await db_manager.execute_query("DELETE FROM advisor_sessions WHERE session_id = ?", (advisor_session_id,))
+    
+    response = RedirectResponse(url="/karshenasanlogin", status_code=303)
+    response.delete_cookie(key="advisor_session_id")
+    return response
 
 @app.get("/logout")
 async def logout(session_id: str = Cookie(None)):

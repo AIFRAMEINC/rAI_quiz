@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اطلاعات کاربران - MBTI</title>
+    <title>پنل مشاوران - مشاهده داده‌ها</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
     <style>
         .header-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
             color: white;
             padding: 50px 40px;
             border-radius: 20px;
             margin-bottom: 40px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 20px 50px rgba(30, 58, 138, 0.3);
             position: relative;
             overflow: hidden;
         }
@@ -42,11 +42,13 @@
         }
         
         .header-section p {
+            color: white;
             font-size: 1.2em;
             opacity: 0.95;
             font-weight: 300;
         }
         
+        /* Navigation Bar */
         .navigation-bar {
             background: white;
             border-radius: 20px;
@@ -83,19 +85,19 @@
         }
         
         .nav-link:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(30, 58, 138, 0.3);
         }
         
-        .nav-link.primary {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        .nav-link.logout {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
             color: white;
         }
         
-        .nav-link.primary:hover {
-            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        .nav-link.logout:hover {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
         }
         
         .stats-section {
@@ -410,24 +412,16 @@
     <div class="container">
         <div class="header-section">
             <div class="header-content">
-                <h1>📊 مشاهده اطلاعات کاربران</h1>
-                <p>پنل مدیریت و نمایش داده‌های جمع‌آوری شده از آزمون‌های شخصیت‌شناسی</p>
+                <h1>👨‍💼 پنل مشاوران</h1>
+                <p>مشاهده و تحلیل داده‌های جمع‌آوری شده از آزمون‌های شخصیت‌شناسی</p>
             </div>
         </div>
         
         <!-- Navigation Bar -->
         <div class="navigation-bar">
             <div class="nav-links">
-                <a href="/quiz" class="nav-link primary">
-                    🏠 بازگشت به داشبورد
-                </a>
-                <a href="/my-results" class="nav-link">
-                    📊 نتایج آزمون‌های من
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="/logout" class="nav-link" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%); color: white;">
-                    🚪 خروج از حساب
+                <a href="/advisor/logout" class="nav-link logout">
+                    🚪 خروج از پنل
                 </a>
             </div>
         </div>
@@ -583,7 +577,7 @@
         
         // Smooth scroll to top button
         const scrollButton = document.createElement('button');
-        scrollButton.innerHTML = '↑';  
+        scrollButton.innerHTML = '↑';
         scrollButton.style.cssText = `
             position: fixed;
             bottom: 30px;
