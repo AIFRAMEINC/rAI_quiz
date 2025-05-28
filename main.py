@@ -1,6 +1,7 @@
 import sqlite3
 import json
 import asyncio
+import aiofiles
 import os
 import html
 import secrets
@@ -9,6 +10,8 @@ import hashlib
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from uuid import uuid4
+import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, Request, Form, HTTPException, Depends, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -23,22 +26,44 @@ DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
 SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
-def load_or_generate_key():
-    if os.path.exists(ENCRYPTION_KEY_FILE):
-        with open(ENCRYPTION_KEY_FILE, "rb") as key_file:
-            key = key_file.read()
-    else:
-        key = Fernet.generate_key()
-        with open(ENCRYPTION_KEY_FILE, "wb") as key_file:
-            key_file.write(key)
-        print(f" کلید رمزنگاری جدید ایجاد و در {ENCRYPTION_KEY_FILE} ذخیره شد. این فایل را امن نگه دارید! ")
-    if len(key) != 44 or not key.endswith(b'='): # Basic check
-        print(f" هشدار: محتوای {ENCRYPTION_KEY_FILE} به نظر یک کلید Fernet معتبر نیست.")
-    return key
+# Thread pool for CPU-intensive tasks
+executor = ThreadPoolExecutor(max_workers=4)
 
-ENCRYPTION_KEY = load_or_generate_key()
-cipher_suite = Fernet(ENCRYPTION_KEY)
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+async def load_or_generate_key():
+    """Async key loading/generation"""
+    try:
+        if os.path.exists(ENCRYPTION_KEY_FILE):
+            async with aiofiles.open(ENCRYPTION_KEY_FILE, "rb") as key_file:
+                key = await key_file.read()
+        else:
+            key = Fernet.generate_key()
+            async with aiofiles.open(ENCRYPTION_KEY_FILE, "wb") as key_file:
+                await key_file.write(key)
+            logger.info(f"کلید رمزنگاری جدید ایجاد و در {ENCRYPTION_KEY_FILE} ذخیره شد.")
+        
+        if len(key) != 44 or not key.endswith(b'='):
+            logger.warning(f"هشدار: محتوای {ENCRYPTION_KEY_FILE} به نظر یک کلید Fernet معتبر نیست.")
+        
+        return key
+    except Exception as e:
+        logger.error(f"خطا در بارگذاری کلید: {e}")
+        raise
+
+# Initialize encryption key asynchronously
+ENCRYPTION_KEY = None
+cipher_suite = None
+
+async def init_encryption():
+    """Initialize encryption components"""
+    global ENCRYPTION_KEY, cipher_suite
+    ENCRYPTION_KEY = await load_or_generate_key()
+    cipher_suite = Fernet(ENCRYPTION_KEY)
+
+# Create directories
 os.makedirs("templates", exist_ok=True)
 os.makedirs("static", exist_ok=True)
 
@@ -46,194 +71,212 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-API_KEY = "AIzaSyCphwC83v0XsBfQIv0ac_JHkJkVopCM43M" # <<< هشدار: کلید خود را امن نگه دارید
+API_KEY = "AIzaSyCphwC83v0XsBfQIv0ac_JHkJkVopCM43M"
 if not API_KEY:
     raise ValueError("متغیر محیطی GEMINI_API_KEY تنظیم نشده است")
 genai.configure(api_key=API_KEY)
 
-# --- Database Setup ---
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+# --- Async Database Operations ---
+class AsyncDBManager:
+    def __init__(self, db_file):
+        self.db_file = db_file
+        self._lock = asyncio.Lock()
+    
+    async def execute_query(self, query: str, params: tuple = (), fetch: bool = False):
+        """Execute database query asynchronously"""
+        async with self._lock:
+            def _execute():
+                conn = sqlite3.connect(self.db_file)
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                try:
+                    cursor.execute(query, params)
+                    if fetch:
+                        result = cursor.fetchall()
+                        conn.close()
+                        return result
+                    else:
+                        conn.commit()
+                        conn.close()
+                        return cursor.lastrowid
+                except Exception as e:
+                    conn.close()
+                    raise e
+            
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(executor, _execute)
+    
+    async def execute_many(self, query: str, params_list: List[tuple]):
+        """Execute multiple queries asynchronously"""
+        async with self._lock:
+            def _execute():
+                conn = sqlite3.connect(self.db_file)
+                cursor = conn.cursor()
+                try:
+                    cursor.executemany(query, params_list)
+                    conn.commit()
+                    conn.close()
+                    return cursor.rowcount
+                except Exception as e:
+                    conn.close()
+                    raise e
+            
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(executor, _execute)
 
-def init_db():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        encrypted_first_name BLOB NOT NULL,
-        encrypted_last_name BLOB NOT NULL,
-        encrypted_phone BLOB UNIQUE NOT NULL,
-        encrypted_password BLOB NOT NULL,
-        age_range TEXT NOT NULL,
-        registration_time TEXT NOT NULL
-    )
+# Initialize database manager
+db_manager = AsyncDBManager(DATABASE_FILE)
+
+async def init_db():
+    """Initialize database asynchronously"""
+    await db_manager.execute_query("""
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            encrypted_first_name BLOB NOT NULL,
+            encrypted_last_name BLOB NOT NULL,
+            encrypted_phone BLOB UNIQUE NOT NULL,
+            encrypted_password BLOB NOT NULL,
+            age_range TEXT NOT NULL,
+            registration_time TEXT NOT NULL
+        )
     """)
     
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS test_results (
-        id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        test_name TEXT NOT NULL,
-        encrypted_answers BLOB,
-        mbti_result TEXT,
-        encrypted_mbti_percentages BLOB,
-        analysis_time TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )
+    await db_manager.execute_query("""
+        CREATE TABLE IF NOT EXISTS test_results (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            test_name TEXT NOT NULL,
+            encrypted_answers BLOB,
+            mbti_result TEXT,
+            encrypted_mbti_percentages BLOB,
+            analysis_time TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
     """)
     
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS sessions (
-        session_id TEXT PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        expires_at TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-    )
+    await db_manager.execute_query("""
+        CREATE TABLE IF NOT EXISTS sessions (
+            session_id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
     """)
-    
-    conn.commit()
-    conn.close()
 
-init_db()
+# --- Async Authentication & Session Management ---
+async def hash_password(password: str) -> str:
+    """Hash password asynchronously"""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode()).hexdigest())
 
-# --- Authentication & Session Management ---
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+async def verify_password(password: str, hashed: str) -> bool:
+    """Verify password asynchronously"""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode()).hexdigest() == hashed)
 
-def verify_password(password: str, hashed: str) -> bool:
-    return hash_password(password) == hashed
+async def generate_password(length: int = 12) -> str:
+    """Generate random password asynchronously"""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, lambda: ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$%^&*") for _ in range(length)))
 
-def generate_password(length: int = 12) -> str:
-    characters = string.ascii_letters + string.digits + "!@#$%^&*"
-    return ''.join(secrets.choice(characters) for _ in range(length))
-
-def create_session(user_id: str) -> str:
+async def create_session(user_id: str) -> str:
+    """Create user session asynchronously"""
     session_id = secrets.token_urlsafe(32)
     expires_at = datetime.now().timestamp() + (24 * 60 * 60)  # 24 hours
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
+    await db_manager.execute_query("""
         INSERT INTO sessions (session_id, user_id, created_at, expires_at)
         VALUES (?, ?, ?, ?)
     """, (session_id, user_id, datetime.now().isoformat(), expires_at))
-    conn.commit()
-    conn.close()
     
     return session_id
 
-def get_current_user(session_id: str = Cookie(None)) -> Optional[Dict]:
+async def get_current_user(session_id: str = Cookie(None)) -> Optional[Dict]:
+    """Get current user asynchronously"""
     if not session_id:
         return None
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # Check if session is valid and not expired
-    cursor.execute("""
+    result = await db_manager.execute_query("""
         SELECT s.user_id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range
         FROM sessions s
         JOIN users u ON s.user_id = u.id
         WHERE s.session_id = ? AND s.expires_at > ?
-    """, (session_id, datetime.now().timestamp()))
-    
-    result = cursor.fetchone()
-    conn.close()
+    """, (session_id, datetime.now().timestamp()), fetch=True)
     
     if result:
+        user_data = result[0]
         return {
-            'id': result['user_id'],
-            'first_name': decrypt_data(result['encrypted_first_name']),
-            'last_name': decrypt_data(result['encrypted_last_name']),
-            'phone': decrypt_data(result['encrypted_phone']),
-            'age_range': result['age_range']
+            'id': user_data['user_id'],
+            'first_name': await decrypt_data(user_data['encrypted_first_name']),
+            'last_name': await decrypt_data(user_data['encrypted_last_name']),
+            'phone': await decrypt_data(user_data['encrypted_phone']),
+            'age_range': user_data['age_range']
         }
     return None
 
-def require_login(user = Depends(get_current_user)):
+async def require_login(user = Depends(get_current_user)):
+    """Require user login dependency"""
     if not user:
         raise HTTPException(status_code=401, detail="لطفاً وارد شوید")
     return user
 
-# --- Encryption/Decryption Helpers ---
-def encrypt_data(data: str) -> Optional[bytes]:
-    if data is None: return None
-    return cipher_suite.encrypt(data.encode('utf-8'))
+# --- Async Encryption/Decryption Helpers ---
+async def encrypt_data(data: str) -> Optional[bytes]:
+    """Encrypt data asynchronously"""
+    if data is None or not cipher_suite:
+        return None
+    
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, lambda: cipher_suite.encrypt(data.encode('utf-8')))
 
-def decrypt_data(encrypted_data: Optional[bytes]) -> Optional[str]:
-    if encrypted_data is None: return None
+async def decrypt_data(encrypted_data: Optional[bytes]) -> str:
+    """Decrypt data asynchronously - Fixed to return empty string instead of None"""
+    if encrypted_data is None or not cipher_suite:
+        return ""  # Return empty string instead of None
+    
     try:
-        return cipher_suite.decrypt(encrypted_data).decode('utf-8')
-    except Exception:
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(executor, lambda: cipher_suite.decrypt(encrypted_data).decode('utf-8'))
+    except Exception as e:
+        logger.error(f"Decryption error: {e}")
         return "خطا در رمزگشایی"
 
 # --- MBTI Questions Database ---
 QUESTIONS_DB = {
     "13-15": [
         "تو توی کلاس و مدرسه ترجیح میدی چطور وقت بگذرونی؟ بیشتر دوست داری با دوستات حرف بزنی و در گروه باشی، یا ترجیح میدی تنها باشی و کارهای خودت رو بکنی؟ چرا؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه مشکلی پیش میاد، مثلاً امتحانی که خراب شده یا دعوایی با دوستت، معمولاً چطوری فکر می‌کنی؟ بیشتر سعی می‌کنی منطقی باشی و راه حل پیدا کنی، یا اول احساساتت مهم هستن؟ یه مثال بزن. (حداقل یک پاراگراف توضیح بده)",
-        
         "فرض کن امروز آخر هفته است و برنامه‌ای نداری. دوست داری روزت رو چطوری بگذرونی؟ از قبل برنامه‌ریزی کنی یا ببینی چه پیش میاد؟ چه کارهایی دوست داری بکنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی معلم یه درس جدید تدریس می‌کنه، تو بیشتر به چه چیزی توجه می‌کنی؟ به مثال‌های عملی و واقعی که میده، یا به ایده‌های کلی و ارتباطش با چیزهای دیگه؟ چرا؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "اگه یکی از دوستات غمگین باشه و نیاز به صحبت داشته باشه، تو معمولاً چطوری کمکش می‌کنی؟ بیشتر گوش می‌دی و همدلی می‌کنی، یا سعی می‌کنی راه حل عملی پیدا کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "تو نسبت به چیزهای جدید و تغییرات چه احساسی داری؟ مثلاً اگه بخوان کلاستون رو عوض کنن یا یه فعالیت جدید شروع کنید. دوست داری یا نگرانت می‌کنه؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی توی یه گروه درسی یا پروژه کار می‌کنی، معمولاً چه نقشی رو بر عهده می‌گیری؟ بیشتر رهبری می‌کنی، ایده میدی، نظم می‌دی، یا از بقیه پشتیبانی می‌کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "آخر هفته‌ها ترجیح میدی چه جور فعالیت‌هایی داشته باشی؟ فعالیت‌هایی که از قبل برنامه‌ریزی شده و مشخص هست، یا اینکه هرچی دلت خواست انجام بدی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه کتاب یا فیلم رو انتخاب می‌کنی، معمولاً به چی بیشتر توجه می‌کنی؟ به داستان و واقعیت‌هایی که توش هست، یا به پیام‌های عمیق و معانی پنهانش؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "اگه بخوای توی یه مهمونی یا جشن شرکت کنی، ترجیح میدی چطور باشه؟ جایی که همه رو بشناسی و راحت باشی، یا جایی که آدم‌های جدید بشناسی؟ چرا؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه تصمیم مهم باید بگیری (مثل انتخاب یه کلاس اضافی یا فعالیت), چطوری فکر می‌کنی؟ بیشتر فایده و ضررش رو حساب می‌کنی، یا به اینکه چه احساسی بهت میده توجه می‌کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "تو معمولاً چطوری یه کار جدید یاد می‌گیری؟ دوست داری اول کلی بخونی و فکر کنی، یا سریع شروع کنی به تجربه کردن و انجام دادن؟ مثال بزن. (حداقل یک پاراگراف توضیح بده)",
-        
         "نسبت به قوانین و مقررات مدرسه چه نظری داری؟ فکر می‌کنی باید دقیقاً رعایت بشن، یا گاهی میشه انعطاف داشت؟ چرا؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی میخوای با کسی صحبت کنی و حرف بزنی، معمولاً در چه شرایطی راحت‌تری؟ توی گروه با چند نفر، یا تک به تک با افراد؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "اگه بتونی آینده‌ت رو تصور کنی، چه جوری دوست داری باشه؟ آیا دوست داری همه چیز از قبل مشخص و برنامه‌ریزی شده باشه، یا ترجیح میدی خودت تصمیم بگیری که چه اتفاقی بیفته؟ (حداقل یک پاراگراف توضیح بده)"
     ],
     
     "15-18": [
         "در محیط‌های اجتماعی مثل مهمونی‌ها، دورهمی‌ها یا فعالیت‌های گروهی، معمولاً چطوری رفتار می‌کنی؟ بیشتر فعال هستی و با همه صحبت می‌کنی، یا ترجیح میدی با چند نفر خاص ارتباط برقرار کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه تصمیم مهم باید بگیری (مثل انتخاب رشته یا دانشگاه), چه عواملی برات مهم‌ترند؟ بیشتر به منطق، آمار و واقعیت‌ها توجه می‌کنی، یا به احساسات و ارزش‌های شخصیت اهمیت میدی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "آخر هفته‌ها و اوقات فراغت رو چطوری می‌گذرونی؟ ترجیح میدی برنامه‌های از پیش تعیین شده داشته باشی، یا بر اساس حال و حوصله‌ت تصمیم بگیری؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی موضوع پیچیده‌ای رو یاد می‌گیری، بیشتر به چه چیزی توجه می‌کنی؟ به جزئیات دقیق و کاربرد عملی‌اش، یا به ایده کلی و ارتباطش با مفاهیم دیگه؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "در روابط دوستی و خانوادگی، وقتی کسی مشکلی داره، معمولاً چطوری واکنش نشون میدی؟ بیشتر سعی می‌کنی راه حل منطقی ارائه بدی، یا اول به احساساتش توجه می‌کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "نسبت به تغییرات و موقعیت‌های جدید چه برخوردی داری؟ آیا انطباق‌پذیری و تغییر برات آسانه، یا ترجیح میدی چیزها ثابت و قابل پیش‌بینی باشن؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "در کارهای گروهی و تیمی، خودت رو چطوری توصیف می‌کنی؟ آیا تمایل داری رهبری کنی، ایده‌پردازی کنی، سازماندهی کنی، یا از دیگران حمایت کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه پروژه یا کار مهم داری، چطوری بهش نزدیک میشی؟ از ابتدا همه چیز رو برنامه‌ریزی می‌کنی، یا هر مرحله رو به موقعش حل می‌کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "کتاب‌ها، فیلم‌ها یا مطالبی که مطالعه می‌کنی معمولاً چه ویژگی‌هایی دارن؟ بیشتر واقع‌گرا و عملی هستن، یا تخیلی و پر از ایده‌های انتزاعی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "در مناقشات و بحث‌های مختلف، معمولاً چه رویکردی داری؟ بیشتر به دنبال یافتن حقیقت و درستی هستی، یا مهمه که احساسات و نظرات همه حفظ بشه؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "انرژیت رو از کجا می‌گیری؟ از تعامل با آدم‌ها و فعالیت‌های اجتماعی، یا از زمان‌هایی که تنها هستی و فکر می‌کنی؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی یه اتفاق غیرمنتظره می‌افته، معمولاً چطوری واکنش نشون میدی؟ سریع خودت رو با شرایط جدید وفق میدی، یا نیاز داری کمی وقت تا بپذیریش؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "در تصمیم‌گیری‌های اخلاقی، چه چیزی برات مهم‌تره؟ اصول کلی و عدالت، یا شرایط خاص و تأثیر روی احساسات افراد؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "محیط ایده‌آل کاری یا تحصیلی برای تو چطوری باید باشه؟ ساختارمند و با قوانین مشخص، یا انعطاف‌پذیر و آزاد؟ (حداقل یک پاراگراف توضیح بده)",
-        
         "وقتی به آینده فکر می‌کنی، بیشتر چه چیزی جذبت می‌کنه؟ امکانات و فرصت‌های جدیدی که ممکنه پیش بیاد، یا اهدافی که از الان مشخص کردی و می‌خوای بهشون برسی؟ (حداقل یک پاراگراف توضیح بده)"
     ]
 }
@@ -406,11 +449,13 @@ estimate_all_eight_preferences_tool = [{
 gemini_model_for_type = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_mbti_tool)
 gemini_model_for_all_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_all_eight_preferences_tool)
 
-# --- Gemini Interaction Functions ---
-def determine_mbti_from_gemini_args(extraversion_introversion, sensing_intuition, thinking_feeling, judging_perceiving):
+# --- Async Gemini Interaction Functions ---
+async def determine_mbti_from_gemini_args(extraversion_introversion, sensing_intuition, thinking_feeling, judging_perceiving):
+    """Determine MBTI type from Gemini arguments"""
     return {"mbti_type": f"{extraversion_introversion}{sensing_intuition}{thinking_feeling}{judging_perceiving}"}
 
-def create_prompt_for_mbti(questions: List[str], answers: List[str], age_range: str) -> str:
+async def create_prompt_for_mbti(questions: List[str], answers: List[str], age_range: str) -> str:
+    """Create prompt for MBTI analysis asynchronously"""
     age_context = {
         "13-15": "این کاربر در رده سنی 13-15 سال قرار دارد. لطفاً در تحلیل این موضوع را در نظر بگیرید که پاسخ‌ها مربوط به یک نوجوان است و ویژگی‌های رشدی این سن را در نظر بگیرید.",
         "15-18": "این کاربر در رده سنی 15-18 سال قرار دارد. لطفاً در تحلیل این موضوع را در نظر بگیرید که پاسخ‌ها مربوط به یک نوجوان-جوان است که در حال گذار به بزرگسالی است."
@@ -425,22 +470,26 @@ def create_prompt_for_mbti(questions: List[str], answers: List[str], age_range: 
     return prompt
 
 async def get_mbti_type_from_gemini(questions: List[str], answers: List[str], age_range: str) -> str:
-    prompt = create_prompt_for_mbti(questions, answers, age_range)
+    """Get MBTI type from Gemini asynchronously"""
     try:
+        prompt = await create_prompt_for_mbti(questions, answers, age_range)
         response = await gemini_model_for_type.generate_content_async(prompt)
+        
         if response.candidates and response.candidates[0].content.parts:
             for part in response.candidates[0].content.parts:
                 if part.function_call and part.function_call.name == "determine_mbti":
                     args = dict(part.function_call.args)
-                    result = determine_mbti_from_gemini_args(**args)
+                    result = await determine_mbti_from_gemini_args(**args)
                     return result["mbti_type"]
-        print("Gemini تابع determine_mbti را فراخوانی نکرد یا پاسخ معتبر نبود.")
+        
+        logger.warning("Gemini تابع determine_mbti را فراخوانی نکرد یا پاسخ معتبر نبود.")
         return "خطا: عدم تشخیص نوع MBTI"
     except Exception as e:
-        print(f"خطا در get_mbti_type_from_gemini: {e}")
+        logger.error(f"خطا در get_mbti_type_from_gemini: {e}")
         return f"خطا در پردازش نوع: {str(e)[:100]}"
 
-def create_prompt_for_all_percentages(questions: List[str], answers: List[str], mbti_type: str, age_range: str) -> str:
+async def create_prompt_for_all_percentages(questions: List[str], answers: List[str], mbti_type: str, age_range: str) -> str:
+    """Create prompt for percentage analysis asynchronously"""
     age_context = {
         "13-15": "این کاربر در رده سنی 13-15 سال قرار دارد. لطفاً در تحلیل درصدها، ویژگی‌های رشدی این سن و عدم کامل بودن شخصیت در این سن را در نظر بگیرید.",
         "15-18": "این کاربر در رده سنی 15-18 سال قرار دارد. لطفاً در تحلیل درصدها، این را در نظر بگیرید که شخصیت او در حال تکمیل است و ممکن است تغییرات بیشتری داشته باشد."
@@ -454,17 +503,20 @@ def create_prompt_for_all_percentages(questions: List[str], answers: List[str], 
         "مجموع درصدها برای هر زوج مخالف (مثلاً برونگرایی + درونگرایی) باید ۱۰۰ شود. "
         "سپس تابع 'estimate_all_eight_mbti_preferences' را با این هشت درصد فراخوانی کن.\n\n"
     )
+    
     for i, (q, a) in enumerate(zip(questions, answers)):
         prompt += f"**سوال {i+1}:** {html.escape(q)}\n**پاسخ {i+1}:** {html.escape(a)}\n\n"
     return prompt
 
 async def get_all_eight_mbti_percentages_from_gemini(questions: List[str], answers: List[str], mbti_type: str, age_range: str) -> Optional[Dict[str, int]]:
+    """Get all eight MBTI percentages from Gemini asynchronously"""
     if "خطا" in mbti_type:
         return None
         
-    prompt = create_prompt_for_all_percentages(questions, answers, mbti_type, age_range)
     try:
+        prompt = await create_prompt_for_all_percentages(questions, answers, mbti_type, age_range)
         response = await gemini_model_for_all_percentages.generate_content_async(prompt)
+        
         if response.candidates and response.candidates[0].content.parts:
             for part in response.candidates[0].content.parts:
                 if part.function_call and part.function_call.name == "estimate_all_eight_mbti_preferences":
@@ -484,7 +536,7 @@ async def get_all_eight_mbti_percentages_from_gemini(questions: List[str], answe
                         p2_val_orig = percentages_from_gemini.get(p2_key)
 
                         if not (isinstance(p1_val_orig, (int, float)) and isinstance(p2_val_orig, (int, float))):
-                            print(f"مقدار غیرعددی یا گمشده برای زوج: {p1_key}={p1_val_orig}, {p2_key}={p2_val_orig}")
+                            logger.warning(f"مقدار غیرعددی یا گمشده برای زوج: {p1_key}={p1_val_orig}, {p2_key}={p2_val_orig}")
                             all_pairs_valid = False
                             break
                         
@@ -492,12 +544,12 @@ async def get_all_eight_mbti_percentages_from_gemini(questions: List[str], answe
                         p2_int = round(float(p2_val_orig))
 
                         if not (0 <= p1_int <= 100 and 0 <= p2_int <= 100):
-                            print(f"درصد خارج از محدوده برای زوج: {p1_key}={p1_int}, {p2_key}={p2_int}")
+                            logger.warning(f"درصد خارج از محدوده برای زوج: {p1_key}={p1_int}, {p2_key}={p2_int}")
                             all_pairs_valid = False
                             break
                         
                         if not (98 <= (p1_int + p2_int) <= 102):
-                            print(f"مجموع زوج درصدها برای {p1_key} و {p2_key} برابر ۱۰۰ نیست: {p1_int} + {p2_int} = {p1_int + p2_int}")
+                            logger.warning(f"مجموع زوج درصدها برای {p1_key} و {p2_key} برابر ۱۰۰ نیست: {p1_int} + {p2_int} = {p1_int + p2_int}")
                             all_pairs_valid = False 
                             break
                         
@@ -507,37 +559,51 @@ async def get_all_eight_mbti_percentages_from_gemini(questions: List[str], answe
                     if all_pairs_valid and len(valid_percentages_int) == 8:
                         return valid_percentages_int
                     else:
-                        print(f"اعتبارسنجی درصدها ناموفق بود. داده دریافتی: {percentages_from_gemini}. داده معتبر شده: {valid_percentages_int}")
+                        logger.warning(f"اعتبارسنجی درصدها ناموفق بود. داده دریافتی: {percentages_from_gemini}")
                         return None 
-        print("Gemini تابع estimate_all_eight_mbti_preferences را فراخوانی نکرد یا پاسخ معتبر نبود.")
+        
+        logger.warning("Gemini تابع estimate_all_eight_mbti_preferences را فراخوانی نکرد یا پاسخ معتبر نبود.")
         return None
     except Exception as e:
-        print(f"خطا در get_all_eight_mbti_percentages_from_gemini: {e}")
+        logger.error(f"خطا در get_all_eight_mbti_percentages_from_gemini: {e}")
         return None
 
-def get_reasoning_for_mbti(mbti_type: str, answers: List[str]) -> str:
+async def get_reasoning_for_mbti(mbti_type: str, answers: List[str]) -> str:
+    """Get reasoning for MBTI result asynchronously"""
     base_reasoning = {
-        "ESTJ": "نظم، مسئولیت‌پذیری و تصمیم‌گیری منطقی", "ISTJ": "دقت، وظیفه‌شناسی و پایبندی به قوانین",
-        "ESFJ": "همدلی، مهارت‌های اجتماعی و توجه به نیازهای دیگران", "ISFJ": "فداکاری، دقت و حمایت از دیگران",
-        "ENTJ": "رهبری قاطع، تفکر استراتژیک و هدف‌محوری", "INTJ": "تفکر استراتژیک، استقلال و خلاقیت",
-        "ENFJ": "همدلی، کاریزما و الهام‌بخشی به دیگران", "INFJ": "همدلی عمیق، بصیرت و تعهد به ارزش‌ها",
-        "ESTP": "انعطاف‌پذیری، عمل‌گرایی و انرژی بالا", "ISTP": "مهارت‌های فنی، استقلال و خونسردی در بحران",
-        "ESFP": "انرژی بالا، مهارت‌های اجتماعی و زندگی در لحظه", "ISFP": "خلاقیت، همدلی و وفاداری به ارزش‌ها",
-        "ENTP": "خلاقیت، کنجکاوی و نوآوری", "INTP": "تحلیل عمیق، کنجکاوی و استقلال",
-        "ENFP": "خلاقیت، همدلی و اشتیاق به امکانات جدید", "INFP": "همدلی، خلاقیت و ارزش‌های شخصی قوی"
+        "ESTJ": "نظم، مسئولیت‌پذیری و تصمیم‌گیری منطقی", 
+        "ISTJ": "دقت، وظیفه‌شناسی و پایبندی به قوانین",
+        "ESFJ": "همدلی، مهارت‌های اجتماعی و توجه به نیازهای دیگران", 
+        "ISFJ": "فداکاری، دقت و حمایت از دیگران",
+        "ENTJ": "رهبری قاطع، تفکر استراتژیک و هدف‌محوری", 
+        "INTJ": "تفکر استراتژیک، استقلال و خلاقیت",
+        "ENFJ": "همدلی، کاریزما و الهام‌بخشی به دیگران", 
+        "INFJ": "همدلی عمیق، بصیرت و تعهد به ارزش‌ها",
+        "ESTP": "انعطاف‌پذیری، عمل‌گرایی و انرژی بالا", 
+        "ISTP": "مهارت‌های فنی، استقلال و خونسردی در بحران",
+        "ESFP": "انرژی بالا، مهارت‌های اجتماعی و زندگی در لحظه", 
+        "ISFP": "خلاقیت، همدلی و وفاداری به ارزش‌ها",
+        "ENTP": "خلاقیت، کنجکاوی و نوآوری", 
+        "INTP": "تحلیل عمیق، کنجکاوی و استقلال",
+        "ENFP": "خلاقیت، همدلی و اشتیاق به امکانات جدید", 
+        "INFP": "همدلی، خلاقیت و ارزش‌های شخصی قوی"
     }
+    
     default_reason = "ویژگی‌های کلیدی متناسب با پاسخ‌های شما"
     reason = base_reasoning.get(mbti_type, default_reason)
+    
     if answers and answers[0]:
         reason += f"؛ به عنوان مثال، در پاسخ اول خود به مواردی اشاره کردید که نشان‌دهنده '{html.escape(answers[0][:70])}...' بود."
+    
     return reason
 
-def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[str], user_answers: List[str], all_percentages: Optional[Dict[str, int]]) -> str:
+async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[str], user_answers: List[str], all_percentages: Optional[Dict[str, int]]) -> str:
+    """Generate HTML MBTI report asynchronously"""
     info = MBTI_DESCRIPTIONS.get(mbti_type)
     if not info:
         return f"<h1>خطا</h1><p>تیپ شخصیتی '{html.escape(mbti_type)}' یافت نشد.</p>"
 
-    reasoning_text = get_reasoning_for_mbti(mbti_type, user_answers)
+    reasoning_text = await get_reasoning_for_mbti(mbti_type, user_answers)
     
     # Prepare data for charts if percentages are available
     pie_chart_data_js = "null"
@@ -674,7 +740,7 @@ def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_question
     """
     return html_content
 
-# --- FastAPI Endpoints ---
+# --- FastAPI Endpoints (All Async) ---
 @app.get("/", response_class=HTMLResponse)
 async def get_home_page(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
@@ -710,43 +776,35 @@ async def handle_registration(
     if len(password) < 8:
         return RedirectResponse(url="/register?error=weak_password", status_code=303)
     
-    # Check if phone exists
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    is_duplicate = False
+    # Check if phone exists (async)
     try:
-        cursor.execute("SELECT encrypted_phone FROM users")
-        all_encrypted_phones = cursor.fetchall()
-        for row in all_encrypted_phones:
-            decrypted_phone = decrypt_data(row['encrypted_phone'])
+        all_users = await db_manager.execute_query("SELECT encrypted_phone FROM users", fetch=True)
+        
+        is_duplicate = False
+        for user in all_users:
+            decrypted_phone = await decrypt_data(user['encrypted_phone'])
             if decrypted_phone == phone:
                 is_duplicate = True
                 break
-    except Exception as e:
-        print(f"خطا در بررسی یکتایی شماره تلفن: {e}")
-        conn.close()
-        return RedirectResponse(url="/register?error=registration_failed", status_code=303)
 
-    if is_duplicate:
-        conn.close()
-        return RedirectResponse(url="/register?error=phone_exists", status_code=303)
+        if is_duplicate:
+            return RedirectResponse(url="/register?error=phone_exists", status_code=303)
 
-    # Create user
-    user_id = str(uuid4())
-    encrypted_fname = encrypt_data(first_name)
-    encrypted_lname = encrypt_data(last_name)
-    encrypted_phone_val = encrypt_data(phone)
-    encrypted_password = encrypt_data(hash_password(password))
-    
-    try:
-        cursor.execute("""
+        # Create user (all async operations)
+        user_id = str(uuid4())
+        encrypted_fname = await encrypt_data(first_name)
+        encrypted_lname = await encrypt_data(last_name)
+        encrypted_phone_val = await encrypt_data(phone)
+        hashed_password = await hash_password(password)
+        encrypted_password = await encrypt_data(hashed_password)
+        
+        await db_manager.execute_query("""
             INSERT INTO users (id, encrypted_first_name, encrypted_last_name, encrypted_phone, encrypted_password, age_range, registration_time)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (user_id, encrypted_fname, encrypted_lname, encrypted_phone_val, encrypted_password, age_range, datetime.now().isoformat()))
-        conn.commit()
         
         # Create session
-        session_id = create_session(user_id)
+        session_id = await create_session(user_id)
         
         # Redirect to quiz dashboard
         response = RedirectResponse(url="/quiz", status_code=303)
@@ -754,11 +812,8 @@ async def handle_registration(
         return response
         
     except Exception as e:
-        print(f"خطا در ایجاد کاربر: {e}")
-        conn.close()
+        logger.error(f"خطا در ایجاد کاربر: {e}")
         return RedirectResponse(url="/register?error=registration_failed", status_code=303)
-    finally:
-        conn.close()
 
 @app.get("/login", response_class=HTMLResponse)
 async def get_login_page(request: Request, error: str = None):
@@ -776,49 +831,38 @@ async def handle_login(
     phone: str = Form(...),
     password: str = Form(...)
 ):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
     try:
-        # Find user by phone
-        cursor.execute("SELECT id, encrypted_phone, encrypted_password FROM users")
-        all_users = cursor.fetchall()
+        # Find user by phone (async)
+        all_users = await db_manager.execute_query("SELECT id, encrypted_phone, encrypted_password FROM users", fetch=True)
         
         user_id = None
         for user in all_users:
-            if decrypt_data(user['encrypted_phone']) == phone:
-                stored_password_hash = decrypt_data(user['encrypted_password'])
-                if verify_password(password, stored_password_hash):
+            decrypted_phone = await decrypt_data(user['encrypted_phone'])
+            if decrypted_phone == phone:
+                stored_password_hash = await decrypt_data(user['encrypted_password'])
+                if await verify_password(password, stored_password_hash):
                     user_id = user['id']
                     break
         
         if not user_id:
-            conn.close()
             return RedirectResponse(url="/login?error=invalid_credentials", status_code=303)
         
         # Create session
-        session_id = create_session(user_id)
+        session_id = await create_session(user_id)
         
         response = RedirectResponse(url="/quiz", status_code=303)
         response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=86400)
         return response
         
     except Exception as e:
-        print(f"خطا در ورود: {e}")
-        conn.close()
+        logger.error(f"خطا در ورود: {e}")
         return RedirectResponse(url="/login?error=login_failed", status_code=303)
-    finally:
-        conn.close()
 
 @app.get("/logout")
 async def logout(session_id: str = Cookie(None)):
-    # Delete session from database
+    # Delete session from database (async)
     if session_id:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
-        conn.commit()
-        conn.close()
+        await db_manager.execute_query("DELETE FROM sessions WHERE session_id = ?", (session_id,))
     
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="session_id")
@@ -863,6 +907,7 @@ async def handle_test_submission(request: Request, test_id: str, user = Depends(
     raise HTTPException(status_code=404, detail="تست پیدا نشد")
 
 async def handle_mbti_test_submission(request: Request, user: Dict):
+    """Handle MBTI test submission asynchronously"""
     form_data = await request.form()
     age_range = user['age_range']
 
@@ -882,7 +927,7 @@ async def handle_mbti_test_submission(request: Request, user: Dict):
             )
         answers.append(answer_value)
     
-    # Process with AI
+    # Process with AI (already async)
     mbti_type_result = await get_mbti_type_from_gemini(questions_for_user, answers, age_range)
     
     all_mbti_percentages_dict = None
@@ -890,24 +935,19 @@ async def handle_mbti_test_submission(request: Request, user: Dict):
     if not "خطا" in mbti_type_result:
         all_mbti_percentages_dict = await get_all_eight_mbti_percentages_from_gemini(questions_for_user, answers, mbti_type_result, age_range)
         if all_mbti_percentages_dict:
-            encrypted_percentages_blob = encrypt_data(json.dumps(all_mbti_percentages_dict))
+            encrypted_percentages_blob = await encrypt_data(json.dumps(all_mbti_percentages_dict))
 
-    # Save to database
+    # Save to database (async)
     test_result_id = str(uuid4())
-    encrypted_answers_json_blob = encrypt_data(json.dumps(answers))
+    encrypted_answers_json_blob = await encrypt_data(json.dumps(answers))
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
     try:
-        cursor.execute("""
+        await db_manager.execute_query("""
             INSERT INTO test_results (id, user_id, test_name, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (test_result_id, user['id'], "آزمون شخصیت‌شناسی MBTI", encrypted_answers_json_blob, mbti_type_result, encrypted_percentages_blob, datetime.now().isoformat()))
-        conn.commit()
     except Exception as e:
-        print(f"خطا در ذخیره نتیجه تست: {e}")
-    finally:
-        conn.close()
+        logger.error(f"خطا در ذخیره نتیجه تست: {e}")
 
     return RedirectResponse(url=f"/result/{user['phone']}/{test_result_id}", status_code=303)
 
@@ -917,27 +957,24 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
     if user['phone'] != phone:
         raise HTTPException(status_code=403, detail="شما اجازه دسترسی به این نتیجه را ندارید")
     
-    # Get test result
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
+    # Get test result (async)
+    result = await db_manager.execute_query("""
         SELECT tr.*, u.age_range FROM test_results tr
         JOIN users u ON tr.user_id = u.id
         WHERE tr.id = ? AND tr.user_id = ?
-    """, (test_result_id, user['id']))
-    
-    result = cursor.fetchone()
-    conn.close()
+    """, (test_result_id, user['id']), fetch=True)
     
     if not result:
         raise HTTPException(status_code=404, detail="نتیجه تست یافت نشد")
     
-    # Decrypt and process result
+    result = result[0]
+    
+    # Decrypt and process result (async)
     answers = []
     percentages = None
     
     if result['encrypted_answers']:
-        decrypted_answers = decrypt_data(result['encrypted_answers'])
+        decrypted_answers = await decrypt_data(result['encrypted_answers'])
         if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
             try:
                 answers = json.loads(decrypted_answers)
@@ -945,19 +982,19 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
                 pass
     
     if result['encrypted_mbti_percentages']:
-        decrypted_percentages = decrypt_data(result['encrypted_mbti_percentages'])
+        decrypted_percentages = await decrypt_data(result['encrypted_mbti_percentages'])
         if decrypted_percentages and decrypted_percentages != "خطا در رمزگشایی":
             try:
                 percentages = json.loads(decrypted_percentages)
             except json.JSONDecodeError:
                 pass
     
-    # Generate report
+    # Generate report (async)
     if "خطا" in result['mbti_result']:
         report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(result['mbti_result'])}</p>"
     else:
         questions_for_age = QUESTIONS_DB.get(result['age_range'], [])
-        report_html = generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
+        report_html = await generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
 
     return templates.TemplateResponse("result.html", {
         "request": request,
@@ -969,17 +1006,12 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
 
 @app.get("/my-results", response_class=HTMLResponse)
 async def get_user_results(request: Request, user = Depends(require_login)):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
+    results = await db_manager.execute_query("""
         SELECT id, test_name, mbti_result, analysis_time
         FROM test_results 
         WHERE user_id = ?
         ORDER BY analysis_time DESC
-    """, (user['id'],))
-    
-    results = cursor.fetchall()
-    conn.close()
+    """, (user['id'],), fetch=True)
     
     return templates.TemplateResponse("my_results.html", {
         "request": request,
@@ -989,53 +1021,108 @@ async def get_user_results(request: Request, user = Depends(require_login)):
 
 @app.get("/show_data", response_class=HTMLResponse)
 async def show_data_page(request: Request, user = Depends(require_login)):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
-               tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
-        FROM users u
-        LEFT JOIN test_results tr ON u.id = tr.user_id
-        ORDER BY u.registration_time DESC
-    """)
-    rows = cursor.fetchall()
-    conn.close()
+    """Show all data page with async processing and proper error handling"""
+    try:
+        rows = await db_manager.execute_query("""
+            SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
+                   tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
+            FROM users u
+            LEFT JOIN test_results tr ON u.id = tr.user_id
+            ORDER BY u.registration_time DESC
+        """, fetch=True)
 
-    users_list = []
-    for row_data in rows:
-        user_dict = dict(row_data)
-        user_dict['first_name'] = decrypt_data(user_dict.pop('encrypted_first_name'))
-        user_dict['last_name'] = decrypt_data(user_dict.pop('encrypted_last_name'))
-        user_dict['phone'] = decrypt_data(user_dict.pop('encrypted_phone'))
+        users_list = []
         
-        decrypted_answers_list = []
-        encrypted_ans_blob = user_dict.pop('encrypted_answers')
-        if encrypted_ans_blob:
-            dec_ans_json = decrypt_data(encrypted_ans_blob)
-            if dec_ans_json and dec_ans_json != "خطا در رمزگشایی":
-                try: decrypted_answers_list = json.loads(dec_ans_json)
-                except json.JSONDecodeError: decrypted_answers_list = ["خطا در پارس JSON پاسخ‌ها"]
-            elif dec_ans_json == "خطا در رمزگشایی": decrypted_answers_list = ["خطا در رمزگشایی پاسخ‌ها"]
-        user_dict['answers'] = decrypted_answers_list
-
-        decrypted_percentages_dict = None
-        encrypted_perc_blob = user_dict.pop('encrypted_mbti_percentages')
-        if encrypted_perc_blob:
-            dec_perc_json = decrypt_data(encrypted_perc_blob)
-            if dec_perc_json and dec_perc_json != "خطا در رمزگشایی":
-                try: decrypted_percentages_dict = json.loads(dec_perc_json)
-                except json.JSONDecodeError: decrypted_percentages_dict = {"error": "خطا در پارس JSON درصدها"}
-            elif dec_perc_json == "خطا در رمزگشایی": decrypted_percentages_dict = {"error": "خطا در رمزگشایی درصدها"}
-        user_dict['mbti_percentages'] = decrypted_percentages_dict
+        # Process all user data concurrently for better performance
+        async def process_user_row(row_data):
+            user_dict = dict(row_data)
             
-        users_list.append(user_dict)
+            # Decrypt user data with proper null handling
+            user_dict['first_name'] = await decrypt_data(user_dict.pop('encrypted_first_name')) or ""
+            user_dict['last_name'] = await decrypt_data(user_dict.pop('encrypted_last_name')) or ""
+            user_dict['phone'] = await decrypt_data(user_dict.pop('encrypted_phone')) or ""
+            
+            # Ensure mbti_result is never None
+            if user_dict.get('mbti_result') is None:
+                user_dict['mbti_result'] = ""
+            
+            # Process answers
+            decrypted_answers_list = []
+            encrypted_ans_blob = user_dict.pop('encrypted_answers')
+            if encrypted_ans_blob:
+                dec_ans_json = await decrypt_data(encrypted_ans_blob)
+                if dec_ans_json and dec_ans_json != "خطا در رمزگشایی":
+                    try: 
+                        decrypted_answers_list = json.loads(dec_ans_json)
+                    except json.JSONDecodeError: 
+                        decrypted_answers_list = ["خطا در پارس JSON پاسخ‌ها"]
+                elif dec_ans_json == "خطا در رمزگشایی": 
+                    decrypted_answers_list = ["خطا در رمزگشایی پاسخ‌ها"]
+            user_dict['answers'] = decrypted_answers_list
+
+            # Process percentages
+            decrypted_percentages_dict = None
+            encrypted_perc_blob = user_dict.pop('encrypted_mbti_percentages')
+            if encrypted_perc_blob:
+                dec_perc_json = await decrypt_data(encrypted_perc_blob)
+                if dec_perc_json and dec_perc_json != "خطا در رمزگشایی":
+                    try: 
+                        decrypted_percentages_dict = json.loads(dec_perc_json)
+                    except json.JSONDecodeError: 
+                        decrypted_percentages_dict = {"error": "خطا در پارس JSON درصدها"}
+                elif dec_perc_json == "خطا در رمزگشایی": 
+                    decrypted_percentages_dict = {"error": "خطا در رمزگشایی درصدها"}
+            user_dict['mbti_percentages'] = decrypted_percentages_dict
+                
+            return user_dict
+
+        # Process all rows concurrently
+        if rows:
+            users_list = await asyncio.gather(*[process_user_row(row) for row in rows])
         
-    return templates.TemplateResponse("debug_data.html", {"request": request, "users_data": users_list, "user": user})
+        return templates.TemplateResponse("debug_data.html", {
+            "request": request, 
+            "users_data": users_list, 
+            "user": user
+        })
+        
+    except Exception as e:
+        logger.error(f"خطا در نمایش داده‌ها: {e}")
+        raise HTTPException(status_code=500, detail="خطا در بارگذاری داده‌ها")
+
+@app.post("/submit_answers")
+async def handle_form_submission(request: Request, user = Depends(require_login)):
+    """Handle form submission from questions page"""
+    return await handle_mbti_test_submission(request, user)
 
 @app.get("/generate-password")
 async def generate_random_password():
-    password = generate_password()
+    """Generate random password asynchronously"""
+    password = await generate_password()
     return {"password": password}
+
+# --- Application Startup ---
+@app.on_event("startup")
+async def startup_event():
+    """Initialize application on startup"""
+    logger.info("🚀 Starting MBTI Application...")
+    
+    # Initialize encryption
+    await init_encryption()
+    logger.info("🔐 Encryption initialized")
+    
+    # Initialize database
+    await init_db()
+    logger.info("💾 Database initialized")
+    
+    logger.info("✅ Application started successfully!")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    logger.info("🛑 Shutting down application...")
+    executor.shutdown(wait=True)
+    logger.info("✅ Application shutdown complete!")
 
 if __name__ == "__main__":
     import uvicorn
