@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نتیجه آزمون کاربر - پنل مشاوران</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 25%, #7c3aed 50%, #c026d3 75%, #db2777 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-section h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-section p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .navigation-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* User Info Card */
+        .user-info-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .user-info-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .user-info-item h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .user-info-item p {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        /* Test Results Section */
+        .test-results-section {
+            margin-bottom: 30px;
+        }
+
+        .test-result-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .test-name {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .test-date {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+
+        /* MBTI Result Display */
+        .mbti-result-display {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .mbti-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 3em;
+            font-weight: 800;
+            padding: 20px 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            letter-spacing: 3px;
+        }
+
+        .mbti-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .mbti-description {
+            font-size: 1.3em;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* Traits Grid */
+        .traits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .trait-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .trait-card h3 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .strengths {
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .weaknesses {
+            border: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .trait-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .trait-card li {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-right: 4px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Percentages Display */
+        .percentages-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .percentages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .percentage-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .percentage-label {
+            font-size: 1em;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .percentage-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        /* Answers Section */
+        .answers-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .answers-section h3 {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .answer-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border-right: 4px solid #3b82f6;
+        }
+
+        .answer-question {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #93c5fd;
+        }
+
+        .answer-text {
+            line-height: 1.7;
+            opacity: 0.9;
+        }
+
+        /* No Results State */
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+        }
+
+        .no-results-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .no-results h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .no-results p {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            backdrop-filter: blur(15px);
+        }
+
+        .charts-section h3 {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            height: 400px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-section {
+                padding: 30px 20px;
+            }
+
+            .header-section h1 {
+                font-size: 2em;
+            }
+
+            .navigation-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-link {
+                justify-content: center;
+            }
+
+            .traits-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .mbti-badge {
+                font-size: 2.2em;
+                padding: 15px 25px;
+            }
+
+            .percentages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .percentages-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1>📊 نتیجه آزمون کاربر</h1>
+            <p>مشاهده جزئیات نتایج آزمون شخصیت‌شناسی</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation-bar">
+            <div>
+                <a href="/advisor/show_data" class="nav-link">
+                    ← بازگشت به لیست کاربران
+                </a>
+            </div>
+            <div>
+                <a href="/advisor/logout" class="nav-link" style="background: rgba(239, 68, 68, 0.3);">
+                    🚪 خروج از پنل
+                </a>
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div class="user-info-card">
+            <h2 style="text-align: center; margin-bottom: 25px;">👤 اطلاعات کاربر</h2>
+            <div class="user-info-grid">
+                <div class="user-info-item">
+                    <h3>👤 نام و نام خانوادگی</h3>
+                    <p>{{ user.first_name }} {{ user.last_name }}</p>
+                </div>
+                <div class="user-info-item">
+                    <h3>📱 شماره تلفن</h3>
+                    <p>{{ user.phone }}</p>
+                </div>
+                <div class="user-info-item">
+                    <h3>🎂 رده سنی</h3>
+                    <p>{{ user.age_range }} سال</p>
+                </div>
+                <div class="user-info-item">
+                    <h3>📅 تاریخ ثبت نام</h3>
+                    <p>{{ user.registration_time[:10] if user.registration_time else 'نامشخص' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results Section -->
+        <div class="test-results-section">
+            {% if test_results %}
+                {% for result in test_results %}
+                <div class="test-result-card">
+                    <div class="test-header">
+                        <div class="test-name">🧠 {{ result.test_name }}</div>
+                        <div class="test-date">
+                            ⏰ {{ result.analysis_time[:19] if result.analysis_time else 'نامشخص' }}
+                        </div>
+                    </div>
+
+                    {% if result.mbti_result and 'خطا' not in result.mbti_result %}
+                        <!-- MBTI Result Display -->
+                        <div class="mbti-result-display">
+                            <div class="mbti-badge">{{ result.mbti_result }}</div>
+                            {% if MBTI_DESCRIPTIONS.get(result.mbti_result) %}
+                                <div class="mbti-title">
+                                    {{ MBTI_DESCRIPTIONS[result.mbti_result]['title'] }}
+                                </div>
+                                <div class="mbti-description">
+                                    {{ MBTI_DESCRIPTIONS[result.mbti_result]['description'] }}
+                                </div>
+
+                                <!-- Traits Grid -->
+                                <div class="traits-grid">
+                                    <div class="trait-card strengths">
+                                        <h3>💪 نقاط قوت</h3>
+                                        <ul>
+                                            {% for strength in MBTI_DESCRIPTIONS[result.mbti_result]['strengths'].split(',') %}
+                                            <li>{{ strength.strip() }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    <div class="trait-card weaknesses">
+                                        <h3>🎯 نکات قابل توجه</h3>
+                                        <ul>
+                                            {% for weakness in MBTI_DESCRIPTIONS[result.mbti_result]['weaknesses'].split(',') %}
+                                            <li>{{ weakness.strip() }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Percentages Section -->
+                        {% if result.percentages and result.percentages is mapping and not result.percentages.get('error') %}
+                        <div class="percentages-section">
+                            <h3 style="text-align: center; margin-bottom: 25px;">📈 درصدهای MBTI</h3>
+                            <div class="percentages-grid">
+                                {% for key, value in result.percentages.items() %}
+                                <div class="percentage-item">
+                                    <div class="percentage-label">
+                                        {{ key | replace('_percentage', '') | replace('extraversion', 'برونگرایی') | replace('introversion', 'درونگرایی') | replace('sensing', 'حسی') | replace('intuition', 'شهودی') | replace('thinking', 'منطقی') | replace('feeling', 'احساسی') | replace('judging', 'قضاوتی') | replace('perceving', 'ادراکی') }}
+                                    </div>
+                                    <div class="percentage-value">{{ value }}%</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- User Answers Section -->
+                        {% if result.answers and result.answers|length > 0 %}
+                        <div class="answers-section">
+                            <h3>💬 پاسخ‌های کاربر</h3>
+                            {% for answer in result.answers %}
+                            <div class="answer-item">
+                                <div class="answer-question">
+                                    سوال {{ loop.index }}:
+                                    {% if QUESTIONS_DB.get(user.age_range) and loop.index0 < QUESTIONS_DB[user.age_range]|length %}
+                                        {{ QUESTIONS_DB[user.age_range][loop.index0][:100] }}...
+                                    {% else %} 
+                                        سوال {{ loop.index }}
+                                    {% endif %}
+                                </div>
+                                <div class="answer-text">{{ answer }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Error State -->
+                        <div style="text-align: center; padding: 40px; background: rgba(239, 68, 68, 0.2); border-radius: 15px;">
+                            <h3 style="color: #fecaca; margin-bottom: 15px;">⚠️ خطا در تحلیل</h3>
+                            <p style="color: #fed7aa;">
+                                {% if result.mbti_result %}
+                                    {{ result.mbti_result }}
+                                {% else %}
+                                    نتیجه آزمون در دسترس نیست
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- No Results State -->
+                <div class="no-results">
+                    <div class="no-results-icon">📝</div>
+                    <h3>هنوز آزمونی انجام نداده است</h3>
+                    <p>این کاربر تا کنون هیچ آزمون شخصیت‌شناسی انجام نداده است.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.user-info-card, .test-result-card');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.6s ease-out';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

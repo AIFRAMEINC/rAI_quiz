@@ -1066,6 +1066,81 @@ async def handle_test_submission(request: Request, test_id: str, user = Depends(
     
     raise HTTPException(status_code=404, detail="تست پیدا نشد")
 
+@app.get("/advisor/user_result/{user_id}", response_class=HTMLResponse)
+async def show_user_result_to_advisor(request: Request, user_id: str, advisor = Depends(require_advisor_login)):
+    """Show specific user's test result to advisor"""
+    try:
+        # Get user information and test results
+        user_data = await db_manager.execute_query("""
+            SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
+                   tr.id as test_id, tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
+            FROM users u
+            LEFT JOIN test_results tr ON u.id = tr.user_id
+            WHERE u.id = ?
+            ORDER BY tr.analysis_time DESC
+        """, (user_id,), fetch=True)
+        
+        if not user_data:
+            raise HTTPException(status_code=404, detail="کاربر یافت نشد")
+        
+        # Process user data
+        processed_user = {}
+        test_results = []
+        
+        for row in user_data:
+            if not processed_user:
+                processed_user = {
+                    'id': row['id'],
+                    'first_name': await decrypt_data(row['encrypted_first_name']) or "",
+                    'last_name': await decrypt_data(row['encrypted_last_name']) or "",
+                    'phone': await decrypt_data(row['encrypted_phone']) or "",
+                    'age_range': row['age_range'],
+                    'registration_time': row['registration_time']
+                }
+            
+            if row['test_id']:  # If user has test results
+                # Decrypt answers
+                answers = []
+                if row['encrypted_answers']:
+                    decrypted_answers = await decrypt_data(row['encrypted_answers'])
+                    if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
+                        try:
+                            answers = json.loads(decrypted_answers)
+                        except json.JSONDecodeError:
+                            answers = ["خطا در پارس پاسخ‌ها"]
+                
+                # Decrypt percentages
+                percentages = None
+                if row['encrypted_mbti_percentages']:
+                    decrypted_percentages = await decrypt_data(row['encrypted_mbti_percentages'])
+                    if decrypted_percentages and decrypted_percentages != "خطا در رمزگشایی":
+                        try:
+                            percentages = json.loads(decrypted_percentages)
+                        except json.JSONDecodeError:
+                            percentages = {"error": "خطا در پارس درصدها"}
+                
+                test_results.append({
+                    'test_id': row['test_id'],
+                    'test_name': row['test_name'],
+                    'mbti_result': row['mbti_result'] or "",
+                    'analysis_time': row['analysis_time'],
+                    'answers': answers,
+                    'percentages': percentages
+                })
+        
+        return templates.TemplateResponse("advisor_user_result.html", {
+            "request": request,
+            "user": processed_user,
+            "test_results": test_results,
+            "advisor": advisor,
+            "MBTI_DESCRIPTIONS": MBTI_DESCRIPTIONS,
+            "QUESTIONS_DB": QUESTIONS_DB
+        })
+        
+    except Exception as e:
+        logger.error(f"خطا در نمایش نتیجه کاربر: {e}")
+        raise HTTPException(status_code=500, detail="خطا در بارگذاری اطلاعات کاربر")
+
 async def handle_mbti_test_submission(request: Request, user: Dict):
     """Handle MBTI test submission asynchronously"""
     form_data = await request.form()
