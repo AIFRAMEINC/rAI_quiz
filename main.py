@@ -17,6 +17,10 @@ from fastapi import FastAPI, Request, Form, HTTPException, Depends, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.exceptions import HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi import Request, status
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from cryptography.fernet import Fernet
 import google.generativeai as genai
@@ -74,6 +78,109 @@ os.makedirs("static", exist_ok=True)
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions with custom error pages"""
+    
+    # 404 Error
+    if exc.status_code == 404:
+        return templates.TemplateResponse("error_404.html", {
+            "request": request
+        }, status_code=404)
+    
+    # 401 Error (Unauthorized)
+    elif exc.status_code == 401:
+        return templates.TemplateResponse("error_401.html", {
+            "request": request
+        }, status_code=401)
+    
+    # 500 Error (Internal Server Error)
+    elif exc.status_code == 500:
+        return templates.TemplateResponse("error_500.html", {
+            "request": request
+        }, status_code=500)
+    
+    # برای سایر خطاها از پیغام پیش‌فرض استفاده می‌کنیم
+    else:
+        return HTMLResponse(
+            content=f"""
+            <!DOCTYPE html>
+            <html lang="fa" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>خطا {exc.status_code}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+                        body {{
+                            font-family: 'Vazirmatn', sans-serif;
+                            background: #1a1a1a;
+                            color: white;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                        }}
+                        .error-box {{
+                            text-align: center;
+                            padding: 40px;
+                            background: rgba(255,255,255,0.1);
+                            border-radius: 20px;
+                            backdrop-filter: blur(10px);
+                            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                        }}
+                        h1 {{ 
+                            font-size: 4em; 
+                            margin: 0 0 20px 0;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                        }}
+                        p {{ 
+                            font-size: 1.2em;
+                            margin-bottom: 30px;
+                            opacity: 0.9;
+                        }}
+                        a {{
+                            display: inline-block;
+                            margin-top: 20px;
+                            padding: 12px 30px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 15px;
+                            transition: 0.3s;
+                            font-weight: 600;
+                            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                        }}
+                        a:hover {{ 
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="error-box">
+                        <h1>خطا {exc.status_code}</h1>
+                        <p>{exc.detail}</p>
+                        <a href="/">بازگشت به صفحه اصلی</a>
+                    </div>
+                </body>
+            </html>
+            """,
+            status_code=exc.status_code
+        )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Handle general exceptions"""
+    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    
+    return templates.TemplateResponse("error_500.html", {
+        "request": request
+    }, status_code=500)
+
 
 API_KEY = "AIzaSyCphwC83v0XsBfQIv0ac_JHkJkVopCM43M"
 if not API_KEY:
@@ -1352,6 +1459,19 @@ async def startup_event():
     
     logger.info("✅ Application started successfully!")
 
+async def require_login(user = Depends(get_current_user)):
+    """Require user login dependency"""
+    if not user:
+        raise HTTPException(status_code=401, detail="لطفاً وارد حساب کاربری خود شوید")
+    return user
+
+async def require_advisor_login(advisor = Depends(get_current_advisor)):
+    """Require advisor login dependency"""  
+    if not advisor:
+        raise HTTPException(status_code=401, detail="لطفاً وارد پنل مشاوران شوید")
+    return advisor
+
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
@@ -1362,3 +1482,15 @@ async def shutdown_event():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/{full_path:path}")
+async def catch_all(request: Request, full_path: str):
+    """Catch all undefined routes and show 404 page"""
+    # بررسی که آیا فایل استاتیک است
+    if full_path.startswith("static/"):
+        raise HTTPException(status_code=404, detail="فایل یافت نشد")
+    
+    # نمایش صفحه 404 برای سایر مسیرها
+    return templates.TemplateResponse("error_404.html", {
+        "request": request
+    }, status_code=404)
