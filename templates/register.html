@@ -288,36 +288,45 @@
             background: rgba(16, 185, 129, 0.1);
         }
 
-        /* Password Input Special Styling */
-        .password-input-wrapper {
-            position: relative;
-        }
-
-        .password-input-wrapper input {
-            padding-left: 60px;
-        }
-
-        .generate-password-btn-inside {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+        /* اضافه کردن استایل جدید */
+        .generate-password-btn {
+            width: 100%;
             background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
             color: white;
+            padding: 14px 25px;
             border: none;
-            padding: 10px 14px;
-            border-radius: 12px;
+            border-radius: 16px;
+            font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-            z-index: 2;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Vazirmatn', sans-serif;
+            margin-top: 12px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
         }
 
-        .generate-password-btn-inside:hover {
+        .generate-password-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .generate-password-btn:hover {
             background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            transform: translateY(-50%) scale(1.1);
-            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+        }
+
+        .generate-password-btn:hover::before {
+            left: 100%;
         }
 
         /* Password Strength & Match Indicators */
@@ -674,13 +683,11 @@
                 
                 <div class="form-group">
                     <label for="password">🔑 رمز عبور:</label>
-                    <div class="password-input-wrapper">
-                        <input type="password" id="password" name="password" required placeholder="رمز عبور خود را وارد کنید" minlength="8">
-                        <button type="button" class="generate-password-btn-inside" id="generatePasswordBtn" title="تولید رمز تصادفی">
-                            🎲
-                        </button>
-                        <div class="password-strength" id="passwordStrength"></div>
-                    </div>
+                    <input type="password" id="password" name="password" required placeholder="رمز عبور خود را وارد کنید" minlength="8">
+                    <button type="button" class="generate-password-btn" id="generatePasswordBtn">
+                        🎲 تولید رمز
+                    </button>
+                    <div class="password-strength" id="passwordStrength"></div>
                 </div>
                 
                 <div class="form-group">
@@ -944,27 +951,6 @@
             
             // Initial form check
             checkFormValidity();
-
-            // 3D hover effects for cards
-            document.querySelectorAll('.info-card, .footer-card').forEach(card => {
-                card.addEventListener('mousemove', function(e) {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    
-                    const rotateX = (y - centerY) / 10;
-                    const rotateY = (centerX - x) / 10;
-                    
-                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
-                });
-            });
         });
     </script>
 </body>

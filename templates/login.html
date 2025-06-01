@@ -720,27 +720,6 @@
             // Initial form check
             checkFormValidity();
 
-            // 3D hover effects for sections
-            document.querySelectorAll('.register-section, .security-notice').forEach(section => {
-                section.addEventListener('mousemove', function(e) {
-                    const rect = section.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    
-                    const rotateX = (y - centerY) / 15;
-                    const rotateY = (centerX - x) / 15;
-                    
-                    section.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-5px)`;
-                });
-                
-                section.addEventListener('mouseleave', function() {
-                    section.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
-                });
-            });
-
             // Input focus animations
             document.querySelectorAll('input').forEach(input => {
                 input.addEventListener('focus', function() {

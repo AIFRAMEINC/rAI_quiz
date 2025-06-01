@@ -256,28 +256,23 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        /* Test Cards Grid */
-        .tests-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 40px;
-        }
-
-        .test-card {
+        /* Main Tests Container */
+        .main-tests-container {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 28px;
             padding: 40px 35px;
             backdrop-filter: blur(30px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
             box-shadow: 
                 0 15px 45px rgba(0, 0, 0, 0.12),
                 0 4px 16px rgba(255, 255, 255, 0.1) inset;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .test-card::before {
+        .main-tests-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -288,121 +283,118 @@
             border-radius: 25px 25px 0 0;
         }
 
-        .test-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            pointer-events: none;
-        }
-
-        .test-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
-            box-shadow: 
-                0 30px 70px rgba(0, 0, 0, 0.2),
-                0 6px 20px rgba(255, 255, 255, 0.15) inset;
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .test-card:hover::after {
-            opacity: 1;
-        }
-
-        .test-icon {
-            font-size: 4em;
-            margin-bottom: 25px;
-            display: block;
+        .tests-header {
             text-align: center;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
-            transition: transform 0.3s ease;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .test-card:hover .test-icon {
-            transform: scale(1.2) rotateY(15deg);
-        }
-
-        .test-card h3 {
-            font-size: 1.8em;
+        .tests-header h3 {
+            font-size: 2em;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 20px;
-            text-align: center;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .test-description {
-            color: #f1f5f9;
+        .tests-header p {
             font-size: 1.1em;
-            line-height: 1.7;
-            margin-bottom: 30px;
-            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
-        /* Test Details */
-        .test-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        /* Tests List */
+        .tests-list {
+            display: flex;
+            flex-direction: column;
             gap: 20px;
-            margin-bottom: 35px;
         }
 
-        .test-detail {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            backdrop-filter: blur(15px);
-            transition: all 0.3s ease;
+        .test-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            padding: 25px 30px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        .test-detail:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-3px);
+        .test-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            border-radius: 18px 18px 0 0;
         }
 
-        .test-detail-label {
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 8px;
-            font-weight: 500;
+        .test-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .test-detail-value {
-            font-size: 1.2em;
+        .test-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .test-icon {
+            font-size: 2.5em;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .test-item:hover .test-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .test-details h4 {
+            font-size: 1.4em;
             font-weight: 700;
             color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 5px;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .test-meta {
+            font-size: 1em;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         /* Start Test Button */
-        .start-test-btn {
-            display: block;
-            width: 100%;
+        .start-test-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px 30px;
-            border: none;
-            border-radius: 18px;
-            font-size: 1.3em;
-            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 16px;
             text-decoration: none;
-            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            border: none;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
         }
 
-        .start-test-btn::before {
+        .start-test-button::before {
             content: '';
             position: absolute;
             top: 0;
@@ -413,14 +405,57 @@
             transition: left 0.5s ease;
         }
 
-        .start-test-btn:hover {
+        .start-test-button:hover {
             background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 15px 45px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
         }
 
-        .start-test-btn:hover::before {
+        .start-test-button:hover::before {
             left: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-tests-container {
+                padding: 30px 25px;
+            }
+
+            .test-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+                padding: 25px 20px;
+            }
+
+            .test-info {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .start-test-button {
+                width: 100%;
+                padding: 16px 20px;
+            }
+
+            .tests-header h3 {
+                font-size: 1.6em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .test-icon {
+                font-size: 2em;
+            }
+
+            .test-details h4 {
+                font-size: 1.2em;
+            }
+
+            .test-meta {
+                font-size: 0.9em;
+            }
         }
 
         /* Stats Overview */
@@ -722,6 +757,7 @@
         </div>
 
         <!-- Tests Section -->
+        <!-- Tests Section -->
         <div class="tests-section fade-in">
             <div class="section-title">
                 <h2>🧠 آزمون‌های موجود</h2>
@@ -730,29 +766,29 @@
                 </p>
             </div>
             
-            <div class="tests-grid">
-                {% for test_id, test_info in available_tests.items() %}
-                <div class="test-card glow-effect">
-                    <span class="test-icon">{{ test_info.icon }}</span>
-                    <h3>{{ test_info.title }}</h3>
-                    <p class="test-description">{{ test_info.description }}</p>
-                    
-                    <div class="test-details">
-                        <div class="test-detail">
-                            <div class="test-detail-label">مدت زمان</div>
-                            <div class="test-detail-value">{{ test_info.duration }}</div>
-                        </div>
-                        <div class="test-detail">
-                            <div class="test-detail-label">تعداد سوال</div>
-                            <div class="test-detail-value">{{ test_info.questions_count }}</div>
-                        </div>
-                    </div>
-                    
-                    <a href="/test/{{ test_id }}" class="start-test-btn glow-effect">
-                        🚀 شروع آزمون
-                    </a>
+            <!-- Main Tests Container -->
+            <div class="main-tests-container glow-effect">
+                <div class="tests-header">
+                    <h3>📋 لیست آزمون‌های شخصیت‌شناسی</h3>
+                    <p>آزمون مورد نظر خود را انتخاب کنید</p>
                 </div>
-                {% endfor %}
+                
+                <div class="tests-list">
+                    {% for test_id, test_info in available_tests.items() %}
+                    <div class="test-item glow-effect">
+                        <div class="test-info">
+                            <span class="test-icon">{{ test_info.icon }}</span>
+                            <div class="test-details">
+                                <h4>{{ test_info.title }}</h4>
+                                <p class="test-meta">{{ test_info.questions_count }} سوال • {{ test_info.duration }}</p>
+                            </div>
+                        </div>
+                        <a href="/test/{{ test_id }}" class="start-test-button glow-effect">
+                            🚀 شروع آزمون
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
@@ -811,27 +847,6 @@
                     el.style.opacity = '1';
                     el.style.transform = 'translateY(0)';
                 }, index * 200);
-            });
-
-            // 3D hover effects for cards
-            document.querySelectorAll('.test-card, .stat-card, .tip-card').forEach(card => {
-                card.addEventListener('mousemove', function(e) {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    
-                    const rotateX = (y - centerY) / 15;
-                    const rotateY = (centerX - x) / 15;
-                    
-                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-15px) scale(1.02)`;
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
-                });
             });
 
             // Add hover effects to navigation links

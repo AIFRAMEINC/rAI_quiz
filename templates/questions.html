@@ -605,7 +605,7 @@
                 <li>صادقانه و بر اساس تجربیات واقعی‌ت پاسخ بده</li>
                 <li>سعی کن مثال‌های مشخص از زندگی‌ت بزنی</li>
                 <li>نگران درست یا غلط بودن پاسخت نباش - هر پاسخی درسته</li>
-                <li>حداقل ۳-۴ جمله برای هر سوال بنویس</li>
+                <li>حداقل ۲-۳ جمله برای هر سوال بنویس</li>
             </ul>
         </div>
 
@@ -638,7 +638,7 @@
                     name="answer_{{i}}" 
                     rows="6" 
                     required 
-                    placeholder="پاسخ خود را اینجا بنویسید... (حداقل ۵۰ کلمه)"
+                    placeholder="پاسخ خود را اینجا بنویسید... (حداقل ۲۰ کلمه)"
                     data-question-index="{{ i }}"
                 >{{ previous_answers.get('answer_' ~ i, '') if previous_answers else '' }}</textarea>
                 <div class="char-counter" id="counter_{{ i }}">0 کلمه</div>
@@ -712,27 +712,6 @@
                 
                 textarea.addEventListener('blur', function() {
                     this.closest('.question-block').style.transform = 'translateY(0) scale(1)';
-                });
-            });
-
-            // 3D hover effects for question blocks
-            document.querySelectorAll('.question-block').forEach(block => {
-                block.addEventListener('mousemove', function(e) {
-                    const rect = block.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    
-                    const rotateX = (y - centerY) / 20;
-                    const rotateY = (centerX - x) / 20;
-                    
-                    block.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
-                });
-                
-                block.addEventListener('mouseleave', function() {
-                    block.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0)';
                 });
             });
         });

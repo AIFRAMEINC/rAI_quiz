@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>آزمون شخصیت‌شناسی MBTI - کشف خود واقعی</title>
+    <title>آزمون شخصیت‌شناسی - کشف خود واقعی</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
     <style>
         * {
@@ -692,7 +692,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-content">
-            <a href="#" class="logo">MBTI Pro</a>
+            <a href="#" class="logo">زنگ شخصیت شناسی</a>
             <div class="nav-links">
                 <a href="#features" class="nav-link">ویژگی‌ها</a>
                 <a href="#how-it-works" class="nav-link">نحوه کار</a>
@@ -731,9 +731,9 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card glow-effect">
-                    <span class="feature-icon">🤖</span>
-                    <h3>هوش مصنوعی پیشرفته</h3>
-                    <p>تحلیل دقیق پاسخ‌های شما با استفاده از الگوریتم‌های پیشرفته هوش مصنوعی برای نتایج بی‌نظیر</p>
+                    <span class="feature-icon">🧬</span>
+                    <h3>تحلیل علمی پیشرفته</h3>
+                    <p>بر اساس جدیدترین روش‌های روان‌شناسی و الگوریتم‌های تخصصی برای تحلیل دقیق شخصیت شما</p>
                 </div>
                 <div class="feature-card glow-effect">
                     <span class="feature-icon">📊</span>
@@ -751,9 +751,9 @@
                     <p>بر اساس تحقیقات روان‌شناسی مدرن و استاندارد بین‌المللی Myers-Briggs طراحی شده</p>
                 </div>
                 <div class="feature-card glow-effect">
-                    <span class="feature-icon">📱</span>
-                    <h3>طراحی Responsive</h3>
-                    <p>تجربه یکسان و عالی در تمام دستگاه‌ها - موبایل، تبلت و دسکتاپ</p>
+                    <span class="feature-icon">💡</span>
+                    <h3>بینش‌های عملی</h3>
+                    <p>دریافت توصیه‌های کاربردی برای بهبود روابط، شغل و زندگی شخصی بر اساس تیپ شخصیتی شما</p>
                 </div>
                 <div class="feature-card glow-effect">
                     <span class="feature-icon">⚡</span>
@@ -836,7 +836,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 MBTI Pro. تمام حقوق محفوظ است. | طراحی شده با ❤️ برای شناخت بهتر</p>
+            <p>&copy; 2024 زنگ شخصیت شناسی. تمام حقوق محفوظ است. | طراحی شده با ❤️ برای شناخت بهتر</p>
         </div>
     </footer>
 
@@ -944,27 +944,6 @@
                     this.innerHTML = '⏳ در حال هدایت...';
                     this.style.pointerEvents = 'none';
                 }
-            });
-        });
-
-        // Advanced 3D hover effects
-        document.querySelectorAll('.feature-card, .stat-item, .step-card').forEach(card => {
-            card.addEventListener('mousemove', function(e) {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-                
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-12px) scale(1.02)`;
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
             });
         });
     </script>
