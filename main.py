@@ -1361,76 +1361,7 @@ async def get_user_results(request: Request, user = Depends(require_login)):
         "results": results
     })
 
-@app.get("/show_data", response_class=HTMLResponse)
-async def show_data_page(request: Request, user = Depends(require_login)):
-    """Show all data page with async processing and proper error handling"""
-    try:
-        rows = await db_manager.execute_query("""
-            SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
-                   tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
-            FROM users u
-            LEFT JOIN test_results tr ON u.id = tr.user_id
-            ORDER BY u.registration_time DESC
-        """, fetch=True)
 
-        users_list = []
-        
-        # Process all user data concurrently for better performance
-        async def process_user_row(row_data):
-            user_dict = dict(row_data)
-            
-            # Decrypt user data with proper null handling
-            user_dict['first_name'] = await decrypt_data(user_dict.pop('encrypted_first_name')) or ""
-            user_dict['last_name'] = await decrypt_data(user_dict.pop('encrypted_last_name')) or ""
-            user_dict['phone'] = await decrypt_data(user_dict.pop('encrypted_phone')) or ""
-            
-            # Ensure mbti_result is never None
-            if user_dict.get('mbti_result') is None:
-                user_dict['mbti_result'] = ""
-            
-            # Process answers
-            decrypted_answers_list = []
-            encrypted_ans_blob = user_dict.pop('encrypted_answers')
-            if encrypted_ans_blob:
-                dec_ans_json = await decrypt_data(encrypted_ans_blob)
-                if dec_ans_json and dec_ans_json != "خطا در رمزگشایی":
-                    try: 
-                        decrypted_answers_list = json.loads(dec_ans_json)
-                    except json.JSONDecodeError: 
-                        decrypted_answers_list = ["خطا در پارس JSON پاسخ‌ها"]
-                elif dec_ans_json == "خطا در رمزگشایی": 
-                    decrypted_answers_list = ["خطا در رمزگشایی پاسخ‌ها"]
-            user_dict['answers'] = decrypted_answers_list
-
-            # Process percentages
-            decrypted_percentages_dict = None
-            encrypted_perc_blob = user_dict.pop('encrypted_mbti_percentages')
-            if encrypted_perc_blob:
-                dec_perc_json = await decrypt_data(encrypted_perc_blob)
-                if dec_perc_json and dec_perc_json != "خطا در رمزگشایی":
-                    try: 
-                        decrypted_percentages_dict = json.loads(dec_perc_json)
-                    except json.JSONDecodeError: 
-                        decrypted_percentages_dict = {"error": "خطا در پارس JSON درصدها"}
-                elif dec_perc_json == "خطا در رمزگشایی": 
-                    decrypted_percentages_dict = {"error": "خطا در رمزگشایی درصدها"}
-            user_dict['mbti_percentages'] = decrypted_percentages_dict
-                
-            return user_dict
-
-        # Process all rows concurrently
-        if rows:
-            users_list = await asyncio.gather(*[process_user_row(row) for row in rows])
-        
-        return templates.TemplateResponse("debug_data.html", {
-            "request": request, 
-            "users_data": users_list, 
-            "user": user
-        })
-        
-    except Exception as e:
-        logger.error(f"خطا در نمایش داده‌ها: {e}")
-        raise HTTPException(status_code=500, detail="خطا در بارگذاری داده‌ها")
 
 @app.post("/submit_answers")
 async def handle_form_submission(request: Request, user = Depends(require_login)):
