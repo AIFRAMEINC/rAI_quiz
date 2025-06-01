@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نتایج آزمون‌های من - MBTI</title>
+    <title>نتایج آزمون‌های من</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -853,11 +853,11 @@
                         <div class="stat-label">آزمون انجام شده</div>
                     </div>
                     <div class="stat-item glow-effect">
-                        <span class="stat-number">{{ results|selectattr('mbti_result')|rejectattr('mbti_result', 'search', 'خطا')|list|length }}</span>
+                        <span class="stat-number">{{ results|rejectattr('mbti_result', 'equalto', 'خطا')|list|length }}</span>
                         <div class="stat-label">نتیجه موفق</div>
                     </div>
                     <div class="stat-item glow-effect">
-                        <span class="stat-number">{{ (results|selectattr('mbti_result')|rejectattr('mbti_result', 'search', 'خطا')|list|length / results|length * 100)|round|int if results|length > 0 else 0 }}%</span>
+                        <span class="stat-number">{{ (results|rejectattr('mbti_result', 'equalto', 'خطا')|list|length / results|length * 100)|round|int if results|length > 0 else 0 }}%</span>
                         <div class="stat-label">نرخ موفقیت</div>
                     </div>
                     <div class="stat-item glow-effect">
