@@ -30,6 +30,11 @@ DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
 SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
+DATABASE_FILE = "mbti_app.db"
+ADVISOR_DATABASE_FILE = "advisor_users.db"  # دیتابیس جدید برای مشاوران
+ENCRYPTION_KEY_FILE = "secret.key"
+SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
+
 # مشخصات لاگین مشاوران
 ADVISOR_USERNAME = "1570760403"
 ADVISOR_PASSWORD = "1570760403"
@@ -238,8 +243,43 @@ class AsyncDBManager:
 # Initialize database manager
 db_manager = AsyncDBManager(DATABASE_FILE)
 
+# دیتابیس جدید برای مشاوران
+class AsyncAdvisorDBManager:
+    def __init__(self, db_file):
+        self.db_file = db_file
+        self._lock = asyncio.Lock()
+    
+    async def execute_query(self, query: str, params: tuple = (), fetch: bool = False):
+        """Execute advisor database query asynchronously"""
+        async with self._lock:
+            def _execute():
+                conn = sqlite3.connect(self.db_file)
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                try:
+                    cursor.execute(query, params)
+                    if fetch:
+                        result = cursor.fetchall()
+                        conn.close()
+                        return result
+                    else:
+                        conn.commit()
+                        conn.close()
+                        return cursor.lastrowid
+                except Exception as e:
+                    conn.close()
+                    raise e
+            
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(executor, _execute)
+
+# Initialize database managers
+db_manager = AsyncDBManager(DATABASE_FILE)
+advisor_db_manager = AsyncAdvisorDBManager(ADVISOR_DATABASE_FILE)
+
 async def init_db():
-    """Initialize database asynchronously"""
+    """Initialize databases asynchronously"""
+    # Initialize user database
     await db_manager.execute_query("""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
@@ -275,13 +315,21 @@ async def init_db():
         )
     """)
 
-    # جدول جلسات مشاوران
+    # Initialize advisor database
+    await advisor_db_manager.execute_query("""
+        CREATE TABLE IF NOT EXISTS advisors (
+            username TEXT PRIMARY KEY,
+            encrypted_password BLOB NOT NULL
+        )
+    """)
+
     await db_manager.execute_query("""
         CREATE TABLE IF NOT EXISTS advisor_sessions (
             session_id TEXT PRIMARY KEY,
             username TEXT NOT NULL,
             created_at TEXT NOT NULL,
-            expires_at TEXT NOT NULL
+            expires_at TEXT NOT NULL,
+            FOREIGN KEY (username) REFERENCES advisors (username)
         )
     """)
 
@@ -1020,7 +1068,7 @@ async def handle_login(
 
 @app.get("/karshenasanlogin", response_class=HTMLResponse)
 async def get_advisor_login_page(request: Request, error: str = None, advisor=Depends(get_current_advisor)):
-    # اگر مشاور از قبل وارد شده باشد، به داشبورد مشاوران هدایت شود
+    """Get advisor login page"""
     if advisor:
         return RedirectResponse(url="/advisor/show_data", status_code=303)
         
@@ -1038,17 +1086,28 @@ async def handle_advisor_login(
     username: str = Form(...),
     password: str = Form(...)
 ):
+    """Handle advisor login"""
     try:
-        # Check advisor credentials
-        if username == ADVISOR_USERNAME and password == ADVISOR_PASSWORD:
-            # Create advisor session
-            session_id = await create_advisor_session(username)
-            
-            response = RedirectResponse(url="/advisor/show_data", status_code=303)
-            response.set_cookie(key="advisor_session_id", value=session_id, httponly=True, max_age=86400)
-            return response
-        else:
+        # بررسی نام کاربری و رمز عبور در دیتابیس مشاوران
+        advisors = await advisor_db_manager.execute_query(
+            "SELECT username, encrypted_password FROM advisors WHERE username = ?",
+            (username,), fetch=True
+        )
+        
+        if not advisors:
             return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
+        
+        advisor = advisors[0]
+        decrypted_password = await decrypt_data(advisor['encrypted_password'])
+        if decrypted_password != password:
+            return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
+        
+        # ایجاد سشن برای مشاور
+        session_id = await create_advisor_session(username)
+        
+        response = RedirectResponse(url="/advisor/show_data", status_code=303)
+        response.set_cookie(key="advisor_session_id", value=session_id, httponly=True, max_age=86400)
+        return response
         
     except Exception as e:
         logger.error(f"خطا در ورود مشاور: {e}")
@@ -1127,7 +1186,7 @@ async def show_advisor_data_page(request: Request, advisor = Depends(require_adv
 
 @app.get("/advisor/logout")
 async def advisor_logout(advisor_session_id: str = Cookie(None)):
-    # Delete advisor session from database (async)
+    """Logout advisor"""
     if advisor_session_id:
         await db_manager.execute_query("DELETE FROM advisor_sessions WHERE session_id = ?", (advisor_session_id,))
     
@@ -1440,7 +1499,7 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=4455)
 
 @app.get("/{full_path:path}")
 async def catch_all(request: Request, full_path: str):
