@@ -30,9 +30,10 @@ DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
 SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
+# --- Configuration ---
 DATABASE_FILE = "mbti_app.db"
 ADVISOR_DATABASE_FILE = "advisor_users.db"  # دیتابیس جدید برای مشاوران
-ENCRYPTION_KEY_FILE = "secret.key"
+ENCRYPTION_KEY_FILE = "secret.key"  # این فایل دیگر استفاده نمی‌شود، اما برای سازگاری نگه داشته شده
 SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
 
 # مشخصات لاگین مشاوران
@@ -315,11 +316,11 @@ async def init_db():
         )
     """)
 
-    # Initialize advisor database
+    # Initialize advisor database with password column
     await advisor_db_manager.execute_query("""
         CREATE TABLE IF NOT EXISTS advisors (
             username TEXT PRIMARY KEY,
-            encrypted_password BLOB NOT NULL
+            password TEXT NOT NULL
         )
     """)
 
@@ -332,7 +333,6 @@ async def init_db():
             FOREIGN KEY (username) REFERENCES advisors (username)
         )
     """)
-
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
     """Hash password asynchronously"""
@@ -1090,7 +1090,7 @@ async def handle_advisor_login(
     try:
         # بررسی نام کاربری و رمز عبور در دیتابیس مشاوران
         advisors = await advisor_db_manager.execute_query(
-            "SELECT username, encrypted_password FROM advisors WHERE username = ?",
+            "SELECT username, password FROM advisors WHERE username = ?",
             (username,), fetch=True
         )
         
@@ -1098,8 +1098,7 @@ async def handle_advisor_login(
             return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
         
         advisor = advisors[0]
-        decrypted_password = await decrypt_data(advisor['encrypted_password'])
-        if decrypted_password != password:
+        if advisor['password'] != password:
             return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
         
         # ایجاد سشن برای مشاور
