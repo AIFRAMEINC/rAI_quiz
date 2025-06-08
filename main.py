@@ -36,10 +36,6 @@ ADVISOR_DATABASE_FILE = "advisor_users.db"  # دیتابیس جدید برای �
 ENCRYPTION_KEY_FILE = "secret.key"  # این فایل دیگر استفاده نمی‌شود، اما برای سازگاری نگه داشته شده
 SESSION_SECRET = "44fd32cf2bbad6ff823421b4cb11aad61ffb7a8583264ade63381353e6ae2d0e"
 
-# مشخصات لاگین مشاوران
-ADVISOR_USERNAME = "1570760403"
-ADVISOR_PASSWORD = "1570760403"
-
 # Thread pool for CPU-intensive tasks
 executor = ThreadPoolExecutor(max_workers=4)
 
@@ -316,7 +312,7 @@ async def init_db():
         )
     """)
 
-    # Initialize advisor database with password column
+    # Initialize advisor database
     await advisor_db_manager.execute_query("""
         CREATE TABLE IF NOT EXISTS advisors (
             username TEXT PRIMARY KEY,
@@ -333,16 +329,17 @@ async def init_db():
             FOREIGN KEY (username) REFERENCES advisors (username)
         )
     """)
+    
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
     """Hash password asynchronously"""
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode()).hexdigest())
+    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode('utf-8')).hexdigest())
 
 async def verify_password(password: str, hashed: str) -> bool:
     """Verify password asynchronously"""
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode()).hexdigest() == hashed)
+    return await loop.run_in_executor(executor, lambda: hashlib.sha256(password.encode('utf-8')).hexdigest() == hashed)
 
 async def generate_password(length: int = 12) -> str:
     """Generate random password asynchronously"""
@@ -1643,14 +1640,17 @@ async def handle_advisor_login(
         )
         
         if not advisors:
+            logger.warning(f"لاگین ناموفق: نام کاربری {username} یافت نشد")
             return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
         
         advisor = advisors[0]
-        if advisor['password'] != password:
+        if not await verify_password(password, advisor['password']):
+            logger.warning(f"لاگین ناموفق: رمز عبور برای {username} اشتباه است")
             return RedirectResponse(url="/karshenasanlogin?error=invalid_credentials", status_code=303)
         
         # ایجاد سشن برای مشاور
         session_id = await create_advisor_session(username)
+        logger.info(f"لاگین موفق برای مشاور: {username}")
         
         response = RedirectResponse(url="/advisor/show_data", status_code=303)
         response.set_cookie(key="advisor_session_id", value=session_id, httponly=True, max_age=86400)
