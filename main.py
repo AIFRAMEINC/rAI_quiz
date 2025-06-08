@@ -1319,13 +1319,22 @@ async def get_reasoning_for_mbti(mbti_type: str, answers: List[str]) -> str:
     
     return reason
 
-async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[str], user_answers: List[str], all_percentages: Optional[Dict[str, int]]) -> str:
+async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[Dict[str, Any]], user_answers: List[int], all_percentages: Optional[Dict[str, int]]) -> str:
     """Generate HTML MBTI report asynchronously"""
     info = MBTI_DESCRIPTIONS.get(mbti_type)
     if not info:
         return f"<h1>خطا</h1><p>تیپ شخصیتی '{html.escape(mbti_type)}' یافت نشد.</p>"
 
-    reasoning_text = await get_reasoning_for_mbti(mbti_type, user_answers)
+    # Convert numeric answers to their corresponding option texts
+    answer_texts = []
+    for i, answer in enumerate(user_answers):
+        if i < len(user_questions) and answer in [1, 2, 3, 4]:
+            answer_texts.append(user_questions[i]['options'][answer-1])
+        else:
+            answer_texts.append("پاسخ نامعتبر")
+
+    # Get reasoning text with text answers
+    reasoning_text = await get_reasoning_for_mbti(mbti_type, answer_texts)
     
     # Prepare data for charts if percentages are available
     pie_chart_data_js = "null"
@@ -1420,6 +1429,18 @@ async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_qu
         </div>
         """
 
+    # Generate answers display section
+    answers_html = ""
+    for i, (q, a) in enumerate(zip(user_questions, user_answers)):
+        if a in [1, 2, 3, 4]:
+            selected_option = q['options'][a-1]
+            answers_html += f"""
+            <div class="answer-item">
+                <h4>سوال {i+1}: {html.escape(q['question'])}</h4>
+                <p><strong>پاسخ شما:</strong> {html.escape(selected_option)}</p>
+            </div>
+            """
+
     html_content = f"""
     <!-- Main Content -->
     <div class="main-content">
@@ -1448,6 +1469,11 @@ async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_qu
         <div class="reasoning-section">
             <h3>🤔 چرا این تیپ برای شما انتخاب شد؟</h3>
             <p>بر اساس تحلیل پاسخ‌های شما، ویژگی‌هایی که بیشترین تطابق را با شخصیت شما داشتند عبارتند از: <strong>{reasoning_text}</strong></p>
+        </div>
+        
+        <div class="answers-section">
+            <h2>📋 پاسخ‌های شما</h2>
+            {answers_html}
         </div>
     </div>
     

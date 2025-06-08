@@ -308,68 +308,115 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .question-block label {
-            font-size: 1.2em;
+        .question-text {
+            font-size: 1.3em;
             line-height: 1.8;
             color: #ffffff;
-            font-weight: 500;
+            font-weight: 600;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            display: block;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .question-block textarea {
-            width: 100%;
-            min-height: 140px;
-            resize: vertical;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        /* Options Styling */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.25);
             border-radius: 16px;
             padding: 18px 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option-item:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateX(-8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .option-item.selected {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.2) 100%);
+            border-color: #10b981;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .option-item.selected:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(16, 185, 129, 0.3) 100%);
+        }
+
+        /* Custom Radio Button */
+        .option-radio {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .option-checkmark {
+            height: 24px;
+            width: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .option-radio:checked ~ .option-checkmark {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .option-radio:checked ~ .option-checkmark::after {
+            content: '';
+            position: absolute;
+            display: block;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            transform: translate(-50%, -50%);
+        }
+
+        .option-letter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-text {
             font-size: 1.1em;
             line-height: 1.6;
-            font-family: 'Vazirmatn', sans-serif;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-            backdrop-filter: blur(20px);
-            box-sizing: border-box;
-        }
-
-        .question-block textarea::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .question-block textarea:focus {
-            border-color: rgba(255, 255, 255, 0.6);
-            outline: none;
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 
-                0 0 0 4px rgba(255, 255, 255, 0.1),
-                0 8px 25px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .question-block textarea:valid {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        /* Character Counter */
-        .char-counter {
-            font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.8);
-            text-align: left;
-            margin-top: 10px;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .char-counter.good {
-            color: #a7f3d0;
-            background: rgba(16, 185, 129, 0.2);
+            color: #f1f5f9;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            flex: 1;
         }
 
         /* Submit Section */
@@ -495,10 +542,19 @@
                 margin-bottom: 25px;
             }
 
-            .question-block textarea {
+            .option-item {
                 padding: 15px 18px;
+                gap: 12px;
+            }
+
+            .option-letter {
+                width: 28px;
+                height: 28px;
                 font-size: 1em;
-                min-height: 120px;
+            }
+
+            .option-text {
+                font-size: 1em;
             }
 
             .submit-section {
@@ -525,9 +581,15 @@
                 padding: 20px 15px;
             }
 
-            .question-block textarea {
+            .option-item {
                 padding: 12px 15px;
-                min-height: 100px;
+                gap: 10px;
+            }
+
+            .option-letter {
+                width: 24px;
+                height: 24px;
+                font-size: 0.9em;
             }
 
             .submit-button {
@@ -594,18 +656,18 @@
         <!-- Quiz Header -->
         <div class="quiz-header fade-in glow-effect">
             <span class="quiz-icon">🧠</span>
-            <h1>وقتشه به چند تا سوال جواب بدی!</h1>
-            <p>لطفاً به سوالات زیر با دقت و صداقت کامل جواب بده. هرچی بیشتر توضیح بدی، نتیجه دقیق‌تر میشه. برای هر سوال حداقل یک پاراگراف بنویس.</p>
+            <h1>آزمون شخصیت‌شناسی MBTI</h1>
+            <p>به سوالات زیر با دقت و صداقت پاسخ دهید. هر سوال دارای چهار گزینه است و شما باید گزینه‌ای را انتخاب کنید که بیشتر شبیه شما است.</p>
         </div>
 
         <!-- Tips Section -->
         <div class="tips-section fade-in glow-effect">
             <h3>💡 نکات مهم برای پاسخ‌دادن:</h3>
             <ul>
-                <li>صادقانه و بر اساس تجربیات واقعی‌ت پاسخ بده</li>
-                <li>سعی کن مثال‌های مشخص از زندگی‌ت بزنی</li>
-                <li>نگران درست یا غلط بودن پاسخت نباش - هر پاسخی درسته</li>
-                <li>حداقل ۲-۳ جمله برای هر سوال بنویس</li>
+                <li>گزینه‌ای را انتخاب کنید که بیشتر شبیه شماست</li>
+                <li>اولین واکنش خود را در نظر بگیرید</li>
+                <li>نگران درست یا غلط بودن پاسخ نباشید</li>
+                <li>صادقانه و بر اساس شخصیت واقعی‌تان پاسخ دهید</li>
             </ul>
         </div>
 
@@ -614,7 +676,7 @@
             <div class="progress-container">
                 <div class="progress-bar" id="progressBar"></div>
             </div>
-            <div class="progress-text" id="progressText">0 از {{ questions|length }} سوال تکمیل شده</div>
+            <div class="progress-text" id="progressText">0 از {{ questions|length }} سوال پاسخ داده شده</div>
         </div>
 
         <!-- Error Message -->
@@ -626,29 +688,36 @@
 
         <!-- Questions Form -->
         <form action="/submit_answers" method="post" id="questionsForm">
-            <input type="hidden" name="user_id" value="{{ user_id }}">
-            <input type="hidden" name="age_range" value="{{ age_range }}">
-            
             {% for i in range(questions|length) %}
             <div class="form-group question-block fade-in glow-effect" id="question_{{ i }}">
                 <div class="question-counter">سوال {{ i + 1 }} از {{ questions|length }}</div>
-                <label for="answer_{{i}}">{{ questions[i] }}</label>
-                <textarea 
-                    id="answer_{{i}}" 
-                    name="answer_{{i}}" 
-                    rows="6" 
-                    required 
-                    placeholder="پاسخ خود را اینجا بنویسید... (حداقل ۲۰ کلمه)"
-                    data-question-index="{{ i }}"
-                >{{ previous_answers.get('answer_' ~ i, '') if previous_answers else '' }}</textarea>
-                <div class="char-counter" id="counter_{{ i }}">0 کلمه</div>
+                <div class="question-text">{{ questions[i].question }}</div>
+                
+                <div class="options-container">
+                    {% for j in range(questions[i].options|length) %}
+                    <label class="option-item" for="answer_{{ i }}_{{ j + 1 }}">
+                        <input 
+                            type="radio" 
+                            class="option-radio" 
+                            id="answer_{{ i }}_{{ j + 1 }}" 
+                            name="answer_{{ i }}" 
+                            value="{{ j + 1 }}" 
+                            required
+                            data-question-index="{{ i }}"
+                        >
+                        <span class="option-checkmark"></span>
+                        <div class="option-letter">{{ ['الف', 'ب', 'ج', 'د'][j] }}</div>
+                        <div class="option-text">{{ questions[i].options[j] }}</div>
+                    </label>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
             
             <!-- Submit Section -->
             <div class="submit-section fade-in glow-effect">
                 <div class="completion-status" id="completionStatus">
-                    لطفاً تمام سوالات را تکمیل کنید
+                    لطفاً به تمام سوالات پاسخ دهید
                 </div>
                 
                 <button type="submit" id="submitButton" class="submit-button glow-effect" disabled>
@@ -656,7 +725,7 @@
                 </button>
                 
                 <div class="loading-message" id="loadingMessage">
-                    🔄 درحال تحلیل پاسخ‌های شما ...
+                    🔄 درحال تحلیل پاسخ‌های شما با هوش مصنوعی...
                     <br>
                     این فرآیند ممکن است تا ۳۰ ثانیه طول بکشد. لطفاً صبور باشید.
                 </div>
@@ -666,9 +735,8 @@
 
     <script>
         // Track completion status
-        let completedQuestions = 0;
+        let answeredQuestions = 0;
         const totalQuestions = {{ questions|length }};
-        const minWordsPerAnswer = 20; // حداقل تعداد کلمات
         
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -686,102 +754,125 @@
 
             checkAllAnswers();
             
-            // Add event listeners to all textareas
-            const textareas = document.querySelectorAll('textarea[required]');
-            textareas.forEach(textarea => {
+            // Add event listeners to all radio buttons
+            const radioButtons = document.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
                 // Check initial state
-                updateWordCount(textarea);
-                checkAnswerCompletion(textarea);
+                checkQuestionCompletion(radio);
                 
-                // Add real-time checking
-                textarea.addEventListener('input', function() {
-                    updateWordCount(this);
-                    checkAnswerCompletion(this);
+                // Add change event listener
+                radio.addEventListener('change', function() {
+                    handleOptionSelection(this);
                     updateProgressBar();
                     updateSubmitButton();
                 });
-                
-                textarea.addEventListener('blur', function() {
-                    checkAnswerCompletion(this);
+            });
+
+            // Add click event listeners to option items
+            const optionItems = document.querySelectorAll('.option-item');
+            optionItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio && !radio.checked) {
+                        radio.checked = true;
+                        handleOptionSelection(radio);
+                        updateProgressBar();
+                        updateSubmitButton();
+                    }
                 });
 
-                // Add focus animations
-                textarea.addEventListener('focus', function() {
-                    this.closest('.question-block').style.transform = 'translateY(-8px) scale(1.02)';
+                // Add hover animations
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(-8px) scale(1.02)';
                 });
                 
-                textarea.addEventListener('blur', function() {
-                    this.closest('.question-block').style.transform = 'translateY(0) scale(1)';
+                item.addEventListener('mouseleave', function() {
+                    if (!this.querySelector('input[type="radio"]').checked) {
+                        this.style.transform = 'translateX(0) scale(1)';
+                    }
                 });
             });
         });
         
-        function updateWordCount(textarea) {
-            const text = textarea.value.trim();
-            const wordCount = text ? text.split(/\s+/).length : 0;
-            const counter = document.getElementById('counter_' + textarea.dataset.questionIndex);
+        function handleOptionSelection(radio) {
+            const questionIndex = radio.dataset.questionIndex;
+            const questionBlock = document.getElementById(`question_${questionIndex}`);
+            const allOptionsInQuestion = questionBlock.querySelectorAll('.option-item');
             
-            if (counter) {
-                counter.textContent = wordCount + ' کلمه';
-                
-                if (wordCount >= minWordsPerAnswer) {
-                    counter.classList.add('good');
-                } else {
-                    counter.classList.remove('good');
-                }
-            }
+            // Remove selected class from all options in this question
+            allOptionsInQuestion.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to the chosen option
+            const selectedOption = radio.closest('.option-item');
+            selectedOption.classList.add('selected');
+            
+            // Mark question as completed
+            questionBlock.classList.add('completed');
+            
+            checkQuestionCompletion(radio);
         }
         
-        function checkAnswerCompletion(textarea) {
-            const text = textarea.value.trim();
-            const wordCount = text ? text.split(/\s+/).length : 0;
-            const questionBlock = textarea.closest('.question-block');
-            const isComplete = wordCount >= minWordsPerAnswer;
+        function checkQuestionCompletion(radio) {
+            const questionIndex = radio.dataset.questionIndex;
+            const questionBlock = document.getElementById(`question_${questionIndex}`);
+            const questionRadios = questionBlock.querySelectorAll('input[type="radio"]');
+            const isAnswered = Array.from(questionRadios).some(r => r.checked);
             
-            if (isComplete) {
+            if (isAnswered) {
                 questionBlock.classList.add('completed');
-                textarea.style.borderColor = '#10b981';
-                textarea.style.background = 'rgba(16, 185, 129, 0.1)';
             } else {
                 questionBlock.classList.remove('completed');
-                textarea.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                textarea.style.background = 'rgba(255, 255, 255, 0.15)';
             }
         }
         
         function checkAllAnswers() {
-            completedQuestions = 0;
-            const textareas = document.querySelectorAll('textarea[required]');
+            answeredQuestions = 0;
             
-            textareas.forEach(textarea => {
-                const text = textarea.value.trim();
-                const wordCount = text ? text.split(/\s+/).length : 0;
+            for (let i = 0; i < totalQuestions; i++) {
+                const questionBlock = document.getElementById(`question_${i}`);
+                const radioButtons = questionBlock.querySelectorAll('input[type="radio"]');
+                const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
                 
-                if (wordCount >= minWordsPerAnswer) {
-                    completedQuestions++;
+                if (isAnswered) {
+                    answeredQuestions++;
+                    questionBlock.classList.add('completed');
+                    
+                    // Update visual selection
+                    const checkedRadio = Array.from(radioButtons).find(radio => radio.checked);
+                    if (checkedRadio) {
+                        const selectedOption = checkedRadio.closest('.option-item');
+                        const allOptionsInQuestion = questionBlock.querySelectorAll('.option-item');
+                        allOptionsInQuestion.forEach(option => {
+                            option.classList.remove('selected');
+                        });
+                        selectedOption.classList.add('selected');
+                    }
+                } else {
+                    questionBlock.classList.remove('completed');
                 }
                 
-                updateWordCount(textarea);
-                checkAnswerCompletion(textarea);
-            });
+                checkQuestionCompletion(radioButtons[0]);
+            }
         }
         
         function updateProgressBar() {
             checkAllAnswers();
-            const progress = (completedQuestions / totalQuestions) * 100;
+            const progress = (answeredQuestions / totalQuestions) * 100;
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
             
             progressBar.style.width = progress + '%';
-            progressText.textContent = `${completedQuestions} از ${totalQuestions} سوال تکمیل شده`;
+            progressText.textContent = `${answeredQuestions} از ${totalQuestions} سوال پاسخ داده شده`;
             
             // Update completion status
             const completionStatus = document.getElementById('completionStatus');
-            if (completedQuestions === totalQuestions) {
-                completionStatus.textContent = '✅ تمام سوالات تکمیل شده! می‌توانید ارسال کنید';
+            if (answeredQuestions === totalQuestions) {
+                completionStatus.textContent = '✅ تمام سوالات پاسخ داده شد! می‌توانید ارسال کنید';
                 completionStatus.classList.add('completed');
             } else {
-                const remaining = totalQuestions - completedQuestions;
+                const remaining = totalQuestions - answeredQuestions;
                 completionStatus.textContent = `⏳ ${remaining} سوال باقی مانده`;
                 completionStatus.classList.remove('completed');
             }
@@ -790,37 +881,36 @@
         function updateSubmitButton() {
             const submitButton = document.getElementById('submitButton');
             
-            if (completedQuestions === totalQuestions) {
+            if (answeredQuestions === totalQuestions) {
                 submitButton.disabled = false;
                 submitButton.textContent = 'ارسال پاسخ‌ها و مشاهده نتیجه ✨';
             } else {
                 submitButton.disabled = true;
-                submitButton.textContent = `ارسال پاسخ‌ها (${totalQuestions - completedQuestions} سوال باقی مانده)`;
+                submitButton.textContent = `ارسال پاسخ‌ها (${totalQuestions - answeredQuestions} سوال باقی مانده)`;
             }
         }
         
         // Form submission handler
         document.getElementById('questionsForm').addEventListener('submit', function(e) {
             // Final validation
-            let allValid = true;
-            const textareas = this.querySelectorAll('textarea[required]');
+            let allAnswered = true;
             
-            for (let textarea of textareas) {
-                const text = textarea.value.trim();
-                const wordCount = text ? text.split(/\s+/).length : 0;
+            for (let i = 0; i < totalQuestions; i++) {
+                const questionBlock = document.getElementById(`question_${i}`);
+                const radioButtons = questionBlock.querySelectorAll('input[type="radio"]');
+                const isAnswered = Array.from(radioButtons).some(radio => radio.checked);
                 
-                if (wordCount < minWordsPerAnswer) {
-                    allValid = false;
-                    // Scroll to first incomplete question
-                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    textarea.focus();
+                if (!isAnswered) {
+                    allAnswered = false;
+                    // Scroll to first unanswered question
+                    questionBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
-                    alert(`لطفاً سوال ${parseInt(textarea.dataset.questionIndex) + 1} را با حداقل ${minWordsPerAnswer} کلمه تکمیل کنید.`);
+                    alert(`لطفاً به سوال ${i + 1} پاسخ دهید.`);
                     break;
                 }
             }
             
-            if (!allValid) {
+            if (!allAnswered) {
                 e.preventDefault();
                 return false;
             }
@@ -841,56 +931,82 @@
         updateProgressBar();
         updateSubmitButton();
 
-        // Add particle effect on typing
-        document.querySelectorAll('textarea').forEach(textarea => {
-            textarea.addEventListener('input', function() {
-                if (Math.random() > 0.95) {
-                    createParticle(textarea);
-                }
+        // Add particle effect on option selection
+        document.querySelectorAll('.option-item').forEach(option => {
+            option.addEventListener('click', function() {
+                createParticle(this);
             });
         });
 
         function createParticle(element) {
             const rect = element.getBoundingClientRect();
-            const x = rect.left + Math.random() * rect.width;
-            const y = rect.top + Math.random() * rect.height;
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
 
             const particle = document.createElement('div');
             particle.style.cssText = `
                 position: fixed;
-                width: 6px;
-                height: 6px;
+                width: 8px;
+                height: 8px;
                 background: #10b981;
                 border-radius: 50%;
                 pointer-events: none;
                 left: ${x}px;
                 top: ${y}px;
                 z-index: 9999;
-                animation: particleFloat 2s ease-out forwards;
+                animation: particleExplode 1s ease-out forwards;
             `;
             
             document.body.appendChild(particle);
             
             setTimeout(() => {
                 particle.remove();
-            }, 2000);
+            }, 1000);
         }
 
         // Add particle animation
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes particleFloat {
+            @keyframes particleExplode {
                 0% {
                     opacity: 1;
-                    transform: translateY(0) scale(1);
+                    transform: scale(1);
                 }
                 100% {
                     opacity: 0;
-                    transform: translateY(-50px) scale(0);
+                    transform: scale(3) translateY(-50px);
                 }
             }
         `;
         document.head.appendChild(style);
+
+        // Add success sound effect (optional)
+        function playSuccessSound() {
+            // Create a simple success sound using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        // Play sound on question completion
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Uncomment the line below if you want sound effects
+                // playSuccessSound();
+            });
+        });
     </script>
 </body>
 </html>
