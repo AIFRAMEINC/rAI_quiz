@@ -329,7 +329,7 @@ async def init_db():
             FOREIGN KEY (username) REFERENCES advisors (username)
         )
     """)
-    
+
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
     """Hash password asynchronously"""
@@ -880,7 +880,7 @@ QUESTIONS_DB = {
         {
             "question": "وقتی با دوستان نزدیک هستید، چقدر صحبت می‌کنید؟",
             "options": [
-                "ب https://x.com/shamim_moosavi/status/1855978038243566058/photo/1بیشتر از همه صحبت می‌کنم",
+                "بیشتر از همه صحبت می‌کنم",
                 "به اندازه دیگران صحبت می‌کنم",
                 "کمتر از دیگران صحبت می‌کنم",
                 "تقریباً صحبت نمی‌کنم"
