@@ -28,13 +28,13 @@ import google.generativeai as genai
 # --- Configuration ---
 DATABASE_FILE = "mbti_app.db"
 ENCRYPTION_KEY_FILE = "secret.key"
-SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
+SESSION_SECRET = "44fd32cf2bbad6ff823421b4cb11aad61ffb7a8583264ade63381353e6ae2d0e"
 
 # --- Configuration ---
 DATABASE_FILE = "mbti_app.db"
 ADVISOR_DATABASE_FILE = "advisor_users.db"  # دیتابیس جدید برای مشاوران
 ENCRYPTION_KEY_FILE = "secret.key"  # این فایل دیگر استفاده نمی‌شود، اما برای سازگاری نگه داشته شده
-SESSION_SECRET = "your-super-secret-session-key-change-this-in-production"
+SESSION_SECRET = "44fd32cf2bbad6ff823421b4cb11aad61ffb7a8583264ade63381353e6ae2d0e"
 
 # مشخصات لاگین مشاوران
 ADVISOR_USERNAME = "1570760403"
