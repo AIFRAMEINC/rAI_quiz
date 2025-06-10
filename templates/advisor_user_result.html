@@ -527,7 +527,7 @@
                                 <div class="answer-question">
                                     سوال {{ loop.index }}:
                                     {% if QUESTIONS_DB.get(user.age_range) and loop.index0 < QUESTIONS_DB[user.age_range]|length %}
-                                        {{ QUESTIONS_DB[user.age_range][loop.index0][:100] }}...
+                                        {{ QUESTIONS_DB[user.age_range][loop.index0]['question'][:100] }}...
                                     {% else %} 
                                         سوال {{ loop.index }}
                                     {% endif %}
