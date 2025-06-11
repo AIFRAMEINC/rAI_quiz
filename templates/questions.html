@@ -655,19 +655,40 @@
     <div class="container">
         <!-- Quiz Header -->
         <div class="quiz-header fade-in glow-effect">
-            <span class="quiz-icon">🧠</span>
-            <h1>آزمون شخصیت‌شناسی MBTI</h1>
-            <p>به سوالات زیر با دقت و صداقت پاسخ دهید. هر سوال دارای چهار گزینه است و شما باید گزینه‌ای را انتخاب کنید که بیشتر شبیه شما است.</p>
+            <span class="quiz-icon">
+                {% if test_id == 'academic_guidance' %}🎓{% else %}🧠{% endif %}
+            </span>
+            <h1>
+                {% if test_id == 'academic_guidance' %}
+                    آزمون هدایت تحصیلی
+                {% else %}
+                    آزمون شخصیت‌شناسی MBTI
+                {% endif %}
+            </h1>
+            <p>
+                {% if test_id == 'academic_guidance' %}
+                    به سوالات زیر با دقت پاسخ دهید تا بتوانیم مناسب‌ترین شاخه‌های تحصیلی را برای شما پیشنهاد دهیم.
+                {% else %}
+                    به سوالات زیر با دقت و صداقت پاسخ دهید. هر سوال دارای چهار گزینه است و شما باید گزینه‌ای را انتخاب کنید که بیشتر شبیه شما است.
+                {% endif %}
+            </p>
         </div>
 
         <!-- Tips Section -->
         <div class="tips-section fade-in glow-effect">
             <h3>💡 نکات مهم برای پاسخ‌دادن:</h3>
             <ul>
-                <li>گزینه‌ای را انتخاب کنید که بیشتر شبیه شماست</li>
-                <li>اولین واکنش خود را در نظر بگیرید</li>
-                <li>نگران درست یا غلط بودن پاسخ نباشید</li>
-                <li>صادقانه و بر اساس شخصیت واقعی‌تان پاسخ دهید</li>
+                {% if test_id == 'academic_guidance' %}
+                    <li>بر اساس علایق واقعی خود پاسخ دهید</li>
+                    <li>آینده شغلی مورد نظرتان را در نظر بگیرید</li>
+                    <li>توانایی‌ها و مهارت‌های خود را بسنجید</li>
+                    <li>نگران درست یا غلط بودن پاسخ نباشید</li>
+                {% else %}
+                    <li>گزینه‌ای را انتخاب کنید که بیشتر شبیه شماست</li>
+                    <li>اولین واکنش خود را در نظر بگیرید</li>
+                    <li>نگران درست یا غلط بودن پاسخ نباشید</li>
+                    <li>صادقانه و بر اساس شخصیت واقعی‌تان پاسخ دهید</li>
+                {% endif %}
             </ul>
         </div>
 
@@ -687,7 +708,7 @@
         {% endif %}
 
         <!-- Questions Form -->
-        <form action="/submit_answers" method="post" id="questionsForm">
+        <form action="/submit_test/{{ test_id }}" method="post" id="questionsForm">
             {% for i in range(questions|length) %}
             <div class="form-group question-block fade-in glow-effect" id="question_{{ i }}">
                 <div class="question-counter">سوال {{ i + 1 }} از {{ questions|length }}</div>
@@ -1007,6 +1028,216 @@
                 // playSuccessSound();
             });
         });
+                // Chart configuration
+        const chartFont = { 
+            size: 14, 
+            family: 'Vazirmatn, Segoe UI, sans-serif',
+            weight: '500'
+        };
+        
+        const chartTitleColor = '#ffffff';
+        const chartLabelColor = '#f1f5f9';
+        const defaultChartErrorMessage = "<p style='text-align:center; color:rgba(255,255,255,0.8); padding:40px 0; font-size:1.2rem; font-family: Vazirmatn, sans-serif;'>نمودار در حال حاضر در دسترس نیست.</p>";
+
+        // Add fade-in animation to elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.main-content > *, .charts-dashboard');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.8s ease-out';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+
+            // Initialize charts based on data availability
+            if (typeof pieChartData !== 'undefined') {
+                renderPieChart();
+            }
+            if (typeof barChartsData !== 'undefined') {
+                renderBarChart('energyBarChart', 'انرژی', barChartsData.energy);
+                renderBarChart('informationBarChart', 'دریافت اطلاعات', barChartsData.information);
+                renderBarChart('decisionBarChart', 'تصمیم‌گیری', barChartsData.decision);
+                renderBarChart('lifestyleBarChart', 'سبک زندگی', barChartsData.lifestyle);
+            }
+            if (typeof radarChartData !== 'undefined') {
+                renderRadarChart();
+            }
+            
+            // Academic guidance charts
+            if (typeof academicPieChartData !== 'undefined') {
+                renderAcademicPieChart();
+            }
+            if (typeof academicBarChartData !== 'undefined') {
+                renderAcademicBarChart();
+            }
+            
+            // Add hover effects to header navigation
+            document.querySelectorAll('.header-nav-btn').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px) scale(1.05)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+
+        // Academic guidance chart functions
+        function renderAcademicPieChart() {
+            const ctx = document.getElementById('academicPieChart');
+            const container = document.querySelector('.pie-chart-container'); 
+            if (ctx && academicPieChartData && academicPieChartData.labels && academicPieChartData.data) {
+                if(container) container.style.height = '550px';
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: academicPieChartData.labels,
+                        datasets: [{
+                            label: 'تمایلات تحصیلی',
+                            data: academicPieChartData.data,
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.9)', 
+                                'rgba(59, 130, 246, 0.9)', 
+                                'rgba(245, 158, 11, 0.9)'
+                            ],
+                            borderColor: ['rgba(255, 255, 255, 0.8)'],
+                            borderWidth: 3, 
+                            hoverOffset: 18
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { 
+                            animateScale: true, 
+                            animateRotate: true, 
+                            duration: 2000, 
+                            easing: 'easeOutQuart' 
+                        },
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    font: chartFont,
+                                    color: chartLabelColor, 
+                                    padding: 25,
+                                    usePointStyle: true, 
+                                    boxWidth: 18 
+                                } 
+                            },
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                borderWidth: 2,
+                                cornerRadius: 15,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.parsed !== undefined ? c.parsed + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        function renderAcademicBarChart() {
+            const ctx = document.getElementById('academicBarChart');
+            const container = ctx ? ctx.closest('.bar-chart-container') : null;
+            if (ctx && academicBarChartData && academicBarChartData.fields) {
+                if(container) container.style.height = '380px';
+                const data = academicBarChartData.fields;
+                const allZeros = data.data.every(item => item === 0);
+                let maxVal = allZeros ? 100 : undefined; 
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'درصد تمایل',
+                            data: data.data,
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.9)', 
+                                'rgba(59, 130, 246, 0.9)', 
+                                'rgba(245, 158, 11, 0.9)'
+                            ],
+                            borderColor: [
+                                'rgba(16, 185, 129, 1)', 
+                                'rgba(59, 130, 246, 1)', 
+                                'rgba(245, 158, 11, 1)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 15,
+                            borderSkipped: false,
+                            barPercentage: 0.7, 
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1800,
+                            easing: 'easeOutQuart'
+                        },
+                        scales: { 
+                            x: { 
+                                ticks: {
+                                    font: chartFont,
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: { 
+                                beginAtZero: true, 
+                                max: maxVal, 
+                                ticks: { 
+                                    callback: (v) => v + '%', 
+                                    font: chartFont,
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.15)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }, 
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                borderWidth: 2,
+                                cornerRadius: 15,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.raw !== undefined ? c.raw + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
     </script>
 </body>
 </html>

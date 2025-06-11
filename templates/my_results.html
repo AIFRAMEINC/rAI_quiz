@@ -873,45 +873,53 @@
                 
                 <div class="results-grid">
                     {% for result in results %}
-                    <div class="result-card {% if result.mbti_result and 'خطا' not in result.mbti_result %}completed{% else %}error{% endif %} glow-effect" onclick="window.location.href='/result/{{ user.phone }}/{{ result.id }}'">
-                        <div class="result-header">
-                            <span class="test-icon">🧠</span>
+                        <div class="result-card {% if result.mbti_result and 'خطا' not in result.mbti_result %}completed{% else %}error{% endif %} glow-effect" onclick="window.location.href='/result/{{ user.phone }}/{{ result.id }}'">
+                            <div class="result-header">
+                                <span class="test-icon">
+                                    {% if result.test_name == "آزمون هدایت تحصیلی" %}🎓{% else %}🧠{% endif %}
+                                </span>
+                                {% if result.mbti_result and 'خطا' not in result.mbti_result %}
+                                    <div class="result-status status-completed">✅ تکمیل شده</div>
+                                {% else %}
+                                    <div class="result-status status-error">❌ خطا در تحلیل</div>
+                                {% endif %}
+                            </div>
+                            
+                            <h3 class="result-title">{{ result.test_name }}</h3>
+                            
                             {% if result.mbti_result and 'خطا' not in result.mbti_result %}
-                                <div class="result-status status-completed">✅ تکمیل شده</div>
+                                <div class="mbti-result">
+                                    <div class="mbti-type">{{ result.mbti_result }}</div>
+                                    <div class="mbti-description">
+                                        {% if result.test_name == "آزمون هدایت تحصیلی" %}
+                                            شاخه‌های پیشنهادی شما
+                                        {% else %}
+                                            نوع شخصیتی شما
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% else %}
-                                <div class="result-status status-error">❌ خطا در تحلیل</div>
+                                <div class="error-display">
+                                    <strong>⚠️ خطا در تحلیل:</strong><br>
+                                    {{ result.mbti_result if result.mbti_result else 'نتیجه در دسترس نیست' }}
+                                </div>
                             {% endif %}
+                            
+                            <div class="result-details">
+                                <div class="result-detail">
+                                    <div class="detail-label">تاریخ انجام</div>
+                                    <div class="detail-value">{{ result.analysis_time[:10] if result.analysis_time else 'نامشخص' }}</div>
+                                </div>
+                                <div class="result-detail">
+                                    <div class="detail-label">زمان</div>
+                                    <div class="detail-value">{{ result.analysis_time[11:16] if result.analysis_time and result.analysis_time|length > 16 else 'نامشخص' }}</div>
+                                </div>
+                            </div>
+                            
+                            <a href="/result/{{ user.phone }}/{{ result.id }}" class="view-result-btn glow-effect">
+                                👁️ مشاهده نتیجه کامل
+                            </a>
                         </div>
-                        
-                        <h3 class="result-title">{{ result.test_name }}</h3>
-                        
-                        {% if result.mbti_result and 'خطا' not in result.mbti_result %}
-                            <div class="mbti-result">
-                                <div class="mbti-type">{{ result.mbti_result }}</div>
-                                <div class="mbti-description">نوع شخصیتی شما</div>
-                            </div>
-                        {% else %}
-                            <div class="error-display">
-                                <strong>⚠️ خطا در تحلیل:</strong><br>
-                                {{ result.mbti_result if result.mbti_result else 'نتیجه در دسترس نیست' }}
-                            </div>
-                        {% endif %}
-                        
-                        <div class="result-details">
-                            <div class="result-detail">
-                                <div class="detail-label">تاریخ انجام</div>
-                                <div class="detail-value">{{ result.analysis_time[:10] if result.analysis_time else 'نامشخص' }}</div>
-                            </div>
-                            <div class="result-detail">
-                                <div class="detail-label">زمان</div>
-                                <div class="detail-value">{{ result.analysis_time[11:16] if result.analysis_time and result.analysis_time|length > 16 else 'نامشخص' }}</div>
-                            </div>
-                        </div>
-                        
-                        <a href="/result/{{ user.phone }}/{{ result.id }}" class="view-result-btn glow-effect">
-                            👁️ مشاهده نتیجه کامل
-                        </a>
-                    </div>
                     {% endfor %}
                 </div>
             </div>

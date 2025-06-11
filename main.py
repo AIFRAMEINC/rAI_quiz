@@ -1384,20 +1384,56 @@ ACADEMIC_FIELD_DESCRIPTIONS = {
     "علوم تجربی": {
         "title": "علوم تجربی",
         "description": "شما به مطالعه طبیعت، سلامت و موجودات زنده علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به تحقیق علمی، پزشکی و محیط‌زیست علاقه دارند.",
-        "strengths": "دقت در جزئیات، علاقه به کمک به دیگران، کنجکاوی علمی، توانایی حل مسائل مرتبط با سلامت و زیست‌شناسی",
-        "weaknesses": "ممکن است در برابر کارهای غیرعلمی یا انتزاعی کم‌صبر باشید، گاهی بیش از حد روی جزئیات تمرکز می‌کنید"
+        "strengths": [
+            "دقت بالا در مشاهده و تحلیل داده‌های علمی",
+            "علاقه شدید به حل مسائل مرتبط با سلامت و زیست‌شناسی",
+            "کنجکاوی علمی و تمایل به کشف ناشناخته‌ها",
+            "مهارت در انجام آزمایش‌های دقیق و کنترل‌شده",
+            "همدلی و تمایل به کمک به دیگران در بهبود سلامتی"
+        ],
+        "weaknesses": [
+            "ممکن است در برابر کارهای غیرعلمی یا انتزاعی کم‌صبر باشید",
+            "تمرکز بیش از حد روی جزئیات و غفلت از کلیات",
+            "نیاز به محیط‌های منظم که ممکن است انعطاف‌پذیری را کاهش دهد",
+            "گاهی اوقات دشواری در ارتباط با موضوعات غیرعلمی",
+            "استرس در مواجهه با موقعیت‌های غیرقابل پیش‌بینی"
+        ]
     },
     "علوم انسانی": {
         "title": "علوم انسانی",
         "description": "شما به درک رفتارها، احساسات و مسائل اجتماعی علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به روانشناسی، مشاوره و فلسفه علاقه دارند.",
-        "strengths": "همدلی بالا، مهارت‌های ارتباطی قوی، توانایی درک عمیق مسائل انسانی، خلاقیت در حل مسائل اجتماعی",
-        "weaknesses": "ممکن است در برابر مسائل منطقی و فنی کم‌علاقه باشید، گاهی بیش از حد احساسی تصمیم می‌گیرید"
+        "strengths": [
+            "همدلی بالا و توانایی درک عمیق احساسات دیگران",
+            "مهارت‌های ارتباطی قوی در گفت‌وگو و مشاوره",
+            "خلاقیت در حل مسائل اجتماعی و انسانی",
+            "تفکر انتقادی در تحلیل موضوعات فلسفی و فرهنگی",
+            "انعطاف‌پذیری در مواجهه با دیدگاه‌های متنوع"
+        ],
+        "weaknesses": [
+            "ممکن است در برابر مسائل منطقی و فنی کم‌علاقه باشید",
+            "تصمیم‌گیری احساسی که گاهی منطق را تحت‌الشعاع قرار می‌دهد",
+            "نیاز به زمان زیاد برای تحلیل عمیق موضوعات",
+            "حساسیت بیش از حد به انتقاد یا اختلاف‌نظر",
+            "دشواری در مدیریت وظایف با ساختار سختگیرانه"
+        ]
     },
     "ریاضی‌فیزیک و فنی‌حرفه‌ای": {
         "title": "ریاضی‌فیزیک و فنی‌حرفه‌ای",
         "description": "شما به حل مسائل منطقی و ساخت چیزهای جدید علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به مهندسی، برنامه‌نویسی و طراحی علاقه دارند.",
-        "strengths": "مهارت‌های منطقی و تحلیلی قوی، خلاقیت در طراحی و ساخت، توانایی حل مسائل پیچیده، علاقه به فناوری",
-        "weaknesses": "ممکن است در تعاملات اجتماعی کم‌صبر باشید، گاهی بیش از حد روی مسائل فنی تمرکز می‌کنید"
+        "strengths": [
+            "مهارت‌های منطقی و تحلیلی قوی در حل مسائل پیچیده",
+            "خلاقیت در طراحی و ساخت ابزارها و فناوری‌های جدید",
+            "تمرکز بالا در انجام کارهای فنی و دقیق",
+            "علاقه به یادگیری فناوری‌های نوین مانند هوش مصنوعی",
+            "استقلال در انجام پروژه‌های فنی"
+        ],
+        "weaknesses": [
+            "ممکن است در تعاملات اجتماعی کم‌صبر باشید",
+            "تمرکز بیش از حد روی مسائل فنی و غفلت از جنبه‌های انسانی",
+            "نیاز به زمان زیاد برای یادگیری مهارت‌های جدید",
+            "دشواری در کار گروهی با افراد غیرفنی",
+            "گاهی اوقات مقاومت در برابر تغییر روش‌های سنتی"
+        ]
     }
 }
 
@@ -1413,7 +1449,7 @@ AVAILABLE_TESTS = {
     "academic_guidance": {
         "title": "آزمون هدایت تحصیلی",
         "description": "کشف شاخه‌های تحصیلی مناسب بر اساس علایق و ویژگی‌های شخصیتی",
-        "duration": "10-15 دقیقه",
+        "duration": "10-15 دقیقه", 
         "questions_count": 30,
         "icon": "🎓"
     }
@@ -1496,6 +1532,79 @@ estimate_field_preferences_tool = [{
     }]
 }]
 
+prioritize_fields_tool = [{
+    "function_declarations": [{
+        "name": "prioritize_academic_fields",
+        "description": "Prioritizes the recommended academic fields based on user answers.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "prioritized_fields": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "field": {
+                                "type": "STRING",
+                                "enum": ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"]
+                            },
+                            "priority": {
+                                "type": "INTEGER",
+                                "description": "Priority rank (1=first, 2=second, 3=third)"
+                            }
+                        },
+                        "required": ["field", "priority"]
+                    },
+                    "description": "List of academic fields with their priority ranks."
+                }
+            },
+            "required": ["prioritized_fields"]
+        }
+    }]
+}]
+
+generate_traits_tool = [{
+    "function_declarations": [{
+        "name": "generate_field_traits",
+        "description": "Generates strengths and weaknesses for academic fields based on user answers.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "fields_traits": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "field": {
+                                "type": "STRING",
+                                "enum": ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"]
+                            },
+                            "strengths": {
+                                "type": "ARRAY",
+                                "items": {"type": "STRING"},
+                                "description": "List of at least 5 strengths for the field"
+                            },
+                            "weaknesses": {
+                                "type": "ARRAY",
+                                "items": {"type": "STRING"},
+                                "description": "List of at least 5 weaknesses for the field"
+                            }
+                        },
+                        "required": ["field", "strengths", "weaknesses"]
+                    },
+                    "description": "Traits for each recommended academic field."
+                }
+            },
+            "required": ["fields_traits"]
+        }
+    }]
+}]
+
+# تعریف مدل Gemini برای تولید ویژگی‌ها
+gemini_model_for_traits = genai.GenerativeModel(model_name="gemini-1-5-flash", tools=generate_traits_tool)
+
+# تعریف مدل Gemini برای اولویت‌بندی
+gemini_model_for_priority = genai.GenerativeModel(model_name="gemini-1-5-flash", tools=prioritize_fields_tool)
 # تعریف مدل‌های Gemini برای آزمون هدایت تحصیلی
 gemini_model_for_academic_fields = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_academic_fields_tool)
 gemini_model_for_field_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_field_preferences_tool)
@@ -1721,6 +1830,46 @@ async def create_prompt_for_field_percentages(questions: List[Dict[str, Any]], a
     
     return prompt
 
+async def create_prompt_for_field_priority(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> str:
+    """Create prompt for prioritizing academic fields"""
+    prompt = (
+        f"بر اساس پاسخ‌های کاربر به سوالات زیر و شاخه‌های پیشنهادی {recommended_fields}، شاخه‌های تحصیلی را اولویت‌بندی کنید (اولویت 1=بالاترین، 2=متوسط، 3=پایین‌ترین). "
+        "پاسخ‌ها به صورت عددی (1=گزینه الف، 2=گزینه ب، 3=گزینه ج، 4=گزینه د) ارائه شده‌اند. "
+        "سپس تابع 'prioritize_academic_fields' را با لیست شاخه‌ها و اولویت‌های آن‌ها فراخوانی کنید.\n\n"
+    )
+    
+    for i, (q, a) in enumerate(zip(questions, answers)):
+        prompt += f"**سوال {i+1}:** {html.escape(q['question'])}\n"
+        prompt += f"**گزینه‌ها:**\n"
+        for j, opt in enumerate(q['options'], 1):
+            prompt += f"{j}. {html.escape(opt)}\n"
+        prompt += f"**پاسخ کاربر:** {a}\n\n"
+    
+    return prompt
+
+async def get_field_priorities_from_gemini(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> List[Dict[str, Any]]:
+    """Get prioritized academic fields from Gemini"""
+    try:
+        prompt = await create_prompt_for_field_priority(questions, answers, recommended_fields)
+        response = await gemini_model_for_priority.generate_content_async(prompt)
+        
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if part.function_call and part.function_call.name == "prioritize_academic_fields":
+                    prioritized_fields = []
+                    for item in part.function_call.args.get("prioritized_fields", []):
+                        field = item.get("field")
+                        priority = int(item.get("priority", 0))
+                        if field in ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"] and priority in [1, 2, 3]:
+                            prioritized_fields.append({"field": field, "priority": priority})
+                    return prioritized_fields
+        
+        logger.warning("Gemini تابع prioritize_academic_fields را فراخوانی نکرد یا پاسخ معتبر نبود.")
+        return []
+    except Exception as e:
+        logger.error(f"خطا در get_field_priorities_from_gemini: {e}")
+        return []
+
 async def get_field_percentages_from_gemini(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> Optional[Dict[str, int]]:
     """Get academic field preference percentages from Gemini"""
     try:
@@ -1755,6 +1904,58 @@ async def get_field_percentages_from_gemini(questions: List[Dict[str, Any]], ans
     except Exception as e:
         logger.error(f"خطا در get_field_percentages_from_gemini: {e}")
         return None
+
+async def create_prompt_for_traits(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> str:
+    """Create prompt for generating field-specific traits"""
+    prompt = (
+        f"بر اساس پاسخ‌های کاربر به سوالات زیر و شاخه‌های پیشنهادی {recommended_fields}، برای هر شاخه حداقل 5 نقطه قوت و 5 نقطه ضعف تولید کنید. "
+        "نقاط قوت و ضعف باید مرتبط با پاسخ‌های کاربر و ویژگی‌های شاخه باشند. "
+        "پاسخ‌ها به صورت عددی (1=گزینه الف، 2=گزینه ب، 3=گزینه ج، 4=گزینه د) ارائه شده‌اند. "
+        "سپس تابع 'generate_field_traits' را با ویژگی‌های تولیدشده فراخوانی کنید.\n\n"
+    )
+    
+    for i, (q, a) in enumerate(zip(questions, answers)):
+        prompt += f"**سوال {i+1}:** {html.escape(q['question'])}\n"
+        prompt += f"**گزینه‌ها:**\n"
+        for j, opt in enumerate(q['options'], 1):
+            prompt += f"{j}. {html.escape(opt)}\n"
+        prompt += f"**پاسخ کاربر:** {a}\n\n"
+    
+    return prompt
+
+async def get_field_traits_from_gemini(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> Dict[str, Dict[str, List[str]]]:
+    """Get field-specific strengths and weaknesses from Gemini"""
+    try:
+        prompt = await create_prompt_for_traits(questions, answers, recommended_fields)
+        response = await gemini_model_for_traits.generate_content_async(prompt)
+        
+        traits_dict = {}
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if part.function_call and part.function_call.name == "generate_field_traits":
+                    for item in part.function_call.args.get("fields_traits", []):
+                        field = item.get("field")
+                        strengths = item.get("strengths", [])
+                        weaknesses = item.get("weaknesses", [])
+                        if field in recommended_fields and len(strengths) >= 5 and len(weaknesses) >= 5:
+                            traits_dict[field] = {"strengths": strengths, "weaknesses": weaknesses}
+        
+        # اگر Gemini ویژگی‌ها را تولید نکرد، از دیکشنری پیش‌فرض استفاده شود
+        for field in recommended_fields:
+            if field not in traits_dict:
+                traits_dict[field] = {
+                    "strengths": ACADEMIC_FIELD_DESCRIPTIONS[field]["strengths"],
+                    "weaknesses": ACADEMIC_FIELD_DESCRIPTIONS[field]["weaknesses"]
+                }
+        
+        return traits_dict
+    except Exception as e:
+        logger.error(f"خطا در get_field_traits_from_gemini: {e}")
+        # در صورت خطا، از دیکشنری پیش‌فرض استفاده شود
+        return {field: {
+            "strengths": ACADEMIC_FIELD_DESCRIPTIONS[field]["strengths"],
+            "weaknesses": ACADEMIC_FIELD_DESCRIPTIONS[field]["weaknesses"]
+        } for field in recommended_fields}
 
 async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[Dict[str, Any]], user_answers: List[int], all_percentages: Optional[Dict[str, int]]) -> str:
     """Generate HTML MBTI report asynchronously"""
@@ -1925,7 +2126,7 @@ async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_qu
     """
     return html_content
 
-async def generate_html_academic_report(test_result_id: str, recommended_fields: List[str], user_questions: List[Dict[str, Any]], user_answers: List[int], field_percentages: Optional[Dict[str, int]]) -> str:
+async def generate_html_academic_report(test_result_id: str, recommended_fields: List[str], user_questions: List[Dict[str, Any]], user_answers: List[int], field_percentages: Optional[Dict[str, int]], field_traits: Dict[str, Dict[str, List[str]]], prioritized_fields: List[Dict[str, Any]]) -> str:
     """Generate HTML academic guidance report"""
     if not recommended_fields or "خطا" in recommended_fields[0]:
         return f"<h1>خطا</h1><p>{html.escape(recommended_fields[0])}</p>"
@@ -1933,27 +2134,33 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
     # Convert numeric answers to text
     answer_texts = [user_questions[i]['options'][a-1] if i < len(user_questions) and a in [1, 2, 3, 4] else "پاسخ نامعتبر" for i, a in enumerate(user_answers)]
     
-    # Generate field descriptions
+    # Generate field descriptions with traits
     fields_html = ""
     for field in recommended_fields:
         info = ACADEMIC_FIELD_DESCRIPTIONS.get(field, {})
-        if info:
-            fields_html += f"""
-            <div class="field-section">
-                <h2>{html.escape(info['title'])}</h2>
-                <p>{html.escape(info['description'])}</p>
-                <div class="traits-grid">
-                    <div class="trait-card strengths">
-                        <h3>💪 نقاط قوت</h3>
-                        <ul>{''.join(f'<li>{html.escape(strength.strip())}</li>' for strength in info['strengths'].split(','))}</ul>
-                    </div>
-                    <div class="trait-card weaknesses">
-                        <h3>🎯 نکات قابل توجه</h3>
-                        <ul>{''.join(f'<li>{html.escape(weakness.strip())}</li>' for weakness in info['weaknesses'].split(','))}</ul>
-                    </div>
+        traits = field_traits.get(field, {"strengths": [], "weaknesses": []})
+        fields_html += f"""
+        <div class="field-section">
+            <h2>{html.escape(info['title'])}</h2>
+            <p>{html.escape(info['description'])}</p>
+            <div class="traits-grid">
+                <div class="trait-card strengths">
+                    <h3>💪 نقاط قوت</h3>
+                    <ul>{''.join(f'<li>{html.escape(strength)}</li>' for strength in traits['strengths'])}</ul>
+                </div>
+                <div class="trait-card weaknesses">
+                    <h3>🎯 نکات قابل توجه</h3>
+                    <ul>{''.join(f'<li>{html.escape(weakness)}</li>' for weakness in traits['weaknesses'])}</ul>
                 </div>
             </div>
-            """
+        </div>
+        """
+
+    # Generate priority table
+    priority_html = "<h2>📋 اولویت‌بندی شاخه‌های پیشنهادی</h2><table class='priority-table'><tr><th>شاخه</th><th>اولویت</th></tr>"
+    for item in prioritized_fields:
+        priority_html += f"<tr><td>{html.escape(item['field'])}</td><td>{item['priority']}</td></tr>"
+    priority_html += "</table>"
 
     # Generate charts if percentages are available
     charts_html_section = ""
@@ -1977,12 +2184,8 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
         charts_html_section = f"""
         <div class="charts-dashboard">
             <h2>📊 تحلیل گرافیکی ترجیحات شما</h2>
-            <p>نمودارهای زیر میزان تمایل شما به هر شاخه تحصیلی را بر اساس تحلیل پاسخ‌های شما نشان می‌دهند.</p>
+            <p>نمودار زیر میزان تمایل شما به هر شاخه تحصیلی را بر اساس تحلیل پاسخ‌های شما نشان می‌دهد.</p>
             <div class="chart-row">
-                <div class="chart-container pie-chart-container">
-                    <h3>نمودار کلی ترجیحات</h3>
-                    <canvas id="academicPieChart"></canvas>
-                </div>
                 <div class="chart-container bar-chart-container">
                     <h3>تفکیک شاخه‌ها</h3>
                     <canvas id="academicBarChart"></canvas>
@@ -2008,14 +2211,19 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
             <p class="academic-subtitle">شاخه‌های پیشنهادی: {html.escape(', '.join(recommended_fields))}</p>
         </div>
         {fields_html}
+        {priority_html}
         <div class="answers-section">
             <h2>📋 پاسخ‌های شما</h2>
             {answers_html}
         </div>
     </div>
     {charts_html_section}
+    <style>
+        .priority-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+        .priority-table th, .priority-table td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
+        .priority-table th {{ background-color: #f2f2f2; }}
+    </style>
     <script>
-        const academicPieChartData = {pie_chart_data_js};
         const academicBarChartData = {bar_chart_data_js};
     </script>
     """
@@ -2369,11 +2577,23 @@ async def handle_academic_test_submission(request: Request, user: Dict):
     # Process with AI
     recommended_fields = await get_academic_fields_from_gemini(questions, answers)
     field_percentages = None
+    field_traits = None
+    prioritized_fields = []
     encrypted_percentages_blob = None
+    encrypted_traits_blob = None
+    encrypted_priorities_blob = None
+    
     if not any("خطا" in field for field in recommended_fields):
         field_percentages = await get_field_percentages_from_gemini(questions, answers, recommended_fields)
+        field_traits = await get_field_traits_from_gemini(questions, answers, recommended_fields)
+        prioritized_fields = await get_field_priorities_from_gemini(questions, answers, recommended_fields)
+        
         if field_percentages:
             encrypted_percentages_blob = await encrypt_data(json.dumps(field_percentages))
+        if field_traits:
+            encrypted_traits_blob = await encrypt_data(json.dumps(field_traits))
+        if prioritized_fields:
+            encrypted_priorities_blob = await encrypt_data(json.dumps(prioritized_fields))
     
     # Save to database
     test_result_id = str(uuid4())
@@ -2381,9 +2601,9 @@ async def handle_academic_test_submission(request: Request, user: Dict):
     
     try:
         await db_manager.execute_query("""
-            INSERT INTO test_results (id, user_id, test_name, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (test_result_id, user['id'], "آزمون هدایت تحصیلی", encrypted_answers_json_blob, ", ".join(recommended_fields), encrypted_percentages_blob, datetime.now().isoformat()))
+            INSERT INTO test_results (id, user_id, test_name, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time, encrypted_traits, encrypted_priorities)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (test_result_id, user['id'], "آزمون هدایت تحصیلی", encrypted_answers_json_blob, ", ".join(recommended_fields), encrypted_percentages_blob, datetime.now().isoformat(), encrypted_traits_blob, encrypted_priorities_blob))
     except Exception as e:
         logger.error(f"خطا در ذخیره نتیجه تست: {e}")
     
@@ -2557,6 +2777,9 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
     
     answers = []
     percentages = None
+    traits = None
+    priorities = []
+    
     if result['encrypted_answers']:
         decrypted_answers = await decrypt_data(result['encrypted_answers'])
         if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
@@ -2573,6 +2796,22 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
             except json.JSONDecodeError:
                 pass
     
+    if result['encrypted_traits']:
+        decrypted_traits = await decrypt_data(result['encrypted_traits'])
+        if decrypted_traits and decrypted_traits != "خطا در رمزگشایی":
+            try:
+                traits = json.loads(decrypted_traits)
+            except json.JSONDecodeError:
+                pass
+    
+    if result['encrypted_priorities']:
+        decrypted_priorities = await decrypt_data(result['encrypted_priorities'])
+        if decrypted_priorities and decrypted_priorities != "خطا در رمزگشایی":
+            try:
+                priorities = json.loads(decrypted_priorities)
+            except json.JSONDecodeError:
+                pass
+    
     if test_name == "آزمون شخصیت‌شناسی MBTI":
         if "خطا" in result['mbti_result']:
             report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(result['mbti_result'])}</p>"
@@ -2581,7 +2820,7 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
             report_html = await generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
     elif test_name == "آزمون هدایت تحصیلی":
         recommended_fields = result['mbti_result'].split(", ") if result['mbti_result'] else []
-        report_html = await generate_html_academic_report(test_result_id, recommended_fields, ACADEMIC_GUIDANCE_QUESTIONS, answers, percentages)
+        report_html = await generate_html_academic_report(test_result_id, recommended_fields, ACADEMIC_GUIDANCE_QUESTIONS, answers, percentages, traits or {}, priorities)
     else:
         report_html = "<h1>خطا</h1><p>نوع تست نامعتبر است.</p>"
 
