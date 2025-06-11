@@ -988,6 +988,283 @@ QUESTIONS_DB = {
     ]
 }
 
+# افزودن سوالات هدایت تحصیلی به QUESTIONS_DB
+ACADEMIC_GUIDANCE_QUESTIONS = [
+    # علوم تجربی
+    {
+        "question": "وقتی کسی در اطراف شما بیمار است، چه احساسی دارید؟",
+        "options": [
+            "دوست دارم به او کمک کنم و حالش را بهتر کنم",
+            "ناراحت می‌شوم، اما نمی‌دانم چطور کمک کنم",
+            "بیشتر کنجکاو می‌شوم که چرا بیمار شده است",
+            "ترجیح می‌دهم از او فاصله بگیرم"
+        ]
+    },
+    {
+        "question": "آیا از مطالعه درباره بدن انسان و نحوه کارکرد آن لذت می‌برید؟",
+        "options": [
+            "خیلی زیاد، همیشه برایم جذاب است",
+            "گاهی اوقات، اگر ساده توضیح داده شود",
+            "نه خیلی، بیشتر به موضوعات دیگر علاقه دارم",
+            "اصلاً، برایم خسته‌کننده است"
+        ]
+    },
+    {
+        "question": "اگر در یک آزمایشگاه زیست‌شناسی باشید، کدام کار را ترجیح می‌دهید؟",
+        "options": [
+            "بررسی نمونه‌ها زیر میکروسکوپ",
+            "کمک به تمیز کردن و مرتب کردن وسایل",
+            "یادداشت‌برداری از نتایج آزمایش",
+            "ترجیح می‌دهم اصلاً آنجا نباشم"
+        ]
+    },
+    {
+        "question": "چقدر به کمک به دیگران در بهبود سلامتی‌شان اهمیت می‌دهید؟",
+        "options": [
+            "خیلی زیاد، این برایم یک اولویت است",
+            "تا حدی، اگر بتوانم کمک می‌کنم",
+            "زیاد مهم نیست، بیشتر به خودم فکر می‌کنم",
+            "اصلاً برایم مهم نیست"
+        ]
+    },
+    {
+        "question": "آیا از یادگیری درباره گیاهان، حیوانات و محیط‌زیست لذت می‌برید؟",
+        "options": [
+            "بله، همیشه برایم جالب است",
+            "گاهی، اگر موضوع جذابی باشد",
+            "نه خیلی، بیشتر به چیزهای دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "وقتی یک مشکل پزشکی در اخبار مطرح می‌شود، چه واکنشی نشان می‌دهید؟",
+        "options": [
+            "کنجکاو می‌شوم و دوست دارم بیشتر بدانم",
+            "کمی توجه می‌کنم، اما سریع فراموش می‌کنم",
+            "برایم مهم نیست، چون به من ربطی ندارد",
+            "ترجیح می‌دهم اخبار دیگری ببینم"
+        ]
+    },
+    {
+        "question": "آیا دوست دارید در آینده شغلی داشته باشید که مستقیماً به مردم کمک کند؟",
+        "options": [
+            "بله، این برایم خیلی مهم است",
+            "شاید، بستگی به شرایط دارد",
+            "نه خیلی، بیشتر به کار مستقل علاقه دارم",
+            "خیر، اصلاً به این فکر نمی‌کنم"
+        ]
+    },
+    {
+        "question": "چقدر از انجام کارهای دقیق و جزئی لذت می‌برید؟",
+        "options": [
+            "خیلی زیاد، جزئیات برایم جذاب هستند",
+            "تا حدی، اگر لازم باشد انجام می‌دهم",
+            "نه خیلی، کارهای کلی را ترجیح می‌دهم",
+            "اصلاً، از جزئیات خسته می‌شوم"
+        ]
+    },
+    {
+        "question": "اگر بخواهید یک پروژه علمی انتخاب کنید، کدام را انتخاب می‌کنید؟",
+        "options": [
+            "بررسی تاثیر تغذیه بر سلامت انسان",
+            "ساخت یک مدل ساده از یک ماشین",
+            "نوشتن یک داستان درباره آینده",
+            "طراحی یک پوستر تبلیغاتی"
+        ]
+    },
+    {
+        "question": "آیا از حل مسائل مرتبط با سلامت و بیماری لذت می‌برید؟",
+        "options": [
+            "بله، همیشه برایم چالش‌برانگیز و جذاب است",
+            "گاهی، اگر موضوع ساده باشد",
+            "نه خیلی، بیشتر به مسائل دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    # علوم انسانی
+    {
+        "question": "آیا از گوش دادن به مشکلات دیگران و کمک به آن‌ها لذت می‌برید؟",
+        "options": [
+            "بله، همیشه آماده کمک هستم",
+            "گاهی، اگر وقت داشته باشم",
+            "نه خیلی، ترجیح می‌دهم خودم را مشغول کنم",
+            "خیر، اصلاً علاقه‌ای ندارم"
+        ]
+    },
+    {
+        "question": "چقدر به درک احساسات و رفتارهای دیگران اهمیت می‌دهید؟",
+        "options": [
+            "خیلی زیاد، برایم بسیار مهم است",
+            "تا حدی، گاهی به آن فکر می‌کنم",
+            "نه خیلی، بیشتر به کارهای دیگر فکر می‌کنم",
+            "اصلاً برایم مهم نیست"
+        ]
+    },
+    {
+        "question": "آیا از بحث درباره موضوعات فلسفی مثل معنای زندگی لذت می‌برید؟",
+        "options": [
+            "بله، این موضوعات برایم خیلی جذاب هستند",
+            "گاهی، اگر بحث جالبی باشد",
+            "نه خیلی، برایم خسته‌کننده است",
+            "خیر، اصلاً به این موضوعات فکر نمی‌کنم"
+        ]
+    },
+    {
+        "question": "اگر دوست شما مشکلی داشته باشد، چه کار می‌کنید؟",
+        "options": [
+            "سعی می‌کنم به او گوش کنم و راه‌حل پیشنهاد بدهم",
+            "کمی با او صحبت می‌کنم و بعد موضوع را عوض می‌کنم",
+            "ترجیح می‌دهم دخالت نکنم",
+            "اصلاً به مشکلات دیگران اهمیت نمی‌دهم"
+        ]
+    },
+    {
+        "question": "آیا از مطالعه درباره تاریخ و فرهنگ‌های مختلف لذت می‌برید؟",
+        "options": [
+            "بله، همیشه برایم جالب است",
+            "گاهی، اگر موضوع جذابی باشد",
+            "نه خیلی، بیشتر به چیزهای دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "چقدر از نوشتن داستان یا مقاله لذت می‌برید؟",
+        "options": [
+            "خیلی زیاد، نوشتن برایم لذت‌بخش است",
+            "تا حدی، اگر موضوع جالبی باشد",
+            "نه خیلی، نوشتن برایم سخت است",
+            "خیر، اصلاً علاقه‌ای به نوشتن ندارم"
+        ]
+    },
+    {
+        "question": "آیا دوست دارید در آینده به مردم کمک کنید تا مشکلات شخصی‌شان را حل کنند؟",
+        "options": [
+            "بله، این برایم خیلی مهم است",
+            "شاید، بستگی به شرایط دارد",
+            "نه خیلی، بیشتر به کار مستقل علاقه دارم",
+            "خیر، اصلاً به این فکر نمی‌کنم"
+        ]
+    },
+    {
+        "question": "وقتی با یک نفر صحبت می‌کنید، چقدر به احساسات او توجه می‌کنید؟",
+        "options": [
+            "خیلی زیاد، همیشه سعی می‌کنم او را درک کنم",
+            "تا حدی، گاهی به احساساتش توجه می‌کنم",
+            "نه خیلی، بیشتر به موضوع صحبت فکر می‌کنم",
+            "اصلاً به احساسات او اهمیت نمی‌دهم"
+        ]
+    },
+    {
+        "question": "آیا از یادگیری درباره نحوه یادگیری و رشد کودکان لذت می‌برید؟",
+        "options": [
+            "بله، این موضوع برایم خیلی جذاب است",
+            "گاهی، اگر ساده توضیح داده شود",
+            "نه خیلی، بیشتر به موضوعات دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "آیا دوست دارید در مورد مسائل اجتماعی و چگونگی بهبود جامعه فکر کنید؟",
+        "options": [
+            "بله، همیشه به این موضوعات فکر می‌کنم",
+            "گاهی، اگر موضوع جالبی باشد",
+            "نه خیلی، بیشتر به مسائل شخصی فکر می‌کنم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    # ریاضی‌فیزیک و فنی‌حرفه‌ای
+    {
+        "question": "آیا از حل مسائل ریاضی و منطقی لذت می‌برید؟",
+        "options": [
+            "بله، همیشه برایم چالش‌برانگیز و جذاب است",
+            "گاهی، اگر مسئله ساده باشد",
+            "نه خیلی، بیشتر به مسائل دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "آیا از کار با کامپیوتر و یادگیری برنامه‌نویسی لذت می‌برید؟",
+        "options": [
+            "بله، خیلی برایم جذاب است",
+            "تا حدی، اگر ساده باشد",
+            "نه خیلی، بیشتر به کارهای دیگر علاقه دارم",
+            "خیر، اصلاً علاقه‌ای ندارم"
+        ]
+    },
+    {
+        "question": "اگر بخواهید چیزی بسازید، کدام را انتخاب می‌کنید؟",
+        "options": [
+            "یک مدل ساده از یک پل یا ساختمان",
+            "یک نقاشی یا پوستر زیبا",
+            "یک داستان یا شعر",
+            "ترجیح می‌دهم چیزی نسازم"
+        ]
+    },
+    {
+        "question": "چقدر از کار با ابزار و وسایل فنی لذت می‌برید؟",
+        "options": [
+            "خیلی زیاد، همیشه برایم جذاب است",
+            "تا حدی، اگر لازم باشد انجام می‌دهم",
+            "نه خیلی، کارهای دیگر را ترجیح می‌دهم",
+            "خیر، اصلاً علاقه‌ای ندارم"
+        ]
+    },
+    {
+        "question": "آیا از یادگیری درباره نحوه کار ماشین‌ها و دستگاه‌ها لذت می‌برید؟",
+        "options": [
+            "بله، همیشه برایم جالب است",
+            "گاهی، اگر موضوع جذابی باشد",
+            "نه خیلی، بیشتر به چیزهای دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "وقتی یک دستگاه خراب می‌شود، چه واکنشی نشان می‌دهید؟",
+        "options": [
+            "کنجکاو می‌شوم و دوست دارم آن را تعمیر کنم",
+            "کمی نگاه می‌کنم، اما کاری نمی‌کنم",
+            "برایم مهم نیست، از یکی دیگر استفاده می‌کنم",
+            "ترجیح می‌دهم یکی دیگر آن را درست کند"
+        ]
+    },
+    {
+        "question": "آیا دوست دارید در آینده شغلی داشته باشید که با طراحی و ساخت چیزهای جدید مرتبط باشد؟",
+        "options": [
+            "بله، این برایم خیلی جذاب است",
+            "شاید، بستگی به شرایط دارد",
+            "نه خیلی، بیشتر به کارهای دیگر علاقه دارم",
+            "خیر، اصلاً به این فکر نمی‌کنم"
+        ]
+    },
+    {
+        "question": "چقدر از حل پازل‌ها و بازی‌های فکری لذت می‌برید؟",
+        "options": [
+            "خیلی زیاد، همیشه برایم سرگرم‌کننده است",
+            "تا حدی، اگر ساده باشد",
+            "نه خیلی، کارهای دیگر را ترجیح می‌دهم",
+            "خیر، اصلاً علاقه‌ای ندارم"
+        ]
+    },
+    {
+        "question": "آیا از یادگیری درباره فناوری‌های جدید مثل هوش مصنوعی لذت می‌برید؟",
+        "options": [
+            "بله، خیلی برایم جذاب است",
+            "گاهی، اگر ساده توضیح داده شود",
+            "نه خیلی، بیشتر به موضوعات دیگر علاقه دارم",
+            "خیر، اصلاً به این موضوعات علاقه ندارم"
+        ]
+    },
+    {
+        "question": "اگر بخواهید یک پروژه انتخاب کنید، کدام را انتخاب می‌کنید؟",
+        "options": [
+            "طراحی یک اپلیکیشن ساده",
+            "نوشتن یک مقاله درباره یک موضوع اجتماعی",
+            "انجام یک آزمایش زیست‌شناسی",
+            "برگزاری یک برنامه گروهی"
+        ]
+    }
+]
+
 MBTI_DESCRIPTIONS = {
     "ESTJ": {
         "title": "ESTJ - مدیر اجرایی", 
@@ -1103,6 +1380,27 @@ MBTI_DESCRIPTIONS = {
     }
 }
 
+ACADEMIC_FIELD_DESCRIPTIONS = {
+    "علوم تجربی": {
+        "title": "علوم تجربی",
+        "description": "شما به مطالعه طبیعت، سلامت و موجودات زنده علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به تحقیق علمی، پزشکی و محیط‌زیست علاقه دارند.",
+        "strengths": "دقت در جزئیات، علاقه به کمک به دیگران، کنجکاوی علمی، توانایی حل مسائل مرتبط با سلامت و زیست‌شناسی",
+        "weaknesses": "ممکن است در برابر کارهای غیرعلمی یا انتزاعی کم‌صبر باشید، گاهی بیش از حد روی جزئیات تمرکز می‌کنید"
+    },
+    "علوم انسانی": {
+        "title": "علوم انسانی",
+        "description": "شما به درک رفتارها، احساسات و مسائل اجتماعی علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به روانشناسی، مشاوره و فلسفه علاقه دارند.",
+        "strengths": "همدلی بالا، مهارت‌های ارتباطی قوی، توانایی درک عمیق مسائل انسانی، خلاقیت در حل مسائل اجتماعی",
+        "weaknesses": "ممکن است در برابر مسائل منطقی و فنی کم‌علاقه باشید، گاهی بیش از حد احساسی تصمیم می‌گیرید"
+    },
+    "ریاضی‌فیزیک و فنی‌حرفه‌ای": {
+        "title": "ریاضی‌فیزیک و فنی‌حرفه‌ای",
+        "description": "شما به حل مسائل منطقی و ساخت چیزهای جدید علاقه‌مند هستید. این شاخه برای افرادی مناسب است که به مهندسی، برنامه‌نویسی و طراحی علاقه دارند.",
+        "strengths": "مهارت‌های منطقی و تحلیلی قوی، خلاقیت در طراحی و ساخت، توانایی حل مسائل پیچیده، علاقه به فناوری",
+        "weaknesses": "ممکن است در تعاملات اجتماعی کم‌صبر باشید، گاهی بیش از حد روی مسائل فنی تمرکز می‌کنید"
+    }
+}
+
 # Available tests
 AVAILABLE_TESTS = {
     "mbti_personality": {
@@ -1111,6 +1409,13 @@ AVAILABLE_TESTS = {
         "duration": "15-20 دقیقه",
         "questions_count": 15,
         "icon": "🧠"
+    },
+    "academic_guidance": {
+        "title": "آزمون هدایت تحصیلی",
+        "description": "کشف شاخه‌های تحصیلی مناسب بر اساس علایق و ویژگی‌های شخصیتی",
+        "duration": "10-15 دقیقه",
+        "questions_count": 30,
+        "icon": "🎓"
     }
 }
 
@@ -1152,6 +1457,48 @@ estimate_all_eight_preferences_tool = [{
         }
     }]
 }]
+
+# تعریف ابزارهای Gemini برای هدایت تحصیلی
+determine_academic_fields_tool = [{
+    "function_declarations": [{
+        "name": "determine_academic_fields",
+        "description": "Determines the most suitable academic fields based on user answers.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "recommended_fields": {
+                    "type": "ARRAY",
+                    "items": {
+                        "type": "STRING",
+                        "enum": ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"]
+                    },
+                    "description": "List of recommended academic fields based on user preferences."
+                }
+            },
+            "required": ["recommended_fields"]
+        }
+    }]
+}]
+
+estimate_field_preferences_tool = [{
+    "function_declarations": [{
+        "name": "estimate_field_preferences",
+        "description": "Estimates the percentage preference for each academic field. Percentages should sum to 100.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "experimental_sciences_percentage": {"type": "NUMBER", "description": "Percentage preference for Experimental Sciences (0-100)."},
+                "humanities_percentage": {"type": "NUMBER", "description": "Percentage preference for Humanities (0-100)."},
+                "math_technical_percentage": {"type": "NUMBER", "description": "Percentage preference for Math-Physics/Technical (0-100)."}
+            },
+            "required": ["experimental_sciences_percentage", "humanities_percentage", "math_technical_percentage"]
+        }
+    }]
+}]
+
+# تعریف مدل‌های Gemini برای آزمون هدایت تحصیلی
+gemini_model_for_academic_fields = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_academic_fields_tool)
+gemini_model_for_field_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_field_preferences_tool)
 
 gemini_model_for_type = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_mbti_tool)
 gemini_model_for_all_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_all_eight_preferences_tool)
@@ -1315,6 +1662,99 @@ async def get_reasoning_for_mbti(mbti_type: str, answers: List[str]) -> str:
         reason += f"؛ به عنوان مثال، در پاسخ اول خود شما گزینه '{html.escape(answers[0][:70])}' را انتخاب کردید که نشان‌دهنده این ویژگی‌هاست."
     
     return reason
+
+async def determine_academic_fields_from_gemini_args(recommended_fields):
+    """Determine academic fields from Gemini arguments"""
+    return {"recommended_fields": recommended_fields}
+
+async def create_prompt_for_academic_fields(questions: List[Dict[str, Any]], answers: List[int]) -> str:
+    """Create prompt for academic field analysis"""
+    prompt = (
+        "بر اساس پاسخ‌های کاربر به سوالات زیر، شاخه‌های تحصیلی مناسب (علوم تجربی، علوم انسانی، ریاضی‌فیزیک و فنی‌حرفه‌ای) را تشخیص دهید. "
+        "پاسخ‌ها به صورت عددی (1=گزینه الف، 2=گزینه ب، 3=گزینه ج، 4=گزینه د) ارائه شده‌اند. "
+        "سپس تابع 'determine_academic_fields' را با لیست شاخه‌های پیشنهادی فراخوانی کنید.\n\n"
+    )
+    
+    for i, (q, a) in enumerate(zip(questions, answers)):
+        prompt += f"**سوال {i+1}:** {html.escape(q['question'])}\n"
+        prompt += f"**گزینه‌ها:**\n"
+        for j, opt in enumerate(q['options'], 1):
+            prompt += f"{j}. {html.escape(opt)}\n"
+        prompt += f"**پاسخ کاربر:** {a}\n\n"
+    
+    return prompt
+
+async def get_academic_fields_from_gemini(questions: List[Dict[str, Any]], answers: List[int]) -> List[str]:
+    """Get recommended academic fields from Gemini"""
+    try:
+        prompt = await create_prompt_for_academic_fields(questions, answers)
+        response = await gemini_model_for_academic_fields.generate_content_async(prompt)
+        
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if part.function_call and part.function_call.name == "determine_academic_fields":
+                    args = dict(part.function_call.args)
+                    return args.get("recommended_fields", [])
+        
+        logger.warning("Gemini تابع determine_academic_fields را فراخوانی نکرد یا پاسخ معتبر نبود.")
+        return ["خطا: عدم تشخیص شاخه‌های تحصیلی"]
+    except Exception as e:
+        logger.error(f"خطا در get_academic_fields_from_gemini: {e}")
+        return [f"خطا در پردازش: {str(e)[:100]}"]
+
+async def create_prompt_for_field_percentages(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> str:
+    """Create prompt for field preference percentages"""
+    prompt = (
+        f"کاربر به سوالات زیر پاسخ داده و شاخه‌های تحصیلی پیشنهادی او {recommended_fields} هستند. "
+        "بر اساس پاسخ‌ها، درصد تمایل به هر شاخه تحصیلی (علوم تجربی، علوم انسانی، ریاضی‌فیزیک و فنی‌حرفه‌ای) را تخمین بزنید. "
+        "مجموع درصدها باید ۱۰۰ باشد. "
+        "پاسخ‌ها به صورت عددی (1=گزینه الف، 2=گزینه ب، 3=گزینه ج، 4=گزینه د) ارائه شده‌اند. "
+        "سپس تابع 'estimate_field_preferences' را با این درصدها فراخوانی کنید.\n\n"
+    )
+    
+    for i, (q, a) in enumerate(zip(questions, answers)):
+        prompt += f"**سوال {i+1}:** {html.escape(q['question'])}\n"
+        prompt += f"**گزینه‌ها:**\n"
+        for j, opt in enumerate(q['options'], 1):
+            prompt += f"{j}. {html.escape(opt)}\n"
+        prompt += f"**پاسخ کاربر:** {a}\n\n"
+    
+    return prompt
+
+async def get_field_percentages_from_gemini(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> Optional[Dict[str, int]]:
+    """Get academic field preference percentages from Gemini"""
+    try:
+        prompt = await create_prompt_for_field_percentages(questions, answers, recommended_fields)
+        response = await gemini_model_for_field_percentages.generate_content_async(prompt)
+        
+        if response.candidates and response.candidates[0].content.parts:
+            for part in response.candidates[0].content.parts:
+                if part.function_call and part.function_call.name == "estimate_field_preferences":
+                    percentages = dict(part.function_call.args)
+                    
+                    valid_percentages = {}
+                    keys = ["experimental_sciences_percentage", "humanities_percentage", "math_technical_percentage"]
+                    total = 0
+                    
+                    for key in keys:
+                        value = percentages.get(key)
+                        if not isinstance(value, (int, float)) or value < 0 or value > 100:
+                            logger.warning(f"مقدار نامعتبر برای {key}: {value}")
+                            return None
+                        valid_percentages[key] = round(float(value))
+                        total += valid_percentages[key]
+                    
+                    if 98 <= total <= 102:
+                        return valid_percentages
+                    else:
+                        logger.warning(f"مجموع درصدها برابر ۱۰۰ نیست: {total}")
+                        return None
+        
+        logger.warning("Gemini تابع estimate_field_preferences را فراخوانی نکرد یا پاسخ معتبر نبود.")
+        return None
+    except Exception as e:
+        logger.error(f"خطا در get_field_percentages_from_gemini: {e}")
+        return None
 
 async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_questions: List[Dict[str, Any]], user_answers: List[int], all_percentages: Optional[Dict[str, int]]) -> str:
     """Generate HTML MBTI report asynchronously"""
@@ -1481,6 +1921,102 @@ async def generate_html_mbti_report(test_result_id: str, mbti_type: str, user_qu
         const pieChartData = {pie_chart_data_js};
         const barChartsData = {bar_charts_data_js};
         const radarChartData = {radar_chart_data_js};
+    </script>
+    """
+    return html_content
+
+async def generate_html_academic_report(test_result_id: str, recommended_fields: List[str], user_questions: List[Dict[str, Any]], user_answers: List[int], field_percentages: Optional[Dict[str, int]]) -> str:
+    """Generate HTML academic guidance report"""
+    if not recommended_fields or "خطا" in recommended_fields[0]:
+        return f"<h1>خطا</h1><p>{html.escape(recommended_fields[0])}</p>"
+
+    # Convert numeric answers to text
+    answer_texts = [user_questions[i]['options'][a-1] if i < len(user_questions) and a in [1, 2, 3, 4] else "پاسخ نامعتبر" for i, a in enumerate(user_answers)]
+    
+    # Generate field descriptions
+    fields_html = ""
+    for field in recommended_fields:
+        info = ACADEMIC_FIELD_DESCRIPTIONS.get(field, {})
+        if info:
+            fields_html += f"""
+            <div class="field-section">
+                <h2>{html.escape(info['title'])}</h2>
+                <p>{html.escape(info['description'])}</p>
+                <div class="traits-grid">
+                    <div class="trait-card strengths">
+                        <h3>💪 نقاط قوت</h3>
+                        <ul>{''.join(f'<li>{html.escape(strength.strip())}</li>' for strength in info['strengths'].split(','))}</ul>
+                    </div>
+                    <div class="trait-card weaknesses">
+                        <h3>🎯 نکات قابل توجه</h3>
+                        <ul>{''.join(f'<li>{html.escape(weakness.strip())}</li>' for weakness in info['weaknesses'].split(','))}</ul>
+                    </div>
+                </div>
+            </div>
+            """
+
+    # Generate charts if percentages are available
+    charts_html_section = ""
+    if field_percentages:
+        pie_labels = ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"]
+        pie_data_values = [
+            field_percentages.get("experimental_sciences_percentage", 33),
+            field_percentages.get("humanities_percentage", 33),
+            field_percentages.get("math_technical_percentage", 34)
+        ]
+        pie_chart_data_js = json.dumps({"labels": pie_labels, "data": pie_data_values})
+
+        bar_chart_data = {
+            "fields": {
+                "labels": pie_labels,
+                "data": pie_data_values
+            }
+        }
+        bar_chart_data_js = json.dumps(bar_chart_data)
+
+        charts_html_section = f"""
+        <div class="charts-dashboard">
+            <h2>📊 تحلیل گرافیکی ترجیحات شما</h2>
+            <p>نمودارهای زیر میزان تمایل شما به هر شاخه تحصیلی را بر اساس تحلیل پاسخ‌های شما نشان می‌دهند.</p>
+            <div class="chart-row">
+                <div class="chart-container pie-chart-container">
+                    <h3>نمودار کلی ترجیحات</h3>
+                    <canvas id="academicPieChart"></canvas>
+                </div>
+                <div class="chart-container bar-chart-container">
+                    <h3>تفکیک شاخه‌ها</h3>
+                    <canvas id="academicBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+        """
+
+    # Generate answers display
+    answers_html = "".join(
+        f"""
+        <div class="answer-item">
+            <h4>سوال {i+1}: {html.escape(q['question'])}</h4>
+            <p><strong>پاسخ شما:</strong> {html.escape(answer_texts[i])}</p>
+        </div>
+        """ for i, q in enumerate(user_questions)
+    )
+
+    html_content = f"""
+    <div class="main-content">
+        <div class="academic-header">
+            <h1>نتایج هدایت تحصیلی شما</h1>
+            <p class="academic-subtitle">شاخه‌های پیشنهادی: {html.escape(', '.join(recommended_fields))}</p>
+        </div>
+        {fields_html}
+        <div class="answers-section">
+            <h2>📋 پاسخ‌های شما</h2>
+            {answers_html}
+        </div>
+    </div>
+    {charts_html_section}
+    <script>
+        const academicPieChartData = {pie_chart_data_js};
+        const academicBarChartData = {bar_chart_data_js};
     </script>
     """
     return html_content
@@ -1764,19 +2300,19 @@ async def get_test_page(request: Request, test_id: str, user=Depends(require_log
     if test_id not in AVAILABLE_TESTS:
         raise HTTPException(status_code=404, detail="تست یافت نشد")
     
+    # بررسی آیا کاربر قبلاً تست را انجام داده است
+    result = await db_manager.execute_query("""
+        SELECT id FROM test_results 
+        WHERE user_id = ? AND test_name = ?
+    """, (user['id'], AVAILABLE_TESTS[test_id]['title']), fetch=True)
+    
+    if result:
+        return RedirectResponse(url="/my-results?error=already_taken", status_code=303)
+    
     if test_id == "mbti_personality":
         age_range = user['age_range']
         if age_range not in QUESTIONS_DB:
             raise HTTPException(status_code=400, detail="رده سنی نامعتبر است.")
-        
-        # بررسی آیا کاربر قبلاً تست را انجام داده است
-        result = await db_manager.execute_query("""
-            SELECT id FROM test_results 
-            WHERE user_id = ? AND test_name = ?
-        """, (user['id'], "آزمون شخصیت‌شناسی MBTI"), fetch=True)
-        
-        if result:
-            return RedirectResponse(url="/my-results?error=already_taken", status_code=303)
         
         questions_for_age = QUESTIONS_DB[age_range]
         return templates.TemplateResponse("questions.html", {
@@ -1786,9 +2322,16 @@ async def get_test_page(request: Request, test_id: str, user=Depends(require_log
             "user": user
         })
     
+    elif test_id == "academic_guidance":
+        return templates.TemplateResponse("questions.html", {
+            "request": request, 
+            "test_id": test_id,
+            "questions": ACADEMIC_GUIDANCE_QUESTIONS,
+            "user": user
+        })
+    
     raise HTTPException(status_code=404, detail="تست پیدا نشد")
 
-@app.post("/submit_test/{test_id}")
 async def handle_test_submission(request: Request, test_id: str, user = Depends(require_login)):
     if test_id not in AVAILABLE_TESTS:
         raise HTTPException(status_code=404, detail="تست یافت نشد")
@@ -1798,11 +2341,69 @@ async def handle_test_submission(request: Request, test_id: str, user = Depends(
     
     raise HTTPException(status_code=404, detail="تست پیدا نشد")
 
-@app.get("/advisor/user_result/{user_id}", response_class=HTMLResponse)
-async def show_user_result_to_advisor(request: Request, user_id: str, advisor = Depends(require_advisor_login)):
-    """Show specific user's test result to advisor"""
+async def handle_academic_test_submission(request: Request, user: Dict):
+    """Handle academic guidance test submission"""
+    form_data = await request.form()
+    questions = ACADEMIC_GUIDANCE_QUESTIONS
+    answers = []
+    
+    for i in range(len(questions)):
+        answer_key = f"answer_{i}"
+        answer_value = form_data.get(answer_key)
+        if not answer_value or not answer_value.strip():
+            return RedirectResponse(
+                url=f"/test/academic_guidance?error=incomplete&question={i+1}",
+                status_code=303
+            )
+        try:
+            answer_num = int(answer_value)
+            if answer_num not in [1, 2, 3, 4]:
+                raise ValueError("پاسخ نامعتبر")
+            answers.append(answer_num)
+        except ValueError:
+            return RedirectResponse(
+                url=f"/test/academic_guidance?error=invalid_answer&question={i+1}",
+                status_code=303
+            )
+    
+    # Process with AI
+    recommended_fields = await get_academic_fields_from_gemini(questions, answers)
+    field_percentages = None
+    encrypted_percentages_blob = None
+    if not any("خطا" in field for field in recommended_fields):
+        field_percentages = await get_field_percentages_from_gemini(questions, answers, recommended_fields)
+        if field_percentages:
+            encrypted_percentages_blob = await encrypt_data(json.dumps(field_percentages))
+    
+    # Save to database
+    test_result_id = str(uuid4())
+    encrypted_answers_json_blob = await encrypt_data(json.dumps(answers))
+    
     try:
-        # Get user information and test results
+        await db_manager.execute_query("""
+            INSERT INTO test_results (id, user_id, test_name, encrypted_answers, mbti_result, encrypted_mbti_percentages, analysis_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (test_result_id, user['id'], "آزمون هدایت تحصیلی", encrypted_answers_json_blob, ", ".join(recommended_fields), encrypted_percentages_blob, datetime.now().isoformat()))
+    except Exception as e:
+        logger.error(f"خطا در ذخیره نتیجه تست: {e}")
+    
+    return RedirectResponse(url=f"/result/{user['phone']}/{test_result_id}", status_code=303)
+
+@app.post("/submit_test/{test_id}")
+async def handle_test_submission(request: Request, test_id: str, user=Depends(require_login)):
+    if test_id not in AVAILABLE_TESTS:
+        raise HTTPException(status_code=404, detail="تست یافت نشد")
+    
+    if test_id == "mbti_personality":
+        return await handle_mbti_test_submission(request, user)
+    elif test_id == "academic_guidance":
+        return await handle_academic_test_submission(request, user)
+    
+    raise HTTPException(status_code=404, detail="تست پیدا نشد")
+
+@app.get("/advisor/user_result/{user_id}", response_class=HTMLResponse)
+async def show_user_result_to_advisor(request: Request, user_id: str, advisor=Depends(require_advisor_login)):
+    try:
         user_data = await db_manager.execute_query("""
             SELECT u.id, u.encrypted_first_name, u.encrypted_last_name, u.encrypted_phone, u.age_range, u.registration_time,
                    tr.id as test_id, tr.test_name, tr.encrypted_answers, tr.mbti_result, tr.encrypted_mbti_percentages, tr.analysis_time
@@ -1815,7 +2416,6 @@ async def show_user_result_to_advisor(request: Request, user_id: str, advisor = 
         if not user_data:
             raise HTTPException(status_code=404, detail="کاربر یافت نشد")
         
-        # Process user data
         processed_user = {}
         test_results = []
         
@@ -1830,24 +2430,27 @@ async def show_user_result_to_advisor(request: Request, user_id: str, advisor = 
                     'registration_time': row['registration_time']
                 }
             
-            if row['test_id']:  # If user has test results
-                # Decrypt answers
+            if row['test_id']:
                 answers = []
                 if row['encrypted_answers']:
                     decrypted_answers = await decrypt_data(row['encrypted_answers'])
                     if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
                         try:
                             answers = json.loads(decrypted_answers)
-                            # Convert numeric answers to text for display
-                            questions_for_age = QUESTIONS_DB.get(processed_user['age_range'], [])
-                            answers = [
-                                questions_for_age[i]['options'][a-1] if i < len(questions_for_age) and a in [1, 2, 3, 4] else "پاسخ نامعتبر"
-                                for i, a in enumerate(answers)
-                            ]
+                            if row['test_name'] == "آزمون شخصیت‌شناسی MBTI":
+                                questions_for_age = QUESTIONS_DB.get(processed_user['age_range'], [])
+                                answers = [
+                                    questions_for_age[i]['options'][a-1] if i < len(questions_for_age) and a in [1, 2, 3, 4] else "پاسخ نامعتبر"
+                                    for i, a in enumerate(answers)
+                                ]
+                            else:  # آزمون هدایت تحصیلی
+                                answers = [
+                                    ACADEMIC_GUIDANCE_QUESTIONS[i]['options'][a-1] if i < len(ACADEMIC_GUIDANCE_QUESTIONS) and a in [1, 2, 3, 4] else "پاسخ نامعتبر"
+                                    for i, a in enumerate(answers)
+                                ]
                         except (json.JSONDecodeError, IndexError):
                             answers = ["خطا در پارس پاسخ‌ها"]
                 
-                # Decrypt percentages
                 percentages = None
                 if row['encrypted_mbti_percentages']:
                     decrypted_percentages = await decrypt_data(row['encrypted_mbti_percentages'])
@@ -1872,7 +2475,9 @@ async def show_user_result_to_advisor(request: Request, user_id: str, advisor = 
             "test_results": test_results,
             "advisor": advisor,
             "MBTI_DESCRIPTIONS": MBTI_DESCRIPTIONS,
-            "QUESTIONS_DB": QUESTIONS_DB
+            "ACADEMIC_FIELD_DESCRIPTIONS": ACADEMIC_FIELD_DESCRIPTIONS,
+            "QUESTIONS_DB": QUESTIONS_DB,
+            "ACADEMIC_GUIDANCE_QUESTIONS": ACADEMIC_GUIDANCE_QUESTIONS
         })
         
     except Exception as e:
@@ -1934,12 +2539,10 @@ async def handle_mbti_test_submission(request: Request, user: Dict):
     return RedirectResponse(url=f"/result/{user['phone']}/{test_result_id}", status_code=303)
 
 @app.get("/result/{phone}/{test_result_id}", response_class=HTMLResponse)
-async def get_test_result(request: Request, phone: str, test_result_id: str, user = Depends(require_login)):
-    # Check if user can access this result
+async def get_test_result(request: Request, phone: str, test_result_id: str, user=Depends(require_login)):
     if user['phone'] != phone:
         raise HTTPException(status_code=403, detail="شما اجازه دسترسی به این نتیجه را ندارید")
     
-    # Get test result (async)
     result = await db_manager.execute_query("""
         SELECT tr.*, u.age_range FROM test_results tr
         JOIN users u ON tr.user_id = u.id
@@ -1950,11 +2553,10 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
         raise HTTPException(status_code=404, detail="نتیجه تست یافت نشد")
     
     result = result[0]
+    test_name = result['test_name']
     
-    # Decrypt and process result (async)
     answers = []
     percentages = None
-    
     if result['encrypted_answers']:
         decrypted_answers = await decrypt_data(result['encrypted_answers'])
         if decrypted_answers and decrypted_answers != "خطا در رمزگشایی":
@@ -1971,12 +2573,17 @@ async def get_test_result(request: Request, phone: str, test_result_id: str, use
             except json.JSONDecodeError:
                 pass
     
-    # Generate report (async)
-    if "خطا" in result['mbti_result']:
-        report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(result['mbti_result'])}</p>"
+    if test_name == "آزمون شخصیت‌شناسی MBTI":
+        if "خطا" in result['mbti_result']:
+            report_html = f"<h1>خطا در تحلیل</h1><p>{html.escape(result['mbti_result'])}</p>"
+        else:
+            questions_for_age = QUESTIONS_DB.get(result['age_range'], [])
+            report_html = await generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
+    elif test_name == "آزمون هدایت تحصیلی":
+        recommended_fields = result['mbti_result'].split(", ") if result['mbti_result'] else []
+        report_html = await generate_html_academic_report(test_result_id, recommended_fields, ACADEMIC_GUIDANCE_QUESTIONS, answers, percentages)
     else:
-        questions_for_age = QUESTIONS_DB.get(result['age_range'], [])
-        report_html = await generate_html_mbti_report(test_result_id, result['mbti_result'], questions_for_age, answers, percentages)
+        report_html = "<h1>خطا</h1><p>نوع تست نامعتبر است.</p>"
 
     return templates.TemplateResponse("result.html", {
         "request": request,
