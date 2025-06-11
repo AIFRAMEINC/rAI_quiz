@@ -239,6 +239,100 @@
             font-weight: 400;
         }
 
+        /* Academic Report Specific Styles */
+        .academic-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .academic-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            font-size: 4em;
+            font-weight: 800;
+            padding: 25px 40px;
+            border-radius: 24px;
+            margin-bottom: 25px;
+            box-shadow: 
+                0 15px 40px rgba(5, 150, 105, 0.4),
+                0 4px 16px rgba(255, 255, 255, 0.2) inset;
+            transition: transform 0.4s ease;
+        }
+
+        .academic-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .academic-subtitle {
+            font-size: 1.4em;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .academic-field-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px 35px;
+            margin-bottom: 35px;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .academic-field-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .field-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .field-priority {
+            display: inline-block;
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .field-header h2 {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .field-description {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #f1f5f9;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         /* Description section */
         .description-section {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
@@ -792,7 +886,7 @@
             family: 'Vazirmatn, Segoe UI, sans-serif',
             weight: '500'
         };
-        
+
         const chartTitleColor = '#ffffff';
         const chartLabelColor = '#f1f5f9';
         const defaultChartErrorMessage = "<p style='text-align:center; color:rgba(255,255,255,0.8); padding:40px 0; font-size:1.2rem; font-family: Vazirmatn, sans-serif;'>نمودار در حال حاضر در دسترس نیست.</p>";
@@ -810,24 +904,27 @@
                 }, index * 150);
             });
 
-            // Initialize charts
-            renderPieChart();
-            if (barChartsData) {
+            // Initialize charts based on data availability
+            if (typeof pieChartData !== 'undefined') {
+                renderPieChart();
+            }
+            if (typeof barChartsData !== 'undefined') {
                 renderBarChart('energyBarChart', 'انرژی', barChartsData.energy);
                 renderBarChart('informationBarChart', 'دریافت اطلاعات', barChartsData.information);
                 renderBarChart('decisionBarChart', 'تصمیم‌گیری', barChartsData.decision);
                 renderBarChart('lifestyleBarChart', 'سبک زندگی', barChartsData.lifestyle);
-            } else {
-                ['energyBarChart', 'informationBarChart', 'decisionBarChart', 'lifestyleBarChart'].forEach(id => {
-                    const el = document.getElementById(id);
-                    const container = el ? el.closest('.bar-chart-container') : null;
-                    if(container) {
-                         container.innerHTML = defaultChartErrorMessage;
-                         container.style.height = 'auto';
-                    }
-                });
             }
-            renderRadarChart();
+            if (typeof radarChartData !== 'undefined') {
+                renderRadarChart();
+            }
+            
+            // Academic guidance charts
+            if (typeof academicPieChartData !== 'undefined') {
+                renderAcademicPieChart();
+            }
+            if (typeof academicBarChartData !== 'undefined') {
+                renderAcademicBarChart();
+            }
             
             // Add hover effects to header navigation
             document.querySelectorAll('.header-nav-btn').forEach(btn => {
@@ -841,6 +938,160 @@
             });
         });
 
+        // Academic guidance chart functions
+        function renderAcademicPieChart() {
+            const ctx = document.getElementById('academicPieChart');
+            const container = document.querySelector('.pie-chart-container'); 
+            if (ctx && academicPieChartData && academicPieChartData.labels && academicPieChartData.data) {
+                if(container) container.style.height = '550px';
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: academicPieChartData.labels,
+                        datasets: [{
+                            label: 'تمایلات تحصیلی',
+                            data: academicPieChartData.data,
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.9)', 
+                                'rgba(59, 130, 246, 0.9)', 
+                                'rgba(245, 158, 11, 0.9)'
+                            ],
+                            borderColor: ['rgba(255, 255, 255, 0.8)'],
+                            borderWidth: 3, 
+                            hoverOffset: 18
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: { 
+                            animateScale: true, 
+                            animateRotate: true, 
+                            duration: 2000, 
+                            easing: 'easeOutQuart' 
+                        },
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    font: chartFont,
+                                    color: chartLabelColor, 
+                                    padding: 25,
+                                    usePointStyle: true, 
+                                    boxWidth: 18 
+                                } 
+                            },
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                borderWidth: 2,
+                                cornerRadius: 15,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.parsed !== undefined ? c.parsed + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        function renderAcademicBarChart() {
+            const ctx = document.getElementById('academicBarChart');
+            const container = ctx ? ctx.closest('.bar-chart-container') : null;
+            if (ctx && academicBarChartData && academicBarChartData.fields) {
+                if(container) container.style.height = '380px';
+                const data = academicBarChartData.fields;
+                const allZeros = data.data.every(item => item === 0);
+                let maxVal = allZeros ? 100 : undefined; 
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'درصد تمایل',
+                            data: data.data,
+                            backgroundColor: [
+                                'rgba(16, 185, 129, 0.9)', 
+                                'rgba(59, 130, 246, 0.9)', 
+                                'rgba(245, 158, 11, 0.9)'
+                            ],
+                            borderColor: [
+                                'rgba(16, 185, 129, 1)', 
+                                'rgba(59, 130, 246, 1)', 
+                                'rgba(245, 158, 11, 1)'
+                            ],
+                            borderWidth: 2,
+                            borderRadius: 15,
+                            borderSkipped: false,
+                            barPercentage: 0.7, 
+                            categoryPercentage: 0.8
+                        }]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1800,
+                            easing: 'easeOutQuart'
+                        },
+                        scales: { 
+                            x: { 
+                                ticks: {
+                                    font: chartFont,
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: { 
+                                beginAtZero: true, 
+                                max: maxVal, 
+                                ticks: { 
+                                    callback: (v) => v + '%', 
+                                    font: chartFont,
+                                    color: chartLabelColor
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.15)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }, 
+                            tooltip: { 
+                                titleFont: chartFont, 
+                                bodyFont: chartFont,
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: 'rgba(255, 255, 255, 0.3)',
+                                borderWidth: 2,
+                                cornerRadius: 15,
+                                callbacks: { 
+                                    label: (c) => `${c.label || ''}: ${c.raw !== undefined ? c.raw + '%' : ''}` 
+                                } 
+                            }
+                        }
+                    }
+                });
+            } else if(container) {
+                container.innerHTML = defaultChartErrorMessage;
+                container.style.height = 'auto';
+            }
+        }
+
+        // Keep existing MBTI chart functions...
         function renderPieChart() {
             const ctx = document.getElementById('mbtiPieChart');
             const container = document.querySelector('.pie-chart-container'); 
@@ -1079,7 +1330,7 @@
             }
         }
 
-        // Print styles
+        // Keep existing functionality for particles and print styles...
         window.addEventListener('beforeprint', function() {
             document.body.style.background = 'white';
             document.querySelectorAll('.chart-container').forEach(el => {
@@ -1087,7 +1338,6 @@
             });
         });
 
-        // Add particle effect on scroll
         window.addEventListener('scroll', function() {
             if (Math.random() > 0.95) {
                 createParticle();
@@ -1119,7 +1369,6 @@
             }, 4000);
         }
 
-        // Add particle animation
         const style = document.createElement('style');
         style.textContent = `
             @keyframes particleRise {

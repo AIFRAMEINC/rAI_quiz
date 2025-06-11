@@ -298,6 +298,8 @@ async def init_db():
             mbti_result TEXT,
             encrypted_mbti_percentages BLOB,
             analysis_time TEXT NOT NULL,
+            encrypted_traits BLOB,  -- ستون جدید
+            encrypted_priorities BLOB,  -- ستون جدید
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     """)
@@ -329,6 +331,18 @@ async def init_db():
             FOREIGN KEY (username) REFERENCES advisors (username)
         )
     """)
+
+    try:
+        await db_manager.execute_query("ALTER TABLE test_results ADD COLUMN encrypted_traits BLOB")
+        logger.info("ستون encrypted_traits به جدول test_results اضافه شد.")
+    except Exception as e:
+        logger.info(f"ستون encrypted_traits از قبل وجود دارد یا خطا رخ داد: {e}")
+    
+    try:
+        await db_manager.execute_query("ALTER TABLE test_results ADD COLUMN encrypted_priorities BLOB")
+        logger.info("ستون encrypted_priorities به جدول test_results اضافه شد.")
+    except Exception as e:
+        logger.info(f"ستون encrypted_priorities از قبل وجود دارد یا خطا رخ داد: {e}")
 
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
@@ -1443,13 +1457,13 @@ AVAILABLE_TESTS = {
         "title": "آزمون شخصیت‌شناسی MBTI",
         "description": "کشف تیپ شخصیتی خود بر اساس استاندارد بین‌المللی MBTI",
         "duration": "15-20 دقیقه",
-        "questions_count": 15,
+        "questions_count": 30,
         "icon": "🧠"
     },
     "academic_guidance": {
         "title": "آزمون هدایت تحصیلی",
         "description": "کشف شاخه‌های تحصیلی مناسب بر اساس علایق و ویژگی‌های شخصیتی",
-        "duration": "10-15 دقیقه", 
+        "duration": "15-20 دقیقه", 
         "questions_count": 30,
         "icon": "🎓"
     }
@@ -1601,10 +1615,10 @@ generate_traits_tool = [{
 }]
 
 # تعریف مدل Gemini برای تولید ویژگی‌ها
-gemini_model_for_traits = genai.GenerativeModel(model_name="gemini-1-5-flash", tools=generate_traits_tool)
+gemini_model_for_traits = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=generate_traits_tool)
 
 # تعریف مدل Gemini برای اولویت‌بندی
-gemini_model_for_priority = genai.GenerativeModel(model_name="gemini-1-5-flash", tools=prioritize_fields_tool)
+gemini_model_for_priority = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=prioritize_fields_tool)
 # تعریف مدل‌های Gemini برای آزمون هدایت تحصیلی
 gemini_model_for_academic_fields = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=determine_academic_fields_tool)
 gemini_model_for_field_percentages = genai.GenerativeModel(model_name="gemini-1.5-flash", tools=estimate_field_preferences_tool)
@@ -1924,7 +1938,6 @@ async def create_prompt_for_traits(questions: List[Dict[str, Any]], answers: Lis
     return prompt
 
 async def get_field_traits_from_gemini(questions: List[Dict[str, Any]], answers: List[int], recommended_fields: List[str]) -> Dict[str, Dict[str, List[str]]]:
-    """Get field-specific strengths and weaknesses from Gemini"""
     try:
         prompt = await create_prompt_for_traits(questions, answers, recommended_fields)
         response = await gemini_model_for_traits.generate_content_async(prompt)
@@ -1935,8 +1948,15 @@ async def get_field_traits_from_gemini(questions: List[Dict[str, Any]], answers:
                 if part.function_call and part.function_call.name == "generate_field_traits":
                     for item in part.function_call.args.get("fields_traits", []):
                         field = item.get("field")
-                        strengths = item.get("strengths", [])
-                        weaknesses = item.get("weaknesses", [])
+                        # تبدیل strengths و weaknesses به لیست‌های ساده
+                        strengths = [
+                            str(s) for s in item.get("strengths", [])
+                            if isinstance(s, (str, int, float, bool))  # فقط انواع قابل سریال‌سازی
+                        ]
+                        weaknesses = [
+                            str(w) for w in item.get("weaknesses", [])
+                            if isinstance(w, (str, int, float, bool))
+                        ]
                         if field in recommended_fields and len(strengths) >= 5 and len(weaknesses) >= 5:
                             traits_dict[field] = {"strengths": strengths, "weaknesses": weaknesses}
         
@@ -2134,18 +2154,33 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
     # Convert numeric answers to text
     answer_texts = [user_questions[i]['options'][a-1] if i < len(user_questions) and a in [1, 2, 3, 4] else "پاسخ نامعتبر" for i, a in enumerate(user_answers)]
     
+    # Get main recommended field (first in list)
+    main_field = recommended_fields[0] if recommended_fields else "نامشخص"
+    field_info = ACADEMIC_FIELD_DESCRIPTIONS.get(main_field, {})
+    
+    # Create reasoning text
+    reasoning_text = f"بر اساس تحلیل پاسخ‌های شما، شاخه‌های {', '.join(recommended_fields)} بیشترین تطابق را با علایق و ویژگی‌های شخصیتی شما دارند."
+    
     # Generate field descriptions with traits
     fields_html = ""
-    for field in recommended_fields:
+    for i, field in enumerate(recommended_fields):
         info = ACADEMIC_FIELD_DESCRIPTIONS.get(field, {})
         traits = field_traits.get(field, {"strengths": [], "weaknesses": []})
+        
+        # Get priority for this field
+        priority = next((item['priority'] for item in prioritized_fields if item['field'] == field), i+1)
+        
         fields_html += f"""
-        <div class="field-section">
-            <h2>{html.escape(info['title'])}</h2>
-            <p>{html.escape(info['description'])}</p>
+        <div class="academic-field-section">
+            <div class="field-header">
+                <div class="field-priority">اولویت {priority}</div>
+                <h2>{html.escape(info.get('title', field))}</h2>
+                <p class="field-description">{html.escape(info.get('description', ''))}</p>
+            </div>
+            
             <div class="traits-grid">
                 <div class="trait-card strengths">
-                    <h3>💪 نقاط قوت</h3>
+                    <h3>💪 نقاط قوت شما در این شاخه</h3>
                     <ul>{''.join(f'<li>{html.escape(strength)}</li>' for strength in traits['strengths'])}</ul>
                 </div>
                 <div class="trait-card weaknesses">
@@ -2156,14 +2191,11 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
         </div>
         """
 
-    # Generate priority table
-    priority_html = "<h2>📋 اولویت‌بندی شاخه‌های پیشنهادی</h2><table class='priority-table'><tr><th>شاخه</th><th>اولویت</th></tr>"
-    for item in prioritized_fields:
-        priority_html += f"<tr><td>{html.escape(item['field'])}</td><td>{item['priority']}</td></tr>"
-    priority_html += "</table>"
-
-    # Generate charts if percentages are available
+    # Prepare charts data
     charts_html_section = ""
+    pie_chart_data_js = "null"
+    bar_chart_data_js = "null"
+    
     if field_percentages:
         pie_labels = ["علوم تجربی", "علوم انسانی", "ریاضی‌فیزیک و فنی‌حرفه‌ای"]
         pie_data_values = [
@@ -2183,9 +2215,14 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
 
         charts_html_section = f"""
         <div class="charts-dashboard">
-            <h2>📊 تحلیل گرافیکی ترجیحات شما</h2>
-            <p>نمودار زیر میزان تمایل شما به هر شاخه تحصیلی را بر اساس تحلیل پاسخ‌های شما نشان می‌دهد.</p>
+            <h2>📊 تحلیل گرافیکی ترجیحات تحصیلی شما</h2>
+            <p>نمودارهای زیر میزان تمایل شما به هر شاخه تحصیلی را بر اساس تحلیل پاسخ‌های شما نشان می‌دهند.</p>
+            
             <div class="chart-row">
+                <div class="chart-container pie-chart-container">
+                    <h3>نمودار کلی ترجیحات شما</h3>
+                    <canvas id="academicPieChart"></canvas>
+                </div>
                 <div class="chart-container bar-chart-container">
                     <h3>تفکیک شاخه‌ها</h3>
                     <canvas id="academicBarChart"></canvas>
@@ -2195,35 +2232,47 @@ async def generate_html_academic_report(test_result_id: str, recommended_fields:
         """
 
     # Generate answers display
-    answers_html = "".join(
-        f"""
+    answers_html = ""
+    for i, (q, answer_text) in enumerate(zip(user_questions, answer_texts)):
+        answers_html += f"""
         <div class="answer-item">
             <h4>سوال {i+1}: {html.escape(q['question'])}</h4>
-            <p><strong>پاسخ شما:</strong> {html.escape(answer_texts[i])}</p>
+            <p><strong>پاسخ شما:</strong> {html.escape(answer_text)}</p>
         </div>
-        """ for i, q in enumerate(user_questions)
-    )
+        """
 
     html_content = f"""
+    <!-- Main Content -->
     <div class="main-content">
         <div class="academic-header">
+            <div class="academic-badge">🎓</div>
             <h1>نتایج هدایت تحصیلی شما</h1>
             <p class="academic-subtitle">شاخه‌های پیشنهادی: {html.escape(', '.join(recommended_fields))}</p>
         </div>
+        
+        <div class="description-section">
+            <h2>✨ توضیحات شاخه اصلی پیشنهادی</h2>
+            <p class="description-text">{html.escape(field_info.get('description', 'شاخه تحصیلی مناسب برای شما بر اساس علایق و ویژگی‌های شخصیتی‌تان انتخاب شده است.'))}</p>
+        </div>
+        
         {fields_html}
-        {priority_html}
+        
+        <div class="reasoning-section">
+            <h3>🤔 چرا این شاخه‌ها برای شما انتخاب شدند؟</h3>
+            <p>{reasoning_text}</p>
+        </div>
+        
         <div class="answers-section">
             <h2>📋 پاسخ‌های شما</h2>
             {answers_html}
         </div>
     </div>
+    
+    <!-- Charts Section -->
     {charts_html_section}
-    <style>
-        .priority-table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
-        .priority-table th, .priority-table td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
-        .priority-table th {{ background-color: #f2f2f2; }}
-    </style>
+    
     <script>
+        const academicPieChartData = {pie_chart_data_js};
         const academicBarChartData = {bar_chart_data_js};
     </script>
     """
