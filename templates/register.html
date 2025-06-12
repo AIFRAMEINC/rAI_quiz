@@ -288,88 +288,6 @@
             background: rgba(16, 185, 129, 0.1);
         }
 
-        /* اضافه کردن استایل جدید */
-        .generate-password-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-            color: white;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 16px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: 'Vazirmatn', sans-serif;
-            margin-top: 12px;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .generate-password-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .generate-password-btn:hover {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
-        }
-
-        .generate-password-btn:hover::before {
-            left: 100%;
-        }
-
-        /* Password Strength & Match Indicators */
-        .password-strength,
-        .password-match {
-            margin-top: 10px;
-            font-size: 0.9em;
-            padding: 8px 15px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .password-strength.weak {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fecaca;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .password-strength.medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fed7aa;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .password-strength.strong {
-            background: rgba(16, 185, 129, 0.2);
-            color: #a7f3d0;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .password-match.match {
-            background: rgba(16, 185, 129, 0.2);
-            color: #a7f3d0;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .password-match.no-match {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fecaca;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
         /* Age Info Box */
         .age-info {
             background: rgba(236, 72, 153, 0.2);
@@ -682,21 +600,6 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">🔑 رمز عبور:</label>
-                    <input type="password" id="password" name="password" required placeholder="رمز عبور خود را وارد کنید" minlength="8">
-                    <button type="button" class="generate-password-btn" id="generatePasswordBtn">
-                        🎲 تولید رمز
-                    </button>
-                    <div class="password-strength" id="passwordStrength"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="confirm_password">🔐 تأیید رمز عبور:</label>
-                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="رمز عبور را مجدداً وارد کنید">
-                    <div class="password-match" id="passwordMatch"></div>
-                </div>
-                
-                <div class="form-group">
                     <label for="age_range">🎂 رده سنی خود را انتخاب کنید:</label>
                     <select id="age_range" name="age_range" required>
                         <option value="">انتخاب کنید...</option>
@@ -745,10 +648,7 @@
             const form = document.getElementById('registerForm');
             const submitBtn = document.getElementById('submitBtn');
             const phoneInput = document.getElementById('phone');
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirm_password');
             const ageSelect = document.getElementById('age_range');
-            const generatePasswordBtn = document.getElementById('generatePasswordBtn');
             
             // Add fade-in animation to elements
             const elements = document.querySelectorAll('.fade-in');
@@ -761,7 +661,7 @@
                     el.style.transform = 'translateY(0)';
                 }, index * 200);
             });
-
+    
             // Phone number formatting
             phoneInput.addEventListener('input', function() {
                 let value = this.value.replace(/\D/g, '');
@@ -785,19 +685,6 @@
                 checkFormValidity();
             });
             
-            // Password strength check
-            passwordInput.addEventListener('input', function() {
-                checkPasswordStrength(this.value);
-                checkPasswordMatch();
-                checkFormValidity();
-            });
-            
-            // Confirm password check
-            confirmPasswordInput.addEventListener('input', function() {
-                checkPasswordMatch();
-                checkFormValidity();
-            });
-            
             // Age range selection feedback
             ageSelect.addEventListener('change', function() {
                 if (this.value) {
@@ -810,89 +697,8 @@
                 checkFormValidity();
             });
             
-            // Generate random password
-            generatePasswordBtn.addEventListener('click', async function() {
-                try {
-                    const response = await fetch('/generate-password');
-                    const data = await response.json();
-                    
-                    passwordInput.value = data.password;
-                    confirmPasswordInput.value = data.password;
-                    
-                    checkPasswordStrength(data.password);
-                    checkPasswordMatch();
-                    checkFormValidity();
-                    
-                    // Show generated password temporarily
-                    const originalType = passwordInput.type;
-                    passwordInput.type = 'text';
-                    confirmPasswordInput.type = 'text';
-                    
-                    setTimeout(() => {
-                        passwordInput.type = originalType;
-                        confirmPasswordInput.type = originalType;
-                    }, 3000);
-                    
-                } catch (error) {
-                    console.error('Error generating password:', error);
-                    alert('خطا در تولید رمز. لطفاً دوباره تلاش کنید.');
-                }
-            });
-            
-            function checkPasswordStrength(password) {
-                const strengthIndicator = document.getElementById('passwordStrength');
-                
-                if (password.length === 0) {
-                    strengthIndicator.style.display = 'none';
-                    return;
-                }
-                
-                strengthIndicator.style.display = 'block';
-                
-                let score = 0;
-                if (password.length >= 8) score++;
-                if (/[a-z]/.test(password)) score++;
-                if (/[A-Z]/.test(password)) score++;
-                if (/[0-9]/.test(password)) score++;
-                if (/[^A-Za-z0-9]/.test(password)) score++;
-                
-                if (score < 3) {
-                    strengthIndicator.className = 'password-strength weak';
-                    strengthIndicator.textContent = '⚠️ رمز ضعیف - حداقل 8 کاراکتر نیاز است';
-                } else if (score < 4) {
-                    strengthIndicator.className = 'password-strength medium';
-                    strengthIndicator.textContent = '🔶 رمز متوسط - بهتر می‌تواند باشد';
-                } else {
-                    strengthIndicator.className = 'password-strength strong';
-                    strengthIndicator.textContent = '✅ رمز قوی - عالی است!';
-                }
-            }
-            
-            function checkPasswordMatch() {
-                const matchIndicator = document.getElementById('passwordMatch');
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
-                
-                if (confirmPassword.length === 0) {
-                    matchIndicator.style.display = 'none';
-                    return;
-                }
-                
-                matchIndicator.style.display = 'block';
-                
-                if (password === confirmPassword) {
-                    matchIndicator.className = 'password-match match';
-                    matchIndicator.textContent = '✅ رمزها مطابقت دارند';
-                } else {
-                    matchIndicator.className = 'password-match no-match';
-                    matchIndicator.textContent = '❌ رمزها مطابقت ندارند';
-                }
-            }
-            
             function checkFormValidity() {
                 const phone = phoneInput.value;
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
                 const firstName = document.getElementById('first_name').value;
                 const lastName = document.getElementById('last_name').value;
                 const ageRange = ageSelect.value;
@@ -901,8 +707,6 @@
                     firstName.trim().length > 0 &&
                     lastName.trim().length > 0 &&
                     phone.length === 11 && phone.startsWith('09') &&
-                    password.length >= 8 &&
-                    password === confirmPassword &&
                     ageRange !== '';
                 
                 submitBtn.disabled = !isValid;
@@ -917,24 +721,10 @@
             // Form submission
             form.addEventListener('submit', function(e) {
                 const phone = phoneInput.value;
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
                 
                 if (phone.length !== 11 || !phone.startsWith('09')) {
                     e.preventDefault();
                     alert('لطفاً شماره همراه را به صورت صحیح وارد کنید (مثال: 09123456789)');
-                    return false;
-                }
-                
-                if (password.length < 8) {
-                    e.preventDefault();
-                    alert('رمز عبور باید حداقل 8 کاراکتر باشد');
-                    return false;
-                }
-                
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('رمزهای وارد شده مطابقت ندارند');
                     return false;
                 }
                 

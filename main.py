@@ -343,6 +343,12 @@ async def init_db():
         logger.info("ستون encrypted_priorities به جدول test_results اضافه شد.")
     except Exception as e:
         logger.info(f"ستون encrypted_priorities از قبل وجود دارد یا خطا رخ داد: {e}")
+    
+    try:
+        await db_manager.execute_query("ALTER TABLE users ADD COLUMN encrypted_plain_password BLOB")
+        logger.info("ستون encrypted_plain_password به جدول users اضافه شد.")
+    except Exception as e:
+        logger.info(f"ستون encrypted_plain_password از قبل وجود دارد یا خطا رخ داد: {e}")
 
 # --- Async Authentication & Session Management ---
 async def hash_password(password: str) -> str:
@@ -2292,10 +2298,6 @@ async def get_register_page(request: Request, error: str = None, user=Depends(ge
     error_message = None
     if error == "phone_exists":
         error_message = "این شماره همراه قبلاً ثبت شده است."
-    elif error == "passwords_mismatch":
-        error_message = "رمزهای وارد شده مطابقت ندارند."
-    elif error == "weak_password":
-        error_message = "رمز باید حداقل 8 کاراکتر باشد."
     elif error == "registration_failed":
         error_message = "خطا در ثبت نام. لطفاً دوباره تلاش کنید."
         
@@ -2307,17 +2309,8 @@ async def handle_registration(
     first_name: str = Form(...),
     last_name: str = Form(...),
     phone: str = Form(...),
-    password: str = Form(...),
-    confirm_password: str = Form(...),
     age_range: str = Form(...)
 ):
-    # Validation
-    if password != confirm_password:
-        return RedirectResponse(url="/register?error=passwords_mismatch", status_code=303)
-    
-    if len(password) < 8:
-        return RedirectResponse(url="/register?error=weak_password", status_code=303)
-    
     # Check if phone exists (async)
     try:
         all_users = await db_manager.execute_query("SELECT encrypted_phone FROM users", fetch=True)
@@ -2332,6 +2325,9 @@ async def handle_registration(
         if is_duplicate:
             return RedirectResponse(url="/register?error=phone_exists", status_code=303)
 
+        # Generate random password
+        password = await generate_password()
+        
         # Create user (all async operations)
         user_id = str(uuid4())
         encrypted_fname = await encrypt_data(first_name)
@@ -2339,17 +2335,18 @@ async def handle_registration(
         encrypted_phone_val = await encrypt_data(phone)
         hashed_password = await hash_password(password)
         encrypted_password = await encrypt_data(hashed_password)
+        encrypted_plain_password = await encrypt_data(password)  # ذخیره رمز اصلی به صورت رمزنگاری شده
         
         await db_manager.execute_query("""
-            INSERT INTO users (id, encrypted_first_name, encrypted_last_name, encrypted_phone, encrypted_password, age_range, registration_time)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (user_id, encrypted_fname, encrypted_lname, encrypted_phone_val, encrypted_password, age_range, datetime.now().isoformat()))
+            INSERT INTO users (id, encrypted_first_name, encrypted_last_name, encrypted_phone, encrypted_password, encrypted_plain_password, age_range, registration_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, encrypted_fname, encrypted_lname, encrypted_phone_val, encrypted_password, encrypted_plain_password, age_range, datetime.now().isoformat()))
         
         # Create session
         session_id = await create_session(user_id)
         
-        # Redirect to quiz dashboard
-        response = RedirectResponse(url="/quiz", status_code=303)
+        # Redirect to quiz dashboard with password parameter
+        response = RedirectResponse(url=f"/quiz?show_password={password}", status_code=303)
         response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=86400)  # 24 hours
         return response
         
@@ -2545,11 +2542,12 @@ async def logout(session_id: str = Cookie(None)):
     return response
 
 @app.get("/quiz", response_class=HTMLResponse)
-async def get_quiz_dashboard(request: Request, user = Depends(require_login)):
+async def get_quiz_dashboard(request: Request, show_password: str = None, user = Depends(require_login)):
     return templates.TemplateResponse("quiz_dashboard.html", {
         "request": request, 
         "user": user,
-        "available_tests": AVAILABLE_TESTS
+        "available_tests": AVAILABLE_TESTS,
+        "show_password": show_password  # اضافه کردن رمز برای نمایش اولیه
     })
 
 @app.get("/test/{test_id}", response_class=HTMLResponse)
@@ -2917,6 +2915,24 @@ async def generate_random_password():
     """Generate random password asynchronously"""
     password = await generate_password()
     return {"password": password}
+
+@app.get("/get-user-password")
+async def get_user_password(user = Depends(require_login)):
+    """Get user's plain password"""
+    try:
+        result = await db_manager.execute_query(
+            "SELECT encrypted_plain_password FROM users WHERE id = ?",
+            (user['id'],), fetch=True
+        )
+        
+        if result and result[0]['encrypted_plain_password']:
+            plain_password = await decrypt_data(result[0]['encrypted_plain_password'])
+            return {"password": plain_password}
+        else:
+            return {"password": None, "error": "رمز عبور یافت نشد"}
+    except Exception as e:
+        logger.error(f"خطا در دریافت رمز عبور: {e}")
+        return {"password": None, "error": "خطا در دریافت رمز عبور"}
 
 # --- Application Startup ---
 @app.on_event("startup")

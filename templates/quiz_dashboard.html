@@ -227,6 +227,123 @@
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
         }
 
+        .nav-link.copy-password {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-link.copy-password:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        /* Toast notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1em;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Welcome modal for showing password */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+
+        .welcome-modal.show {
+            display: flex;
+        }
+
+        .welcome-modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 28px;
+            padding: 50px 40px;
+            max-width: 500px;
+            text-align: center;
+            backdrop-filter: blur(30px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.5s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .welcome-modal h2 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .password-display {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #10b981;
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+
+        .welcome-modal button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .welcome-modal button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
         /* Tests Section */
         .tests-section {
             margin-bottom: 50px;
@@ -743,11 +860,15 @@
         </div>
 
         <!-- Navigation Bar -->
+        <!-- Navigation Bar -->
         <div class="navigation-bar fade-in glow-effect">
             <div class="nav-links">
                 <a href="/my-results" class="nav-link primary glow-effect">
                     📊 نتایج آزمون‌های من
                 </a>
+                <button class="nav-link copy-password glow-effect" id="copyPasswordBtn">
+                    🔑 کپی رمز
+                </button>
             </div>
             <div class="nav-links">
                 <a href="/logout" class="nav-link logout glow-effect">
@@ -916,7 +1037,88 @@
                     particle.remove();
                 }, 2000);
             }
+            // Password copy functionality
+            const copyPasswordBtn = document.getElementById('copyPasswordBtn');
+
+            copyPasswordBtn.addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/get-user-password');
+                    const data = await response.json();
+                    
+                    if (data.password) {
+                        // Copy to clipboard
+                        await navigator.clipboard.writeText(data.password);
+                        
+                        // Show toast notification
+                        showToast('✅ رمز عبور با موفقیت کپی شد!');
+                    } else {
+                        showToast('❌ خطا در دریافت رمز عبور', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error copying password:', error);
+                    showToast('❌ خطا در کپی کردن رمز عبور', 'error');
+                }
+            });
+
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.textContent = message;
+                
+                if (type === 'error') {
+                    toast.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 38, 0.9) 100%)';
+                }
+                
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 3000);
+            }
+
+            // Show password on first login
+            const urlParams = new URLSearchParams(window.location.search);
+            const showPassword = urlParams.get('show_password');
+
+            if (showPassword) {
+                // Remove password from URL
+                window.history.replaceState({}, document.title, '/quiz');
+                
+                // Show welcome modal with password
+                const modal = document.createElement('div');
+                modal.className = 'welcome-modal';
+                modal.innerHTML = `
+                    <div class="welcome-modal-content">
+                        <h2>🎉 ثبت نام با موفقیت انجام شد!</h2>
+                        <p style="font-size: 1.2em; color: #f1f5f9; margin-bottom: 20px;">
+                            رمز عبور شما به صورت خودکار ایجاد شده است. 
+                            لطفاً آن را یادداشت کنید:
+                        </p>
+                        <div class="password-display">${showPassword}</div>
+                        <p style="color: #fbbf24; margin-bottom: 30px;">
+                            ⚠️ این رمز را در جای امن نگهداری کنید
+                        </p>
+                        <button onclick="this.parentElement.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.parentElement.remove(), 300);">
+                            متوجه شدم
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 100);
+            }
         });
+
 
         // Add ripple and particle animation keyframes
         const style = document.createElement('style');
